@@ -33,12 +33,12 @@ error message.
 
 A function that should return a message when no items are available to render.
 
-#### renderPageSize
+#### renderPageSize (defaults to `10`)
 
 A number that specifies how many items to render per page (does not apply to
 `uniform` items).
 
-#### threshold
+#### threshold (defaults to `500`)
 
 The number of pixels to ensure the top and bottom of the list is buffered with.
 
@@ -46,6 +46,13 @@ The number of pixels to ensure the top and bottom of the list is buffered with.
 
 A boolean that specifies whether or not the rendered items are of uniform width
 and height. Uniform items allow space to be preallocated on the page without actually rendering the items.
+
+#### fetch
+
+A function that receives the current list of items and a callback. The callback
+should be invoked when the fetch is complete with the error (if any) as the
+first argument and a boolean determining whether the entire list is fetched or
+not.
 
 
 ## Examples
