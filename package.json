@@ -1,0 +1,14 @@
+{
+  "name": "react-list",
+  "version": "0.0.1",
+  "author": "Casey Foster <c@sey.me>",
+  "licence": "MIT",
+  "main": "react-list.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orgsync/react-list"
+  },
+  "dependencies": {
+    "react": "x"
+  }
+}

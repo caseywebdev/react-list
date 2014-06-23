@@ -1,0 +1,14 @@
+{
+  "name": "react-list",
+  "version": "0.0.1",
+  "ignore": [
+    "/.gitignore",
+    "/.npmignore",
+    "/node_modules",
+    "/package.json",
+    "/test.*"
+  ],
+  "dependencies": {
+    "react": "x"
+  }
+}
