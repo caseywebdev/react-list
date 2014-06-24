@@ -13,10 +13,11 @@
 
   var requestAnimationFrame =
     (typeof window !== 'undefined' && window.requestAnimationFrame) ||
-      function (cb) { setTimeout(cb, 16); }
+      function (cb) { return setTimeout(cb, 16); };
+
   var cancelAnimationFrame =
     (typeof window !== 'undefined' && window.cancelAnimationFrame) ||
-      function (id) { clearTimeout(id); }
+      clearTimeout;
 
   var isEqualSubset = function (a, b) {
     for (var key in a) if (b[key] !== a[key]) return false;
