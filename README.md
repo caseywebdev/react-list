@@ -35,8 +35,7 @@ A function that should return a message when no items are available to render.
 
 #### renderPageSize (defaults to `10`)
 
-A number that specifies how many items to render per page (does not apply to
-`uniform` items).
+A number that specifies how many items to render per page (this is calculated automatically for `uniform` items).
 
 #### threshold (defaults to `500`)
 

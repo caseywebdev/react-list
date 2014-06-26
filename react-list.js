@@ -51,10 +51,8 @@
         error: this.props.error,
         index: 0,
         length: 0,
-        itemWidth: 0,
         itemHeight: 0,
-        columns: 0,
-        rows: 0
+        columns: 0
       };
     },
 
@@ -93,7 +91,7 @@
       } else if (scrollParent === window) {
         return -el.getBoundingClientRect().top;
       } else {
-        return scrollParent.scrollTop - el.offsetTop
+        return scrollParent.scrollTop - el.offsetTop;
       }
     },
 
@@ -107,7 +105,7 @@
       var scrollParent = this.getScrollParent();
       return scrollParent === window ?
         scrollParent.innerHeight :
-        scrollParent.clientHeight
+        scrollParent.clientHeight;
     },
 
     scrollTo: function (item) {
@@ -139,49 +137,47 @@
     update: function () {
       this.afid = requestAnimationFrame(this.update);
       var items = this.props.items;
-      var uniform = this.props.uniform;
-      var scroll = this.getScroll();
-      var itemWidth = this.state.itemWidth;
+      var threshold = this.props.threshold;
       var itemHeight = this.state.itemHeight;
       var columns = this.state.columns;
-      var rows = this.state.rows;
       var index = this.state.index;
       var length = this.state.length;
-      if (uniform) {
+      var elBottom = this.getDOMNode().scrollHeight;
+      var viewTop = this.getScroll();
+      var viewBottom = viewTop + this.getViewportHeight();
+      if (this.props.uniform) {
+        index = 0;
+        length = 1;
 
         // Grab the item elements.
         var itemEls = this.refs.items.getDOMNode().children;
 
-        // Set itemWidth and itemHeight based on the first item.
+        // Set `itemHeight` based on the first item. If the first item has not
+        // been rendered yet, defer this branch until the next tick.
         if (itemEls.length) {
-          itemWidth = itemEls[0].offsetWidth;
           itemHeight = itemEls[0].offsetHeight;
 
           var top = itemEls[0].offsetTop;
-          var columns = 1;
+          columns = 1;
           for (var i = 1, l = itemEls.length; i < l; ++i) {
             if (itemEls[i].offsetTop !== top) break;
             ++columns;
           }
-          rows = Math.ceil(this.getViewportHeight() / itemHeight);
-
-          var rowThreshold = Math.ceil(this.props.threshold / itemHeight);
-
-          length = columns * (rows + rowThreshold * 2);
-          index = Math.max(
-            0,
-            Math.min(
-              (items.length + columns) - (items.length % columns) - length,
-              (Math.floor(scroll / itemHeight) - rowThreshold) * columns
-            )
-          );
-        } else {
-          length = this.props.renderPageSize;
+          if (viewBottom > -threshold && viewTop < elBottom + threshold) {
+            var rows = Math.ceil(this.getViewportHeight() / itemHeight);
+            var rowThreshold = Math.ceil(threshold / itemHeight);
+            length = columns * (rows + rowThreshold * 2);
+            index = Math.max(
+              0,
+              Math.min(
+                (Math.ceil(items.length / columns) * columns) - length,
+                (Math.floor(viewTop / itemHeight) - rowThreshold) * columns
+              )
+            );
+          }
         }
-      } else if (length <= items.length) {
-        var listBottom = this.getDOMNode().scrollHeight - this.props.threshold;
-        var visibleBottom = scroll + this.getViewportHeight();
-        if (listBottom < visibleBottom) length += this.props.renderPageSize;
+      } else if (length <= items.length && viewBottom > elBottom - threshold) {
+        length += this.props.renderPageSize;
       }
 
       // Fetch if the models in memory have been exhausted.
@@ -189,10 +185,8 @@
 
       // Finally, set the new state.
       this.setState({
-        itemWidth: itemWidth,
         itemHeight: itemHeight,
         columns: columns,
-        rows: rows,
         index: index,
         length: length
       });
