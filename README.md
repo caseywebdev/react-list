@@ -48,11 +48,9 @@ and height. Uniform items allow space to be preallocated on the page without act
 
 #### fetch
 
-A function that receives the current list of items and a callback. The callback
-should be invoked when the fetch is complete with the error (if any) as the
-first argument and a boolean determining whether the entire list is fetched or
-not.
-
+A function that receives a callback. The callback should be invoked when the
+fetch is complete with the error (if any) as the first argument and a boolean
+determining whether the entire list is fetched or not.
 
 ## Examples
 

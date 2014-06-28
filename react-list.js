@@ -130,7 +130,7 @@
         return;
       }
       this.setState({isLoading: true, error: null});
-      this.props.fetch(this.props.items, this.handleFetchResult);
+      this.props.fetch(this.handleFetchResult);
     },
 
     // REFACTOR
