@@ -195,6 +195,7 @@
     renderSpace: function (n) {
       if (!this.props.uniform || !this.state.columns) return;
       var height = (n / this.state.columns) * this.state.itemHeight;
+      if (!height) return;
       return DOM.div({style: {height: height}});
     },
 
