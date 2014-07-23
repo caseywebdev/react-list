@@ -47,6 +47,7 @@
 
     getInitialState: function () {
       return {
+        isLoaded: !this.props.fetch,
         isLoading: this.props.isLoading,
         error: this.props.error,
         index: 0,
@@ -56,12 +57,8 @@
       };
     },
 
-    componentWillMount: function () {
-      this.isDoneFetching = !this.props.fetch;
-      if (this.props.fetchInitially) this.fetch();
-    },
-
     componentDidMount: function () {
+      if (this.props.fetchInitially) this.fetch();
       this.update();
     },
 
@@ -120,17 +117,20 @@
       if (current < min) this.setScroll(min);
     },
 
-    handleFetchResult: function (er, isDone) {
-      if (!er && isDone) this.isDoneFetching = true;
-      this.setState({isLoading: false, error: er});
+    fetch: function () {
+      if (!this.state.isLoaded && !this.state.isLoading && !this.state.error) {
+        this.setState({isLoading: true, error: null});
+        this.props.fetch(this.handleFetch);
+      }
     },
 
-    fetch: function () {
-      if (this.isDoneFetching || this.state.isLoading || this.state.error) {
-        return;
-      }
-      this.setState({isLoading: true, error: null});
-      this.props.fetch(this.handleFetchResult);
+    handleFetch: function (er, isDone) {
+      if (!this.isMounted()) return;
+      this.setState({
+        isLoaded: !er && !!isDone,
+        isLoading: false,
+        error: er
+      });
     },
 
     // REFACTOR
