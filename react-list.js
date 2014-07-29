@@ -167,13 +167,8 @@
             var rows = Math.ceil(this.getViewportHeight() / itemHeight);
             var rowThreshold = Math.ceil(threshold / itemHeight);
             length = columns * (rows + rowThreshold * 2);
-            index = Math.max(
-              0,
-              Math.min(
-                (Math.ceil(items.length / columns) * columns) - length,
-                (Math.floor(viewTop / itemHeight) - rowThreshold) * columns
-              )
-            );
+            index = (Math.floor(viewTop / itemHeight) - rowThreshold) * columns;
+            index = Math.max(0, index);
           }
         }
       } else if (length <= items.length && viewBottom > elBottom - threshold) {
