@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "ignore": [
     "/.gitignore",
     "/.npmignore",
@@ -9,6 +9,6 @@
     "/test.*"
   ],
   "dependencies": {
-    "react": "0.11.0"
+    "react": "^0.11.0"
   }
 }
