@@ -138,6 +138,7 @@
       this.afid = requestAnimationFrame(this.update);
       var items = this.props.items;
       var threshold = this.props.threshold;
+      var renderPageSize = this.props.renderPageSize;
       var itemHeight = this.state.itemHeight;
       var columns = this.state.columns;
       var index = this.state.index;
@@ -147,7 +148,7 @@
       var viewBottom = viewTop + this.getViewportHeight();
       if (this.props.uniform) {
         index = 0;
-        length = 1;
+        length = renderPageSize;
 
         // Grab the item elements.
         var itemEls = this.refs.items.getDOMNode().children;
@@ -172,7 +173,7 @@
           }
         }
       } else if (length <= items.length && viewBottom > elBottom - threshold) {
-        length += this.props.renderPageSize;
+        length += renderPageSize;
       }
 
       // Fetch if the models in memory have been exhausted.
