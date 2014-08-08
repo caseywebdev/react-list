@@ -118,13 +118,14 @@
     },
 
     fetch: function () {
-      if (!this.state.isLoaded && !this.state.isLoading && !this.state.error) {
-        this.setState({isLoading: true, error: null});
-        this.props.fetch(this.handleFetch);
-      }
+      if (this.state.isLoaded || this.isFetching) return;
+      this.setState({isLoading: true, error: null});
+      this.isFetching = true;
+      this.props.fetch(this.handleFetch);
     },
 
     handleFetch: function (er, isDone) {
+      this.isFetching = false;
       if (!this.isMounted()) return;
       this.setState({
         isLoaded: !er && !!isDone,
