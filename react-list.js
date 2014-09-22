@@ -148,8 +148,6 @@
       var viewTop = this.getScroll();
       var viewBottom = viewTop + this.getViewportHeight();
       if (this.props.uniform) {
-        index = 0;
-        length = renderPageSize;
 
         // Grab the item elements.
         var itemEls = this.refs.items.getDOMNode().children;
@@ -166,13 +164,20 @@
             ++columns;
           }
           if (viewBottom > -threshold && viewTop < elBottom + threshold) {
-            var rows = Math.ceil(this.getViewportHeight() / itemHeight);
             var rowThreshold = Math.ceil(threshold / itemHeight);
-            length = columns * (rows + rowThreshold * 2);
             index = (Math.floor(viewTop / itemHeight) - rowThreshold) * columns;
-            index = Math.max(0, index);
+            var rows = Math.ceil(this.getViewportHeight() / itemHeight);
+            length = columns * (rows + rowThreshold * 2);
           }
         }
+
+        // Ensure at least `renderPageSize` elements are rendered at any given
+        // time. This will ensure `columns` can be calculated correctly. It's
+        // also important to always supply a `renderPageSize` that is >= the
+        // most columns of items that will ever be visible, but this is the
+        // responsibility of the component consumer.
+        index = Math.max(0, Math.min(index, items.length - renderPageSize));
+        length = Math.max(length, renderPageSize);
       } else if (length <= items.length && viewBottom > elBottom - threshold) {
         length += renderPageSize;
       }
