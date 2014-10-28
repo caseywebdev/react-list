@@ -11,7 +11,11 @@
     React.render(ReactList({
       items: items,
       renderItem: function (item, i) {
-        return React.DOM.div({key: i}, 'This is item #' + item + '.');
+        return React.createElement(
+          'div',
+          {key: i},
+          'This is item #' + item + '.'
+        );
       },
       uniform: true
     }), document.getElementById('items-list'));

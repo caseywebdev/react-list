@@ -9,8 +9,6 @@
 })(this, function (React) {
   'use strict';
 
-  var DOM = React.DOM;
-
   var requestAnimationFrame =
     (typeof window !== 'undefined' && window.requestAnimationFrame) ||
       function (cb) { return setTimeout(cb, 16); };
@@ -37,11 +35,19 @@
         renderPageSize: 10,
         threshold: 500,
         uniform: false,
-        component: DOM.div,
-        renderItem: function (item, i) { return DOM.div({key: i}, item); },
-        renderLoading: function () { return DOM.div(null, 'Loading...'); },
-        renderError: function (er) { return DOM.div(null, er); },
-        renderEmpty: function () { return DOM.div(null, 'Nothing to show.'); }
+        component: 'div',
+        renderItem: function (item, i) {
+          return React.createElement('div', {key: i}, item);
+        },
+        renderLoading: function () {
+          return React.createElement('div', null, 'Loading...');
+        },
+        renderError: function (er) {
+          return React.createElement('div', null, '' + er);
+        },
+        renderEmpty: function () {
+          return React.createElement('div', null, 'Nothing to show.');
+        }
       };
     },
 
@@ -198,7 +204,7 @@
       if (!this.props.uniform || !this.state.columns) return;
       var height = (n / this.state.columns) * this.state.itemHeight;
       if (!height) return;
-      return DOM.div({style: {height: height}});
+      return React.createElement('div', {style: {height: height}});
     },
 
     renderSpaceAbove: function () {
@@ -211,7 +217,7 @@
     },
 
     renderItems: function () {
-      return DOM.div({ref: 'items'}, this.props.items
+      return React.createElement('div', {ref: 'items'}, this.props.items
         .slice(this.state.index, this.state.index + this.state.length)
         .map(this.props.renderItem)
       );
@@ -225,7 +231,7 @@
     },
 
     render: function () {
-      return this.props.component(this.props,
+      return React.createElement(this.props.component, this.props,
         this.renderSpaceAbove(),
         this.renderItems(),
         this.renderSpaceBelow(),
