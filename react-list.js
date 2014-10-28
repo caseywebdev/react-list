@@ -225,14 +225,11 @@
     },
 
     render: function () {
-      var Component = this.props.component;
-      return this.transferPropsTo(
-        Component(null,
-          this.renderSpaceAbove(),
-          this.renderItems(),
-          this.renderSpaceBelow(),
-          this.renderStatusMessage()
-        )
+      return this.props.component(this.props,
+        this.renderSpaceAbove(),
+        this.renderItems(),
+        this.renderSpaceBelow(),
+        this.renderStatusMessage()
       );
     }
   });
