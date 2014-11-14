@@ -124,7 +124,7 @@
     },
 
     fetch: function () {
-      if (this.state.isLoaded || this.isFetching) return;
+      if (this.state.isLoaded || this.isFetching || this.state.error) return;
       this.setState({isLoading: true, error: null});
       this.isFetching = true;
       this.props.fetch(this.handleFetch);
