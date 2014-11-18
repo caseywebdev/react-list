@@ -16,20 +16,27 @@ bower install react-list
 
 The list of items to be rendered.
 
-#### renderItem
+#### renderItems(children)
 
-A function that receives and item (and its relative index) and returns the content to be rendered for that item.
+A function that receives the rendered items as children. **You must set
+ref='items' on the element that contains `children` so item calculations can be
+made.** By default this element is a `<div>`.
 
-#### renderLoading
+#### renderItem(item, index)
+
+A function that receives an item (and its relative index) and returns the
+content to be rendered for that item.
+
+#### renderLoading()
 
 A function that should return a loading message.
 
-#### renderError
+#### renderError(error)
 
 A function that receives an error from a failed `fetch` and should return an
 error message.
 
-#### renderEmpty
+#### renderEmpty()
 
 A function that should return a message when no items are available to render.
 

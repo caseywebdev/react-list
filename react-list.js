@@ -36,6 +36,9 @@
         threshold: 500,
         uniform: false,
         component: 'div',
+        renderItems: function (children) {
+          return React.createElement('div', {ref: 'items'}, children);
+        },
         renderItem: function (item, i) {
           return React.createElement('div', {key: i}, item);
         },
@@ -217,9 +220,10 @@
     },
 
     renderItems: function () {
-      return React.createElement('div', {ref: 'items'}, this.props.items
-        .slice(this.state.index, this.state.index + this.state.length)
-        .map(this.props.renderItem)
+      return this.props.renderItems(
+        this.props.items
+          .slice(this.state.index, this.state.index + this.state.length)
+          .map(this.props.renderItem)
       );
     },
 
