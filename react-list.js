@@ -166,10 +166,10 @@
         if (itemEls.length) {
           itemHeight = itemEls[0].offsetHeight;
 
-          var top = itemEls[0].offsetTop + itemHeight;
+          var firstRowBottom = itemEls[0].offsetTop + itemHeight;
           columns = 1;
           for (var i = 1, l = itemEls.length; i < l; ++i) {
-            if (itemEls[i].offsetTop > top) break;
+            if (firstRowBottom < itemEls[i].offsetTop) break;
             ++columns;
           }
           if (viewBottom > -threshold && viewTop < elBottom + threshold) {
