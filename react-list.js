@@ -217,7 +217,10 @@
     },
 
     renderItems: function () {
-      return React.createElement('div', {ref: 'items'}, this.props.items
+      var listStyle = this.props.listStyle;
+
+      return React.createElement('div', {ref: 'items', style: listStyle},
+        this.props.items
         .slice(this.state.index, this.state.index + this.state.length)
         .map(this.props.renderItem)
       );
