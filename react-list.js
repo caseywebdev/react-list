@@ -163,10 +163,10 @@
         if (itemEls.length) {
           itemHeight = itemEls[0].offsetHeight;
 
-          var top = itemEls[0].offsetTop;
+          var top = itemEls[0].offsetTop + itemHeight;
           columns = 1;
           for (var i = 1, l = itemEls.length; i < l; ++i) {
-            if (itemEls[i].offsetTop !== top) break;
+            if (itemEls[i].offsetTop > top) break;
             ++columns;
           }
           if (viewBottom > -threshold && viewTop < elBottom + threshold) {
