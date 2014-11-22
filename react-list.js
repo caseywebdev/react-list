@@ -169,7 +169,7 @@
           var firstRowBottom = itemEls[0].offsetTop + itemHeight;
           columns = 1;
           for (var i = 1, l = itemEls.length; i < l; ++i) {
-            if (firstRowBottom < itemEls[i].offsetTop) break;
+            if (itemEls[i].offsetTop >= firstRowBottom) break;
             ++columns;
           }
           if (viewBottom > -threshold && viewTop < elBottom + threshold) {
