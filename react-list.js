@@ -164,12 +164,12 @@
         // Set `itemHeight` based on the first item. If the first item has not
         // been rendered yet, defer this branch until the next tick.
         if (itemEls.length) {
-          itemHeight = itemEls[0].offsetHeight;
-
-          var firstRowBottom = itemEls[0].offsetTop + itemHeight;
+          var firstRect = itemEls[0].getBoundingClientRect();
+          itemHeight = Math.floor(firstRect.height);
+          var firstRowBottom = firstRect.top + itemHeight;
           columns = 1;
           for (var i = 1, l = itemEls.length; i < l; ++i) {
-            if (itemEls[i].offsetTop >= firstRowBottom) break;
+            if (itemEls[i].getBoundingClientRect().top >= firstRowBottom) break;
             ++columns;
           }
           if (viewBottom > -threshold && viewTop < elBottom + threshold) {
