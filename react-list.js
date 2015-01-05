@@ -165,18 +165,23 @@
         // been rendered yet, defer this branch until the next tick.
         if (itemEls.length) {
           var firstRect = itemEls[0].getBoundingClientRect();
-          itemHeight = Math.floor(firstRect.height);
-          var firstRowBottom = firstRect.top + itemHeight;
-          columns = 1;
-          for (var i = 1, l = itemEls.length; i < l; ++i) {
-            if (itemEls[i].getBoundingClientRect().top >= firstRowBottom) break;
-            ++columns;
-          }
-          if (viewBottom > -threshold && viewTop < elBottom + threshold) {
-            var rowThreshold = Math.ceil(threshold / itemHeight);
-            index = (Math.floor(viewTop / itemHeight) - rowThreshold) * columns;
-            var rows = Math.ceil(this.getViewportHeight() / itemHeight);
-            length = columns * (rows + rowThreshold * 2);
+          if (firstRect.height) {
+            itemHeight = firstRect.height;
+            var firstRowBottom = firstRect.top + itemHeight;
+            columns = 1;
+            for (var i = 1, l = itemEls.length; i < l; ++i) {
+              if (itemEls[i].getBoundingClientRect().top >= firstRowBottom) {
+                break;
+              }
+              ++columns;
+            }
+            if (viewBottom > -threshold && viewTop < elBottom + threshold) {
+              var rowThreshold = Math.ceil(threshold / itemHeight);
+              index =
+                (Math.floor(viewTop / itemHeight) - rowThreshold) * columns;
+              var rows = Math.ceil(this.getViewportHeight() / itemHeight);
+              length = columns * (rows + rowThreshold * 2);
+            }
           }
         }
 
