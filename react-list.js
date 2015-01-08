@@ -165,8 +165,9 @@
         // been rendered yet, defer this branch until the next tick.
         if (itemEls.length) {
           var firstRect = itemEls[0].getBoundingClientRect();
-          if (firstRect.height) {
-            itemHeight = firstRect.height;
+          var firstRectHeight = Math.floor(firstRect.height);
+          if (firstRectHeight) {
+            itemHeight = firstRectHeight;
             var firstRowBottom = firstRect.top + itemHeight;
             columns = 1;
             for (var i = 1, l = itemEls.length; i < l; ++i) {
