@@ -64,8 +64,4 @@ determining whether the entire list is fetched or not.
 Check out [the test file](https://orgsync.github.io/react-list/test.html) for a
 full example.
 
-## Known Issues
-
-- Paging should be supported, but isn't yet.
-
 [React]: https://github.com/facebook/react
