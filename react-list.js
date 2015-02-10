@@ -60,7 +60,7 @@
         isLoading: this.props.isLoading,
         error: this.props.error,
         index: 0,
-        length: 0,
+        length: this.props.renderPageSize,
         itemHeight: 0,
         columns: 0
       };
