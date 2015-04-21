@@ -1,5 +1,6 @@
-/*.sublime-*
-/.gitignore
-/bower.json
-/bower_components
-/test.*
+.gitignore
+bower.json
+bower_components
+index.html
+Makefile
+react-list.es6

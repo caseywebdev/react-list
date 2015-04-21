@@ -51,7 +51,7 @@
 
       this.state = {
         from: 0,
-        to: this.props.pageSize
+        size: this.props.pageSize
       };
     }
 
@@ -69,10 +69,11 @@
     }, {
       key: 'componentWillReceiveProps',
       value: function componentWillReceiveProps(next) {
-        var to = this.state.to;
+        var size = this.state.size;
+        var length = next.length;
+        var pageSize = next.pageSize;
 
-        var nextTo = Math.min(to, next.length);
-        if (nextTo !== to) this.setState({ to: nextTo });
+        this.setState({ size: Math.min(Math.max(size, pageSize), length) });
       }
     }, {
       key: 'componentDidMount',
@@ -138,7 +139,7 @@
 
         if (elBottom >= frameBottom + threshold) {
           return;
-        }this.setState({ to: Math.min(this.state.to + pageSize, length) });
+        }this.setState({ size: Math.min(this.state.size + pageSize, length) });
       }
     }, {
       key: 'render',
@@ -147,11 +148,11 @@
 
         var _state = this.state;
         var from = _state.from;
-        var to = _state.to;
+        var size = _state.size;
 
         var items = [];
-        for (var i = from; i < to; ++i) {
-          items.push(this.props.itemRenderer(i, i - from));
+        for (var i = 0; i < size; ++i) {
+          items.push(this.props.itemRenderer(from + i, i));
         }
         return this.props.itemsRenderer(items, function (c) {
           return _this.items = c;
@@ -209,7 +210,7 @@
         columns: 1,
         from: 0,
         itemHeight: 0,
-        to: 1
+        size: 1
       };
     }
 
@@ -225,13 +226,12 @@
         var _state2 = this.state;
         var columns = _state2.columns;
         var from = _state2.from;
-        var to = _state2.to;
+        var size = _state2.size;
+        var length = next.length;
 
-        var nextFrom = Math.min(from, this.getMaxFrom(next.length, columns));
-        var nextTo = Math.min(to, next.length);
-        if (nextFrom === from && nextTo === to) {
-          return;
-        }this.setState({ from: nextFrom, to: nextTo });
+        from = Math.max(Math.min(from, this.getMaxFrom(length, columns)), 0);
+        size = Math.min(Math.max(size, 1), length) - from;
+        this.setState({ from: from, size: size });
       }
     }, {
       key: 'setScroll',
@@ -269,9 +269,9 @@
 
         var from = Math.min(Math.floor(Math.max(0, this.getScroll()) / itemHeight) * columns, this.getMaxFrom(this.props.length, columns));
 
-        var to = Math.min(from + (Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns, this.props.length);
+        var size = Math.min((Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns, this.props.length - from);
 
-        this.setState({ columns: columns, from: from, itemHeight: itemHeight, to: to });
+        this.setState({ columns: columns, from: from, itemHeight: itemHeight, size: size });
       }
     }, {
       key: 'getMaxFrom',

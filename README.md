@@ -1,4 +1,4 @@
-# ReactList
+# react-list
 
 A versatile infinite scroll [React] component.
 
@@ -50,4 +50,4 @@ Has the same properties as `List`, but `pageSize` and `threshold` are ignored.
 Check out [the test file] for examples of both the `List` and `UniformList` components.
 
 [React]: https://github.com/facebook/react
-[the test file]: https://orgsync.github.io/react-list/test.html
+[the test file]: https://orgsync.github.io/react-list/

@@ -26,7 +26,7 @@ export class List extends React.Component {
 
   state = {
     from: 0,
-    to: this.props.pageSize
+    size: this.props.pageSize
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -34,9 +34,9 @@ export class List extends React.Component {
   }
 
   componentWillReceiveProps(next) {
-    const {to} = this.state;
-    const nextTo = Math.min(to, next.length);
-    if (nextTo !== to) this.setState({to: nextTo});
+    const {size} = this.state;
+    const {length, pageSize} = next;
+    this.setState({size: Math.min(Math.max(size, pageSize), length)});
   }
 
   componentDidMount() {
@@ -83,14 +83,14 @@ export class List extends React.Component {
     const elBottom = React.findDOMNode(this).getBoundingClientRect().height;
     const {pageSize, length, threshold} = this.props;
     if (elBottom >= frameBottom + threshold) return;
-    this.setState({to: Math.min(this.state.to + pageSize, length)});
+    this.setState({size: Math.min(this.state.size + pageSize, length)});
   }
 
   render() {
-    const {from, to} = this.state;
+    const {from, size} = this.state;
     const items = [];
-    for (let i = from; i < to; ++i) {
-      items.push(this.props.itemRenderer(i, i - from));
+    for (let i = 0; i < size; ++i) {
+      items.push(this.props.itemRenderer(from + i, i));
     }
     return this.props.itemsRenderer(items, c => this.items = c);
   }
@@ -113,15 +113,15 @@ export class UniformList extends List {
     columns: 1,
     from: 0,
     itemHeight: 0,
-    to: 1
+    size: 1
   }
 
   componentWillReceiveProps(next) {
-    const {columns, from, to} = this.state;
-    const nextFrom = Math.min(from, this.getMaxFrom(next.length, columns));
-    const nextTo = Math.min(to, next.length);
-    if (nextFrom === from && nextTo === to) return
-    this.setState({from: nextFrom, to: nextTo});
+    let {columns, from, size} = this.state;
+    const {length} = next;
+    from = Math.max(Math.min(from, this.getMaxFrom(length, columns)), 0);
+    size = Math.min(Math.max(size, 1), length) - from;
+    this.setState({from, size});
   }
 
   setScroll(y) {
@@ -159,12 +159,12 @@ export class UniformList extends List {
       this.getMaxFrom(this.props.length, columns)
     );
 
-    const to = Math.min(
-      from + ((Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns),
-      this.props.length
+    const size = Math.min(
+      ((Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns),
+      this.props.length - from
     );
 
-    this.setState({columns, from, itemHeight, to});
+    this.setState({columns, from, itemHeight, size});
   }
 
   getMaxFrom(length, columns) {
