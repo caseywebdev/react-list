@@ -6,62 +6,48 @@ A versatile infinite scroll [React] component.
 
 ```bash
 bower install react-list
+
+# or
+
+npm install react-list
 ```
 
-## API
+## Components
 
-### Properties
+### `reactList.List`
 
-#### items
+#### itemRenderer(index, key)
 
-The list of items to be rendered.
+A function that receives an index and a key and returns the content to be
+rendered for the item at that index.
 
-#### renderItems(children)
+#### itemsRenderer(items, ref)
 
-A function that receives the rendered items as children. **You must set
-ref='items' on the element that contains `children` so item calculations can be
-made.** By default this element is a `<div>`.
+A function that receives the rendered items and a ref. By default this element
+is just a `<div>`. Generally it only needs to be overriden for use in a
+`<table>` or other special case. **NOTE: You must set ref={ref} on the component
+that contains the `items` so the correct item sizing calculations can be made.**
 
-#### renderItem(item, index)
+#### length
 
-A function that receives an item (and its relative index) and returns the
-content to be rendered for that item.
+The number of items in the list.
 
-#### renderLoading()
+#### pageSize (defaults to `10`)
 
-A function that should return a loading message.
-
-#### renderError(error)
-
-A function that receives an error from a failed `fetch` and should return an
-error message.
-
-#### renderEmpty()
-
-A function that should return a message when no items are available to render.
-
-#### renderPageSize (defaults to `10`)
-
-A number that specifies how many items to render per page (this is calculated automatically for `uniform` items).
+The number of items to batch up for new renders.
 
 #### threshold (defaults to `500`)
 
-The number of pixels to ensure the top and bottom of the list is buffered with.
+The number of pixels to ensure the bottom of the list is buffered with.
 
-#### uniform (defaults to `false`)
+### `reactList.UniformList`
 
-A boolean that specifies whether or not the rendered items are of uniform width
-and height. Uniform items allow space to be preallocated on the page without actually rendering the items.
+Has the same properties as `List`, but `pageSize` and `threshold` are ignored.
 
-#### fetch
-
-A function that receives a callback. The callback should be invoked when the
-fetch is complete with the error (if any) as the first argument and a boolean
-determining whether the entire list is fetched or not.
 
 ## Examples
 
-Check out [the test file](https://orgsync.github.io/react-list/test.html) for a
-full example.
+Check out [the test file] for examples of both the `List` and `UniformList` components.
 
 [React]: https://github.com/facebook/react
+[the test file]: https://orgsync.github.io/react-list/test.html
