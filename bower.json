@@ -1,6 +1,7 @@
 {
   "name": "react-list",
   "version": "0.2.10",
+  "main": "react-list.js",
   "ignore": [
     ".gitignore",
     ".npmignore",
