@@ -1,6 +1,7 @@
 .gitignore
 bower.json
 bower_components
+cogs.js
 index.html
 Makefile
 react-list.es6

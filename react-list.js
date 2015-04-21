@@ -230,7 +230,7 @@
         var length = next.length;
 
         from = Math.max(Math.min(from, this.getMaxFrom(length, columns)), 0);
-        size = Math.min(Math.max(size, 1), length) - from;
+        size = Math.min(Math.max(size, 1), length - from);
         this.setState({ from: from, size: size });
       }
     }, {

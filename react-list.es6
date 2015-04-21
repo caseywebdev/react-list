@@ -120,7 +120,7 @@ export class UniformList extends List {
     let {columns, from, size} = this.state;
     const {length} = next;
     from = Math.max(Math.min(from, this.getMaxFrom(length, columns)), 0);
-    size = Math.min(Math.max(size, 1), length) - from;
+    size = Math.min(Math.max(size, 1), length - from);
     this.setState({from, size});
   }
 

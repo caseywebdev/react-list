@@ -4,6 +4,7 @@
   "ignore": [
     ".gitignore",
     ".npmignore",
+    "cogs.js",
     "Makefile",
     "node_modules",
     "package.json",
