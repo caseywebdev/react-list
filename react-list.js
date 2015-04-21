@@ -260,12 +260,12 @@
         if (!itemEls.length) {
           return;
         }var firstRect = itemEls[0].getBoundingClientRect();
-        var itemHeight = firstRect.height;
+        var itemHeight = Math.floor(firstRect.height);
         if (!itemHeight) {
           return;
-        }var firstRowBottom = firstRect.top + itemHeight;
+        }var firstRowBottom = Math.floor(firstRect.top) + itemHeight;
         var columns = 1;
-        while (itemEls[columns] && itemEls[columns].getBoundingClientRect().top < firstRowBottom) ++columns;
+        while (itemEls[columns] && Math.floor(itemEls[columns].getBoundingClientRect().top) < firstRowBottom) ++columns;
 
         var from = Math.min(Math.floor(Math.max(0, this.getScroll()) / itemHeight) * columns, this.getMaxFrom(this.props.length, columns));
 

@@ -144,14 +144,14 @@ export class UniformList extends List {
     if (!itemEls.length) return;
 
     const firstRect = itemEls[0].getBoundingClientRect();
-    const itemHeight = firstRect.height;
+    const itemHeight = Math.floor(firstRect.height);
     if (!itemHeight) return;
 
-    const firstRowBottom = firstRect.top + itemHeight;
+    const firstRowBottom = Math.floor(firstRect.top) + itemHeight;
     let columns = 1;
     while (
       itemEls[columns] &&
-      itemEls[columns].getBoundingClientRect().top < firstRowBottom
+      Math.floor(itemEls[columns].getBoundingClientRect().top) < firstRowBottom
     ) ++columns;
 
     const from = Math.min(

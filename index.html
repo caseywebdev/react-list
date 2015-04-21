@@ -12,6 +12,15 @@
       font-family: 'Helvetica Neue', sans-serif;
     }
 
+    a {
+      color: #38afd4;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -24,7 +33,7 @@
     }
 
     #contained-uniform,
-    #contained-varied {
+    #contained-variable {
       margin: 10px auto;
       border: 10px solid red;
       position: relative;
@@ -37,7 +46,11 @@
 
   <body>
     <h1>react-list</h1>
-    <a href='https://github.com/orgsync/react-list'>Source</a>
+    <a href='https://github.com/orgsync/react-list'>Source</a><br>
+    <a href='#contained-uniform'>Contained Uniform</a><br>
+    <a href='#window-uniform'>Window Uniform</a><br>
+    <a href='#contained-variable'>Contained Variable</a><br>
+    <a href='#window-variable'>Window Variable</a>
 
     <h2>Contained Uniform</h2>
     <div id='contained-uniform'></div>
@@ -45,11 +58,11 @@
     <h2>Window Uniform</h2>
     <div id='window-uniform'></div>
 
-    <h2>Contained Varied</h2>
-    <div id='contained-varied'></div>
+    <h2>Contained Variable</h2>
+    <div id='contained-variable'></div>
 
-    <h2>Window Varied</h2>
-    <div id='window-varied'></div>
+    <h2>Window Variable</h2>
+    <div id='window-variable'></div>
     <script>
       var renderRow = function (i, key) {
         return React.createElement('tr', {key: key},
@@ -75,7 +88,7 @@
       };
 
       ['contained', 'window'].forEach(function (env) {
-        ['uniform', 'varied'].forEach(function (type) {
+        ['uniform', 'variable'].forEach(function (type) {
           var factory = React.createFactory(
             reactList[type === 'uniform' ? 'UniformList' : 'List']
           );
