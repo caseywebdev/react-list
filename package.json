@@ -10,5 +10,9 @@
   },
   "peerDependencies": {
     "react": ">= 0.12.0 < 0.14.0"
+  },
+  "devDependencies": {
+    "cogs": "1.0.3",
+    "cogs-transformer-babel": "1.0.8"
   }
 }

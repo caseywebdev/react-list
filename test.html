@@ -5,25 +5,86 @@
     <title>React-List Test</title>
     <script src='bower_components/react/react-with-addons.js'></script>
     <script src='react-list.js'></script>
-    <script src='test.js'></script>
     <style>
     body {
-      padding: 20px;
       text-align: center;
-    }
-    body {
+      margin: 0;
       font-family: 'Helvetica Neue', sans-serif;
     }
-    p {
-      padding: 800px 0;
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0;
+    }
+
+    td {
+      padding: 5px;
+      border: 1px solid black;
+    }
+
+    #contained-uniform,
+    #contained-varied {
+      margin: 10px auto;
+      border: 10px solid red;
+      position: relative;
+      width: 50%;
+      height: 400px;
+      overflow: auto;
     }
     </style>
   </head>
 
   <body>
     <h1>React-List Test</h1>
-    <p>Below are 100,000 items.</p>
-    <div id='items-list'></div>
-    <p>Above are 100,000 items.</p>
+
+    <h2>Contained Uniform</h2>
+    <div id='contained-uniform'></div>
+
+    <h2>Window Uniform</h2>
+    <div id='window-uniform'></div>
+
+    <h2>Contained Varied</h2>
+    <div id='contained-varied'></div>
+
+    <h2>Window Varied</h2>
+    <div id='window-varied'></div>
+    <script>
+      var renderRow = function (i, key) {
+        return React.createElement('tr', {key: key},
+          React.createElement('td', null, 'This'),
+          React.createElement('td', null, 'is'),
+          React.createElement('td', null, 'table'),
+          React.createElement('td', null, 'row'),
+          React.createElement('td', null, '#' + (i + 1))
+        );
+      };
+
+      var renderTable = function (items, ref) {
+        return React.createElement('table', null,
+          React.createElement('tbody', {ref: ref}, items)
+        )
+      };
+
+      var renderVariedItem = function (i, key) {
+        return React.createElement('div', {
+          key: key,
+          style: {height: 20 + ((i % 20) * 10) + ((i % 100) * 10)}
+        }, 'This is variable height item #' + (i + 1))
+      };
+
+      ['contained', 'window'].forEach(function (env) {
+        ['uniform', 'varied'].forEach(function (type) {
+          var factory = React.createFactory(
+            reactList[type === 'uniform' ? 'UniformList' : 'List']
+          );
+          React.render(factory({
+            itemRenderer: type === 'uniform' ? renderRow : renderVariedItem,
+            itemsRenderer: type === 'uniform' ? renderTable : undefined,
+            length: type === 'uniform' ? 100000 : 1000
+          }), document.getElementById(env + '-' + type));
+        });
+      });
+    </script>
   </body>
 </html>

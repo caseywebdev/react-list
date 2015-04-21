@@ -1,252 +1,337 @@
-(function (root, factory) {
+(function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['react'], factory);
+    define(['exports', 'react'], factory);
   } else if (typeof exports !== 'undefined') {
-    module.exports = factory(require('react'));
+    factory(exports, require('react'));
   } else {
-    root.ReactList = factory(root.React);
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.React);
+    global.reactList = mod.exports;
   }
-})(this, function (React) {
+})(this, function (exports, _react) {
   'use strict';
 
-  var requestAnimationFrame =
-    (typeof window !== 'undefined' && window.requestAnimationFrame) ||
-      function (cb) { return setTimeout(cb, 16); };
+  var _interopRequire = function (obj) { return obj && obj.__esModule ? obj['default'] : obj; };
 
-  var cancelAnimationFrame =
-    (typeof window !== 'undefined' && window.cancelAnimationFrame) ||
-      clearTimeout;
+  var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-  var isEqualSubset = function (a, b) {
-    for (var key in a) if (b[key] !== a[key]) return false;
-    return true;
+  var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+  var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+  var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+  Object.defineProperty(exports, '__esModule', {
+    value: true
+  });
+
+  var _React = _interopRequire(_react);
+
+  var isEqualSubset = function isEqualSubset(a, b) {
+    for (var _key in a) {
+      if (b[_key] !== a[_key]) {
+        return false;
+      }
+    }return true;
   };
 
-  var isEqual = function (a, b) {
+  var isEqual = function isEqual(a, b) {
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
-  return React.createClass({
-    getDefaultProps: function () {
-      return {
-        items: [],
-        isLoading: false,
-        error: null,
-        renderPageSize: 10,
-        threshold: 500,
-        uniform: false,
-        component: 'div',
-        renderItems: function (children) {
-          return React.createElement('div', {ref: 'items'}, children);
-        },
-        renderItem: function (item, i) {
-          return React.createElement('div', {key: i}, item);
-        },
-        renderLoading: function () {
-          return React.createElement('div', null, 'Loading...');
-        },
-        renderError: function (er) {
-          return React.createElement('div', null, '' + er);
-        },
-        renderEmpty: function () {
-          return React.createElement('div', null, 'Nothing to show.');
-        }
-      };
-    },
+  var List = (function (_React$Component) {
+    function List() {
+      _classCallCheck(this, List);
 
-    getInitialState: function () {
-      return {
-        isLoaded: !this.props.fetch,
-        isLoading: this.props.isLoading,
-        error: this.props.error,
-        index: 0,
-        length: this.props.renderPageSize,
-        itemHeight: 0,
-        columns: 0
-      };
-    },
-
-    componentDidMount: function () {
-      if (this.props.fetchInitially) this.fetch();
-      this.update();
-    },
-
-    componentWillUnmount: function () {
-      cancelAnimationFrame(this.afid);
-    },
-
-    shouldComponentUpdate: function (props, state) {
-      return !isEqual(this.props, props) || !isEqual(this.state, state);
-    },
-
-    getScrollParent: function () {
-      if (this._scrollParent) return this._scrollParent;
-      for (var el = this.getDOMNode(); el; el = el.parentElement) {
-        var overflowY = window.getComputedStyle(el).overflowY;
-        if (overflowY === 'auto' || overflowY === 'scroll') return el;
+      if (_React$Component != null) {
+        _React$Component.apply(this, arguments);
       }
-      return window;
-    },
 
-    // Get scroll position relative to the top of the list.
-    getScroll: function () {
-      var scrollParent = this.getScrollParent();
-      var el = this.getDOMNode();
-      if (scrollParent === el) {
-        return el.scrollTop;
-      } else if (scrollParent === window) {
-        return -el.getBoundingClientRect().top;
-      } else {
-        return scrollParent.scrollTop - el.offsetTop;
+      this.state = {
+        from: 0,
+        to: this.props.pageSize
+      };
+    }
+
+    _inherits(List, _React$Component);
+
+    _createClass(List, [{
+      key: 'state',
+      value: undefined,
+      enumerable: true
+    }, {
+      key: 'shouldComponentUpdate',
+      value: function shouldComponentUpdate(nextProps, nextState) {
+        return !isEqual(this.props, nextProps) || !isEqual(this.state, nextState);
       }
-    },
+    }, {
+      key: 'componentWillReceiveProps',
+      value: function componentWillReceiveProps(next) {
+        var to = this.state.to;
 
-    setScroll: function (y) {
-      var scrollParent = this.getScrollParent();
-      if (scrollParent === window) return window.scrollTo(0, y);
-      scrollParent.scrollTop = y;
-    },
-
-    getViewportHeight: function () {
-      var scrollParent = this.getScrollParent();
-      return scrollParent === window ?
-        scrollParent.innerHeight :
-        scrollParent.clientHeight;
-    },
-
-    scrollTo: function (item) {
-      var items = this.props.items;
-      var targetIndex = items.indexOf(item);
-      if (targetIndex === -1) return;
-      var itemHeight = this.state.itemHeight;
-      var current = this.getScroll();
-      var max = Math.floor(targetIndex / this.state.columns) * itemHeight;
-      var min = max - this.getViewportHeight() + itemHeight;
-      if (current > max) return this.setScroll(max);
-      if (current < min) this.setScroll(min);
-    },
-
-    fetch: function () {
-      if (this.state.isLoaded || this.isFetching || this.state.error) return;
-      this.setState({isLoading: true, error: null});
-      this.isFetching = true;
-      this.props.fetch(this.handleFetch);
-    },
-
-    handleFetch: function (er, isDone) {
-      this.isFetching = false;
-      if (!this.isMounted()) return;
-      this.setState({
-        isLoaded: !er && !!isDone,
-        isLoading: false,
-        error: er
-      });
-    },
-
-    // REFACTOR
-    update: function () {
-      this.afid = requestAnimationFrame(this.update);
-      var items = this.props.items;
-      var threshold = this.props.threshold;
-      var renderPageSize = this.props.renderPageSize;
-      var itemHeight = this.state.itemHeight;
-      var columns = this.state.columns;
-      var index = this.state.index;
-      var length = this.state.length;
-      var elBottom = this.getDOMNode().scrollHeight;
-      var viewTop = this.getScroll();
-      var viewBottom = viewTop + this.getViewportHeight();
-      if (this.props.uniform) {
-
-        // Grab the item elements.
-        var itemEls = this.refs.items.getDOMNode().children;
-
-        // Set `itemHeight` based on the first item. If the first item has not
-        // been rendered yet, defer this branch until the next tick.
-        if (itemEls.length) {
-          var firstRect = itemEls[0].getBoundingClientRect();
-          var firstRectHeight = Math.floor(firstRect.height);
-          if (firstRectHeight) {
-            itemHeight = firstRectHeight;
-            var firstRowBottom = firstRect.top + itemHeight;
-            columns = 1;
-            for (var i = 1, l = itemEls.length; i < l; ++i) {
-              if (itemEls[i].getBoundingClientRect().top >= firstRowBottom) {
-                break;
-              }
-              ++columns;
-            }
-            if (viewBottom > -threshold && viewTop < elBottom + threshold) {
-              var rowThreshold = Math.ceil(threshold / itemHeight);
-              index =
-                (Math.floor(viewTop / itemHeight) - rowThreshold) * columns;
-              var rows = Math.ceil(this.getViewportHeight() / itemHeight);
-              length = columns * (rows + rowThreshold * 2);
-            }
+        var nextTo = Math.min(to, next.length);
+        if (nextTo !== to) this.setState({ to: nextTo });
+      }
+    }, {
+      key: 'componentDidMount',
+      value: function componentDidMount() {
+        this.scrollParent = this.getScrollParent();
+        this.updateFrame = this.updateFrame.bind(this);
+        window.addEventListener('resize', this.updateFrame);
+        this.scrollParent.addEventListener('scroll', this.updateFrame);
+        this.updateFrame();
+      }
+    }, {
+      key: 'componentDidUpdate',
+      value: function componentDidUpdate() {
+        this.updateFrame();
+      }
+    }, {
+      key: 'componentWillUnmount',
+      value: function componentWillUnmount() {
+        window.removeEventListener('resize', this.updateFrame);
+        this.scrollParent.removeEventListener('scroll', this.updateFrame);
+      }
+    }, {
+      key: 'getScrollParent',
+      value: function getScrollParent() {
+        for (var el = _React.findDOMNode(this); el; el = el.parentElement) {
+          var overflowY = window.getComputedStyle(el).overflowY;
+          if (overflowY === 'auto' || overflowY === 'scroll') {
+            return el;
           }
         }
+        return window;
+      }
+    }, {
+      key: 'getScroll',
+      value: function getScroll() {
+        var scrollParent = this.scrollParent;
 
-        // Ensure at least `renderPageSize` elements are rendered at any given
-        // time. This will ensure `columns` can be calculated correctly. It's
-        // also important to always supply a `renderPageSize` that is >= the
-        // most columns of items that will ever be visible, but this is the
-        // responsibility of the component consumer.
-        index = Math.max(0, Math.min(index, items.length - renderPageSize));
-        length = Math.max(length, renderPageSize);
-      } else if (length <= items.length && viewBottom > elBottom - threshold) {
-        length += renderPageSize;
+        var el = _React.findDOMNode(this);
+        if (scrollParent === el) {
+          return el.scrollTop;
+        }if (scrollParent === window) {
+          return -el.getBoundingClientRect().top;
+        }return scrollParent.scrollTop - el.offsetTop;
+      }
+    }, {
+      key: 'getViewportHeight',
+      value: function getViewportHeight() {
+        var scrollParent = this.scrollParent;
+        var innerHeight = scrollParent.innerHeight;
+        var clientHeight = scrollParent.clientHeight;
+
+        return scrollParent === window ? innerHeight : clientHeight;
+      }
+    }, {
+      key: 'updateFrame',
+      value: function updateFrame() {
+        var frameBottom = this.getScroll() + this.getViewportHeight();
+        var elBottom = _React.findDOMNode(this).getBoundingClientRect().height;
+        var _props = this.props;
+        var pageSize = _props.pageSize;
+        var length = _props.length;
+        var threshold = _props.threshold;
+
+        if (elBottom >= frameBottom + threshold) {
+          return;
+        }this.setState({ to: Math.min(this.state.to + pageSize, length) });
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        var _this = this;
+
+        var _state = this.state;
+        var from = _state.from;
+        var to = _state.to;
+
+        var items = [];
+        for (var i = from; i < to; ++i) {
+          items.push(this.props.itemRenderer(i, i - from));
+        }
+        return this.props.itemsRenderer(items, function (c) {
+          return _this.items = c;
+        });
+      }
+    }], [{
+      key: 'propTypes',
+      value: {
+        itemRenderer: _React.PropTypes.func,
+        itemsRenderer: _React.PropTypes.func,
+        length: _React.PropTypes.number,
+        pageSize: _React.PropTypes.number,
+        threshold: _React.PropTypes.number
+      },
+      enumerable: true
+    }, {
+      key: 'defaultProps',
+      value: {
+        itemRenderer: function itemRenderer(i, j) {
+          return _React.createElement(
+            'div',
+            { key: j },
+            i
+          );
+        },
+        itemsRenderer: function itemsRenderer(items, ref) {
+          return _React.createElement(
+            'div',
+            { ref: ref },
+            items
+          );
+        },
+        length: 0,
+        pageSize: 10,
+        threshold: 500
+      },
+      enumerable: true
+    }]);
+
+    return List;
+  })(_React.Component);
+
+  exports.List = List;
+  ;
+
+  var UniformList = (function (_List) {
+    function UniformList() {
+      _classCallCheck(this, UniformList);
+
+      if (_List != null) {
+        _List.apply(this, arguments);
       }
 
-      // Fetch if the models in memory have been exhausted.
-      if (index + length > items.length) this.fetch();
-
-      // Finally, set the new state.
-      this.setState({
-        itemHeight: itemHeight,
-        columns: columns,
-        index: index,
-        length: length
-      });
-    },
-
-    renderSpace: function (n) {
-      if (!this.props.uniform || !this.state.columns) return;
-      var height = (n / this.state.columns) * this.state.itemHeight;
-      if (!height) return;
-      return React.createElement('div', {style: {height: height}});
-    },
-
-    renderSpaceAbove: function () {
-      return this.renderSpace(this.state.index);
-    },
-
-    renderSpaceBelow: function () {
-      var n = this.props.items.length - this.state.index - this.state.length;
-      return this.renderSpace(Math.max(0, n));
-    },
-
-    renderItems: function () {
-      return this.props.renderItems(
-        this.props.items
-          .slice(this.state.index, this.state.index + this.state.length)
-          .map(this.props.renderItem)
-      );
-    },
-
-    renderStatusMessage: function () {
-      var info = this.props.fetch ? this.state : this.props;
-      if (info.isLoading) return this.props.renderLoading();
-      if (info.error) return this.props.renderError(info.error);
-      if (!this.props.items.length) return this.props.renderEmpty();
-    },
-
-    render: function () {
-      return React.createElement(this.props.component, this.props,
-        this.renderSpaceAbove(),
-        this.renderItems(),
-        this.renderSpaceBelow(),
-        this.renderStatusMessage()
-      );
+      this.state = {
+        columns: 1,
+        from: 0,
+        itemHeight: 0,
+        to: 1
+      };
     }
-  });
+
+    _inherits(UniformList, _List);
+
+    _createClass(UniformList, [{
+      key: 'state',
+      value: undefined,
+      enumerable: true
+    }, {
+      key: 'componentWillReceiveProps',
+      value: function componentWillReceiveProps(next) {
+        var _state2 = this.state;
+        var columns = _state2.columns;
+        var from = _state2.from;
+        var to = _state2.to;
+
+        var nextFrom = Math.min(from, this.getMaxFrom(next.length, columns));
+        var nextTo = Math.min(to, next.length);
+        if (nextFrom === from && nextTo === to) {
+          return;
+        }this.setState({ from: nextFrom, to: nextTo });
+      }
+    }, {
+      key: 'setScroll',
+      value: function setScroll(y) {
+        var scrollParent = this.scrollParent;
+
+        if (scrollParent === window) {
+          return window.scrollTo(0, y);
+        }scrollParent.scrollTop = y;
+      }
+    }, {
+      key: 'scrollTo',
+      value: function scrollTo(i) {
+        var itemHeight = this.state.itemHeight;
+
+        var current = this.getScroll();
+        var max = Math.floor(i / this.state.columns) * itemHeight;
+        var min = max - this.getViewportHeight() + itemHeight;
+        if (current > max) this.setScroll(max);
+        if (current < min) this.setScroll(min);
+      }
+    }, {
+      key: 'updateFrame',
+      value: function updateFrame() {
+        var itemEls = _React.findDOMNode(this.items).children;
+        if (!itemEls.length) {
+          return;
+        }var firstRect = itemEls[0].getBoundingClientRect();
+        var itemHeight = firstRect.height;
+        if (!itemHeight) {
+          return;
+        }var firstRowBottom = firstRect.top + itemHeight;
+        var columns = 1;
+        while (itemEls[columns] && itemEls[columns].getBoundingClientRect().top < firstRowBottom) ++columns;
+
+        var from = Math.min(Math.floor(Math.max(0, this.getScroll()) / itemHeight) * columns, this.getMaxFrom(this.props.length, columns));
+
+        var to = Math.min(from + (Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns, this.props.length);
+
+        this.setState({ columns: columns, from: from, itemHeight: itemHeight, to: to });
+      }
+    }, {
+      key: 'getMaxFrom',
+      value: function getMaxFrom(length, columns) {
+        return Math.max(0, length - columns - length % columns);
+      }
+    }, {
+      key: 'getSpace',
+      value: function getSpace(n) {
+        return n / this.state.columns * this.state.itemHeight;
+      }
+    }, {
+      key: 'render',
+      value: function render() {
+        var position = 'relative';
+        var height = this.getSpace(this.props.length);
+        var transform = 'translate(0, ' + this.getSpace(this.state.from) + 'px)';
+        return _React.createElement(
+          'div',
+          { style: { position: position, height: height } },
+          _React.createElement(
+            'div',
+            { style: { position: position, WebkitTransform: transform, transform: transform } },
+            _get(Object.getPrototypeOf(UniformList.prototype), 'render', this).call(this)
+          )
+        );
+      }
+    }], [{
+      key: 'propTypes',
+      value: {
+        itemRenderer: _React.PropTypes.func,
+        itemsRenderer: _React.PropTypes.func,
+        length: _React.PropTypes.number
+      },
+      enumerable: true
+    }, {
+      key: 'defaultProps',
+      value: {
+        itemRenderer: function itemRenderer(i, j) {
+          return _React.createElement(
+            'div',
+            { key: j },
+            i
+          );
+        },
+        itemsRenderer: function itemsRenderer(items, ref) {
+          return _React.createElement(
+            'div',
+            { ref: ref },
+            items
+          );
+        },
+        length: 0
+      },
+      enumerable: true
+    }]);
+
+    return UniformList;
+  })(List);
+
+  exports.UniformList = UniformList;
+  ;
 });
