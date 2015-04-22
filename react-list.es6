@@ -1,12 +1,5 @@
 import React from 'react';
 
-const isEqualSubset = (a, b) => {
-  for (const key in a) if (b[key] !== a[key]) return false;
-  return true;
-};
-
-const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
-
 export class List extends React.Component {
   static propTypes = {
     itemRenderer: React.PropTypes.func,
@@ -27,10 +20,6 @@ export class List extends React.Component {
   state = {
     from: 0,
     size: this.props.pageSize
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return !isEqual(this.props, nextProps) || !isEqual(this.state, nextState);
   }
 
   componentWillReceiveProps(next) {
@@ -95,6 +84,9 @@ export class List extends React.Component {
     return this.props.itemsRenderer(items, c => this.items = c);
   }
 };
+
+List.prototype.shouldComponentUpdate =
+  React.addons.PureRenderMixin.shouldComponentUpdate;
 
 export class UniformList extends List {
   static propTypes = {

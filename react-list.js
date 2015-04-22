@@ -29,18 +29,6 @@
 
   var _React = _interopRequire(_react);
 
-  var isEqualSubset = function isEqualSubset(a, b) {
-    for (var _key in a) {
-      if (b[_key] !== a[_key]) {
-        return false;
-      }
-    }return true;
-  };
-
-  var isEqual = function isEqual(a, b) {
-    return isEqualSubset(a, b) && isEqualSubset(b, a);
-  };
-
   var List = (function (_React$Component) {
     function List() {
       _classCallCheck(this, List);
@@ -61,11 +49,6 @@
       key: 'state',
       value: undefined,
       enumerable: true
-    }, {
-      key: 'shouldComponentUpdate',
-      value: function shouldComponentUpdate(nextProps, nextState) {
-        return !isEqual(this.props, nextProps) || !isEqual(this.state, nextState);
-      }
     }, {
       key: 'componentWillReceiveProps',
       value: function componentWillReceiveProps(next) {
@@ -197,6 +180,8 @@
 
   exports.List = List;
   ;
+
+  List.prototype.shouldComponentUpdate = _React.addons.PureRenderMixin.shouldComponentUpdate;
 
   var UniformList = (function (_List) {
     function UniformList() {
