@@ -12,6 +12,9 @@ bower install react-list
 npm install react-list
 ```
 
+`react-list` depends on React **with addons**. `react-list` leverages the
+[PureRenderMixin] to make updates more efficient.
+
 ## Components
 
 ### `reactList.List`
@@ -50,4 +53,5 @@ Has the same properties as `List`, but `pageSize` and `threshold` are ignored.
 Check out [the test file] for examples of both the `List` and `UniformList` components.
 
 [React]: https://github.com/facebook/react
+[PureRenderMixin]: https://facebook.github.io/react/docs/pure-render-mixin.html
 [the test file]: https://orgsync.github.io/react-list/
