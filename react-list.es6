@@ -92,13 +92,15 @@ export class UniformList extends List {
   static propTypes = {
     itemRenderer: React.PropTypes.func,
     itemsRenderer: React.PropTypes.func,
-    length: React.PropTypes.number
+    length: React.PropTypes.number,
+    threshold: React.PropTypes.number
   }
 
   static defaultProps = {
     itemRenderer: (i, j) => <div key={j}>{i}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
-    length: 0
+    length: 0,
+    threshold: 500
   }
 
   state = {
@@ -146,13 +148,16 @@ export class UniformList extends List {
       Math.floor(itemEls[columns].getBoundingClientRect().top) < firstRowBottom
     ) ++columns;
 
+    const {threshold} = this.props;
+    const top = Math.max(0, this.getScroll() - threshold);
     const from = Math.min(
-      Math.floor(Math.max(0, this.getScroll()) / itemHeight) * columns,
+      Math.floor(top / itemHeight) * columns,
       this.getMaxFrom(this.props.length, columns)
     );
 
+    const viewportHeight = this.getViewportHeight() + (threshold * 2);
     const size = Math.min(
-      ((Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns),
+      (Math.ceil(viewportHeight / itemHeight) + 1) * columns,
       this.props.length - from
     );
 

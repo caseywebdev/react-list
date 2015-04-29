@@ -252,9 +252,13 @@
         var columns = 1;
         while (itemEls[columns] && Math.floor(itemEls[columns].getBoundingClientRect().top) < firstRowBottom) ++columns;
 
-        var from = Math.min(Math.floor(Math.max(0, this.getScroll()) / itemHeight) * columns, this.getMaxFrom(this.props.length, columns));
+        var threshold = this.props.threshold;
 
-        var size = Math.min((Math.ceil(this.getViewportHeight() / itemHeight) + 1) * columns, this.props.length - from);
+        var top = Math.max(0, this.getScroll() - threshold);
+        var from = Math.min(Math.floor(top / itemHeight) * columns, this.getMaxFrom(this.props.length, columns));
+
+        var viewportHeight = this.getViewportHeight() + threshold * 2;
+        var size = Math.min((Math.ceil(viewportHeight / itemHeight) + 1) * columns, this.props.length - from);
 
         this.setState({ columns: columns, from: from, itemHeight: itemHeight, size: size });
       }
@@ -289,7 +293,8 @@
       value: {
         itemRenderer: _React.PropTypes.func,
         itemsRenderer: _React.PropTypes.func,
-        length: _React.PropTypes.number
+        length: _React.PropTypes.number,
+        threshold: _React.PropTypes.number
       },
       enumerable: true
     }, {
@@ -309,7 +314,8 @@
             items
           );
         },
-        length: 0
+        length: 0,
+        threshold: 500
       },
       enumerable: true
     }]);

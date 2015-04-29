@@ -41,16 +41,18 @@ The number of items to batch up for new renders.
 
 #### threshold (defaults to `500`)
 
-The number of pixels to ensure the bottom of the list is buffered with.
+The number of pixels to ensure the list is buffered with.
 
 ### `reactList.UniformList`
 
-Has the same properties as `List`, but `pageSize` and `threshold` are ignored.
-
+`UniformList` has the same properties as `List`, but `pageSize` is ignored and
+calculated automatically based on the size of the first rendered element in the
+list.
 
 ## Examples
 
-Check out [the test file] for examples of both the `List` and `UniformList` components.
+Check out [the test file] for examples of both the `List` and `UniformList`
+components.
 
 [React]: https://github.com/facebook/react
 [PureRenderMixin]: https://facebook.github.io/react/docs/pure-render-mixin.html
