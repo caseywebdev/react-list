@@ -7,7 +7,7 @@ export class List extends React.Component {
     length: React.PropTypes.number,
     pageSize: React.PropTypes.number,
     threshold: React.PropTypes.number
-  }
+  };
 
   static defaultProps = {
     itemRenderer: (i, j) => <div key={j}>{i}</div>,
@@ -15,12 +15,12 @@ export class List extends React.Component {
     length: 0,
     pageSize: 10,
     threshold: 500
-  }
+  };
 
   state = {
     from: 0,
     size: this.props.pageSize
-  }
+  };
 
   componentWillReceiveProps(next) {
     const {size} = this.state;
@@ -96,21 +96,21 @@ export class UniformList extends List {
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
     threshold: React.PropTypes.number
-  }
+  };
 
   static defaultProps = {
     itemRenderer: (i, j) => <div key={j}>{i}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
     threshold: 500
-  }
+  };
 
   state = {
     from: 0,
     itemHeight: this.props.itemHeight || 0,
     itemsPerRow: this.props.itemsPerRow || 1,
     size: 1
-  }
+  };
 
   componentWillReceiveProps(next) {
     let {itemsPerRow, from, size} = this.state;
