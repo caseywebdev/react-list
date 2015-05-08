@@ -265,7 +265,10 @@
           if (!itemEls.length) return;
 
           var firstRect = itemEls[0].getBoundingClientRect();
-          itemHeight = firstRect.height;
+          itemHeight = this.state.itemHeight;
+          if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
+            itemHeight = firstRect.height;
+          }
           if (!itemHeight) return;
 
           var firstRowBottom = Math.round(firstRect.bottom);
@@ -284,8 +287,6 @@
 
         var viewportHeight = this.getViewportHeight() + threshold * 2;
         var size = Math.min((Math.ceil(viewportHeight / itemHeight) + 1) * itemsPerRow, this.props.length - from);
-
-        console.log(itemsPerRow);
 
         this.setState({ itemsPerRow: itemsPerRow, from: from, itemHeight: itemHeight, size: size });
       }
