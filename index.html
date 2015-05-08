@@ -5,6 +5,7 @@
     <title>react-list</title>
     <script src='bower_components/react/react-with-addons.js'></script>
     <script src='react-list.js'></script>
+    <script src='http://localhost:35729/livereload.js'></script>
     <style>
     body {
       text-align: center;
@@ -27,16 +28,20 @@
       margin: 0;
     }
 
+    .zebra {
+      background: #efefef;
+    }
+
     td {
       padding: 5px;
-      border: 1px solid black;
+      height: 20px;
+      overflow: hidden;
     }
 
     #contained-uniform,
     #contained-variable {
       margin: 10px auto;
       border: 10px solid red;
-      position: relative;
       width: 50%;
       height: 400px;
       overflow: auto;
@@ -66,7 +71,11 @@
     <div id='window-variable'></div>
     <script>
       var renderRow = function (i, key) {
-        return React.createElement('tr', {key: key},
+        return React.createElement('tr',
+          {
+            key: key,
+            className: i % 2 ? null : 'zebra'
+          },
           React.createElement('td', null, 'This'),
           React.createElement('td', null, 'is'),
           React.createElement('td', null, 'table'),
@@ -84,6 +93,7 @@
       var renderVariedItem = function (i, key) {
         return React.createElement('div', {
           key: key,
+          className: i % 2 ? null : 'zebra',
           style: {height: 20 + ((i % 20) * 10) + ((i % 100) * 10)}
         }, 'This is variable height item #' + (i + 1))
       };
@@ -93,7 +103,7 @@
           var factory = React.createFactory(
             reactList[type === 'uniform' ? 'UniformList' : 'List']
           );
-          React.render(factory({
+          window[env + '_' + type] = React.render(factory({
             itemRenderer: type === 'uniform' ? renderRow : renderVariedItem,
             itemsRenderer: type === 'uniform' ? renderTable : undefined,
             length: type === 'uniform' ? 100000 : 1000

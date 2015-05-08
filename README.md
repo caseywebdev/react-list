@@ -100,6 +100,13 @@ The number of items to batch up for new renders.
 
 The number of pixels to ensure the list is buffered with.
 
+#### Methods
+
+##### scrollTo(index)
+
+Put the element at `index` at the top of the viewport. **NOTE: Unlike with the
+UniformList, you can only scroll to elements that have been rendered.**
+
 ---
 
 ### `reactList.UniformList`
@@ -135,7 +142,11 @@ take over.**
 
 ##### scrollTo(index)
 
-Scroll the viewport so that the element at index `index` is visible.
+Put the element at `index` at the top of the viewport.
+
+##### scrollAround(index)
+
+Scroll the viewport so that the element at `index` is visible.
 
 [React]: https://github.com/facebook/react
 [PureRenderMixin]: https://facebook.github.io/react/docs/pure-render-mixin.html

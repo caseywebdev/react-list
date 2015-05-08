@@ -46,7 +46,8 @@ export class List extends React.Component {
   }
 
   getScrollParent() {
-    for (let el = React.findDOMNode(this); el; el = el.parentElement) {
+    let el = React.findDOMNode(this);
+    while (el = el.parentElement) {
       const overflowY = window.getComputedStyle(el).overflowY;
       if (overflowY === 'auto' || overflowY === 'scroll') return el;
     }
@@ -55,10 +56,28 @@ export class List extends React.Component {
 
   getScroll() {
     const {scrollParent} = this;
-    const el = React.findDOMNode(this);
-    if (scrollParent === el) return el.scrollTop;
-    if (scrollParent === window) return -el.getBoundingClientRect().top;
-    return scrollParent.scrollTop - el.offsetTop;
+    const elTop = React.findDOMNode(this).getBoundingClientRect().top;
+    if (scrollParent === window) return -elTop;
+    const scrollParentTop = scrollParent.getBoundingClientRect().top;
+    return scrollParentTop + scrollParent.clientTop - elTop;
+  }
+
+  setScroll(y) {
+    const {scrollParent} = this;
+    if (scrollParent === window) {
+      const elTop = React.findDOMNode(this).getBoundingClientRect().top;
+      const windowTop = document.documentElement.getBoundingClientRect().top;
+      return window.scrollTo(0, Math.round(elTop) - windowTop + y);
+    }
+    scrollParent.scrollTop += y - this.getScroll();
+  }
+
+  scrollTo(i) {
+    const itemEl = React.findDOMNode(this.items).children[i];
+    if (!itemEl) return;
+    const itemElTop = itemEl.getBoundingClientRect().top;
+    const elTop = React.findDOMNode(this).getBoundingClientRect().top;
+    this.setScroll(itemElTop - elTop);
   }
 
   getViewportHeight() {
@@ -120,18 +139,21 @@ export class UniformList extends List {
     this.setState({from, size});
   }
 
-  setScroll(y) {
-    const {scrollParent} = this;
-    if (scrollParent === window) return window.scrollTo(0, y);
-    scrollParent.scrollTop = y;
+  getMaxScrollFor(index) {
+    const {itemHeight, itemsPerRow} = this.state;
+    return Math.floor(index / itemsPerRow) * itemHeight;
   }
 
-  scrollTo(i) {
+  scrollTo(index) {
+    this.setScroll(this.getMaxScrollFor(index));
+  }
+
+  scrollAround(index) {
     const {itemHeight} = this.state;
     const current = this.getScroll();
-    const max = Math.floor(i / this.state.itemsPerRow) * itemHeight;
+    const max = this.getMaxScrollFor(index);
+    if (current > max) return this.setScroll(max);
     const min = max - this.getViewportHeight() + itemHeight;
-    if (current > max) this.setScroll(max);
     if (current < min) this.setScroll(min);
   }
 
@@ -143,14 +165,17 @@ export class UniformList extends List {
       if (!itemEls.length) return;
 
       const firstRect = itemEls[0].getBoundingClientRect();
-      itemHeight = Math.floor(firstRect.height);
+      itemHeight = this.state.itemHeight;
+      if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
+        itemHeight = firstRect.height;
+      }
       if (!itemHeight) return;
 
-      const firstRowBottom = Math.floor(firstRect.top) + itemHeight;
+      const firstRowBottom = Math.round(firstRect.bottom);
       itemsPerRow = 1;
       for (
         let item = itemEls[itemsPerRow];
-        item && Math.floor(item.getBoundingClientRect().top) < firstRowBottom;
+        item && Math.round(item.getBoundingClientRect().top) < firstRowBottom;
         item = itemEls[itemsPerRow]
       ) ++itemsPerRow;
     }
@@ -182,12 +207,12 @@ export class UniformList extends List {
   }
 
   render() {
-    const position = 'relative';
-    const height = this.getSpace(this.props.length);
     const transform = `translate(0, ${this.getSpace(this.state.from)}px)`;
     return (
-      <div style={{position, height}}>
-        <div style={{position, WebkitTransform: transform, transform}}>
+      <div
+        style={{position: 'relative', height: this.getSpace(this.props.length)}}
+      >
+        <div style={{WebkitTransform: transform, transform}}>
           {super.render()}
         </div>
       </div>

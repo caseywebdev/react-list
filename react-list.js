@@ -79,7 +79,8 @@
     }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
-        for (var el = _React.findDOMNode(this); el; el = el.parentElement) {
+        var el = _React.findDOMNode(this);
+        while (el = el.parentElement) {
           var overflowY = window.getComputedStyle(el).overflowY;
           if (overflowY === 'auto' || overflowY === 'scroll') return el;
         }
@@ -90,10 +91,31 @@
       value: function getScroll() {
         var scrollParent = this.scrollParent;
 
-        var el = _React.findDOMNode(this);
-        if (scrollParent === el) return el.scrollTop;
-        if (scrollParent === window) return -el.getBoundingClientRect().top;
-        return scrollParent.scrollTop - el.offsetTop;
+        var elTop = _React.findDOMNode(this).getBoundingClientRect().top;
+        if (scrollParent === window) return -elTop;
+        var scrollParentTop = scrollParent.getBoundingClientRect().top;
+        return scrollParentTop + scrollParent.clientTop - elTop;
+      }
+    }, {
+      key: 'setScroll',
+      value: function setScroll(y) {
+        var scrollParent = this.scrollParent;
+
+        if (scrollParent === window) {
+          var elTop = _React.findDOMNode(this).getBoundingClientRect().top;
+          var windowTop = document.documentElement.getBoundingClientRect().top;
+          return window.scrollTo(0, Math.round(elTop) - windowTop + y);
+        }
+        scrollParent.scrollTop += y - this.getScroll();
+      }
+    }, {
+      key: 'scrollTo',
+      value: function scrollTo(i) {
+        var itemEl = _React.findDOMNode(this.items).children[i];
+        if (!itemEl) return;
+        var itemElTop = itemEl.getBoundingClientRect().top;
+        var elTop = _React.findDOMNode(this).getBoundingClientRect().top;
+        this.setScroll(itemElTop - elTop);
       }
     }, {
       key: 'getViewportHeight',
@@ -207,22 +229,28 @@
         this.setState({ from: from, size: size });
       }
     }, {
-      key: 'setScroll',
-      value: function setScroll(y) {
-        var scrollParent = this.scrollParent;
+      key: 'getMaxScrollFor',
+      value: function getMaxScrollFor(index) {
+        var _state3 = this.state;
+        var itemHeight = _state3.itemHeight;
+        var itemsPerRow = _state3.itemsPerRow;
 
-        if (scrollParent === window) return window.scrollTo(0, y);
-        scrollParent.scrollTop = y;
+        return Math.floor(index / itemsPerRow) * itemHeight;
       }
     }, {
       key: 'scrollTo',
-      value: function scrollTo(i) {
+      value: function scrollTo(index) {
+        this.setScroll(this.getMaxScrollFor(index));
+      }
+    }, {
+      key: 'scrollAround',
+      value: function scrollAround(index) {
         var itemHeight = this.state.itemHeight;
 
         var current = this.getScroll();
-        var max = Math.floor(i / this.state.itemsPerRow) * itemHeight;
+        var max = this.getMaxScrollFor(index);
+        if (current > max) return this.setScroll(max);
         var min = max - this.getViewportHeight() + itemHeight;
-        if (current > max) this.setScroll(max);
         if (current < min) this.setScroll(min);
       }
     }, {
@@ -237,12 +265,12 @@
           if (!itemEls.length) return;
 
           var firstRect = itemEls[0].getBoundingClientRect();
-          itemHeight = Math.floor(firstRect.height);
+          itemHeight = firstRect.height;
           if (!itemHeight) return;
 
-          var firstRowBottom = Math.floor(firstRect.top) + itemHeight;
+          var firstRowBottom = Math.round(firstRect.bottom);
           itemsPerRow = 1;
-          for (var item = itemEls[itemsPerRow]; item && Math.floor(item.getBoundingClientRect().top) < firstRowBottom; item = itemEls[itemsPerRow]) {
+          for (var item = itemEls[itemsPerRow]; item && Math.round(item.getBoundingClientRect().top) < firstRowBottom; item = itemEls[itemsPerRow]) {
             ++itemsPerRow;
           }
         }
@@ -256,6 +284,8 @@
 
         var viewportHeight = this.getViewportHeight() + threshold * 2;
         var size = Math.min((Math.ceil(viewportHeight / itemHeight) + 1) * itemsPerRow, this.props.length - from);
+
+        console.log(itemsPerRow);
 
         this.setState({ itemsPerRow: itemsPerRow, from: from, itemHeight: itemHeight, size: size });
       }
@@ -272,15 +302,15 @@
     }, {
       key: 'render',
       value: function render() {
-        var position = 'relative';
-        var height = this.getSpace(this.props.length);
         var transform = 'translate(0, ' + this.getSpace(this.state.from) + 'px)';
         return _React.createElement(
           'div',
-          { style: { position: position, height: height } },
+          {
+            style: { position: 'relative', height: this.getSpace(this.props.length) }
+          },
           _React.createElement(
             'div',
-            { style: { position: position, WebkitTransform: transform, transform: transform } },
+            { style: { WebkitTransform: transform, transform: transform } },
             _get(Object.getPrototypeOf(UniformList.prototype), 'render', this).call(this)
           )
         );
