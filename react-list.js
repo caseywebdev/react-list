@@ -172,7 +172,6 @@
   })(_React.Component);
 
   exports.List = List;
-  ;
 
   List.prototype.shouldComponentUpdate = _React.addons.PureRenderMixin.shouldComponentUpdate;
 
@@ -233,20 +232,17 @@
         var itemHeight = _props2.itemHeight;
         var itemsPerRow = _props2.itemsPerRow;
 
-        var itemEls = undefined,
-            firstRect = undefined;
-
         if (itemHeight == null || itemsPerRow == null) {
-          var _itemEls = _React.findDOMNode(this.items).children;
-          if (!_itemEls.length) return;
+          var itemEls = _React.findDOMNode(this.items).children;
+          if (!itemEls.length) return;
 
-          firstRect = _itemEls[0].getBoundingClientRect();
+          var firstRect = itemEls[0].getBoundingClientRect();
           itemHeight = Math.floor(firstRect.height);
           if (!itemHeight) return;
 
           var firstRowBottom = Math.floor(firstRect.top) + itemHeight;
           itemsPerRow = 1;
-          for (var item = _itemEls[itemsPerRow]; item && Math.floor(item.getBoundingClientRect().top) < firstRowBottom; item = _itemEls[itemsPerRow]) {
+          for (var item = itemEls[itemsPerRow]; item && Math.floor(item.getBoundingClientRect().top) < firstRowBottom; item = itemEls[itemsPerRow]) {
             ++itemsPerRow;
           }
         }
@@ -327,5 +323,4 @@
   })(List);
 
   exports.UniformList = UniformList;
-  ;
 });

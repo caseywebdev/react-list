@@ -83,7 +83,7 @@ export class List extends React.Component {
     }
     return this.props.itemsRenderer(items, c => this.items = c);
   }
-};
+}
 
 List.prototype.shouldComponentUpdate =
   React.addons.PureRenderMixin.shouldComponentUpdate;
@@ -137,13 +137,12 @@ export class UniformList extends List {
 
   updateFrame() {
     let {itemHeight, itemsPerRow} = this.props;
-    let itemEls, firstRect;
 
     if (itemHeight == null || itemsPerRow == null) {
-      let itemEls = React.findDOMNode(this.items).children;
+      const itemEls = React.findDOMNode(this.items).children;
       if (!itemEls.length) return;
 
-      firstRect = itemEls[0].getBoundingClientRect();
+      const firstRect = itemEls[0].getBoundingClientRect();
       itemHeight = Math.floor(firstRect.height);
       if (!itemHeight) return;
 
@@ -194,4 +193,4 @@ export class UniformList extends List {
       </div>
     );
   }
-};
+}
