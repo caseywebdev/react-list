@@ -2,6 +2,7 @@ import React from 'react';
 
 export class List extends React.Component {
   static propTypes = {
+    initialIndex: React.PropTypes.number,
     itemRenderer: React.PropTypes.func,
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
@@ -34,6 +35,9 @@ export class List extends React.Component {
     window.addEventListener('resize', this.updateFrame);
     this.scrollParent.addEventListener('scroll', this.updateFrame);
     this.updateFrame();
+    const {initialIndex} = this.props;
+    if (initialIndex == null) return;
+    this.afId = requestAnimationFrame(this.scrollTo.bind(this, initialIndex));
   }
 
   componentDidUpdate() {
@@ -43,6 +47,7 @@ export class List extends React.Component {
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame);
+    cancelAnimationFrame(this.afId);
   }
 
   getScrollParent() {
@@ -109,6 +114,7 @@ List.prototype.shouldComponentUpdate =
 
 export class UniformList extends List {
   static propTypes = {
+    initialIndex: React.PropTypes.number,
     itemHeight: React.PropTypes.number,
     itemRenderer: React.PropTypes.func,
     itemsPerRow: React.PropTypes.number,

@@ -64,6 +64,10 @@
         window.addEventListener('resize', this.updateFrame);
         this.scrollParent.addEventListener('scroll', this.updateFrame);
         this.updateFrame();
+        var initialIndex = this.props.initialIndex;
+
+        if (initialIndex == null) return;
+        this.afId = requestAnimationFrame(this.scrollTo.bind(this, initialIndex));
       }
     }, {
       key: 'componentDidUpdate',
@@ -75,6 +79,7 @@
       value: function componentWillUnmount() {
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame);
+        cancelAnimationFrame(this.afId);
       }
     }, {
       key: 'getScrollParent',
@@ -159,6 +164,7 @@
     }], [{
       key: 'propTypes',
       value: {
+        initialIndex: _React.PropTypes.number,
         itemRenderer: _React.PropTypes.func,
         itemsRenderer: _React.PropTypes.func,
         length: _React.PropTypes.number,
@@ -319,6 +325,7 @@
     }], [{
       key: 'propTypes',
       value: {
+        initialIndex: _React.PropTypes.number,
         itemHeight: _React.PropTypes.number,
         itemRenderer: _React.PropTypes.func,
         itemsPerRow: _React.PropTypes.number,

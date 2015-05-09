@@ -76,6 +76,12 @@ near it.
 
 #### Props
 
+##### initialIndex
+
+Optionally specify an index to scroll to after mounting. For the `UniformList`,
+this can be any index less than `length`. For the variable height `List`,
+however, this value must be less than `pageSize`.
+
 ##### itemRenderer(index, key)
 
 A function that receives an index and a key and returns the content to be
