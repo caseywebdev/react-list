@@ -209,7 +209,7 @@ export class UniformList extends List {
   }
 
   getSpace(n) {
-    return (n / this.state.itemsPerRow) * this.state.itemHeight;
+    return Math.ceil(n / this.state.itemsPerRow) * this.state.itemHeight;
   }
 
   render() {
