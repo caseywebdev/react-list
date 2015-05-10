@@ -12,6 +12,7 @@
     "react": "0.13.x"
   },
   "devDependencies": {
+    "bower": "1.4.1",
     "cogs": "1.0.4",
     "cogs-transformer-babel": "1.0.10"
   }
