@@ -120,6 +120,7 @@ export class UniformList extends List {
     itemsPerRow: React.PropTypes.number,
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
+    pageSize: React.PropTypes.number,
     threshold: React.PropTypes.number
   };
 
@@ -127,6 +128,7 @@ export class UniformList extends List {
     itemRenderer: (i, j) => <div key={j}>{i}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
+    pageSize: 1,
     threshold: 500
   };
 
@@ -134,7 +136,7 @@ export class UniformList extends List {
     from: 0,
     itemHeight: this.props.itemHeight || 0,
     itemsPerRow: this.props.itemsPerRow || 1,
-    size: 1
+    size: this.props.pageSize
   };
 
   componentWillReceiveProps(next) {
