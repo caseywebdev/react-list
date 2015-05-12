@@ -1,7 +1,8 @@
 BIN=node_modules/.bin/
+BOWER=$(BIN)bower
 COGS=$(BIN)cogs
 
 dev:
 	npm install
-	bower install
+	$(BOWER) install
 	$(COGS) -w react-list.es6
