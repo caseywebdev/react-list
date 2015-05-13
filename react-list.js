@@ -60,9 +60,10 @@
         var from = _state.from;
         var size = _state.size;
         var length = next.length;
+        var pageSize = next.pageSize;
 
         from = Math.max(Math.min(from, this.getMaxFrom(length, itemsPerRow)), 0);
-        size = Math.min(Math.max(size, 1), length - from);
+        size = Math.min(Math.max(size, pageSize), length - from);
         this.setState({ from: from, size: size });
       }
     }, {
