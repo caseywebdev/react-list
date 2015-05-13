@@ -2,114 +2,20 @@
 
 <html>
   <head>
-    <title>react-list</title>
-    <script src='bower_components/react/react-with-addons.js'></script>
+    <title>ReactList</title>
+    <script src='bower_components/react/react.js'></script>
     <script src='react-list.js'></script>
+    <script src='index.js'></script>
     <script src='http://localhost:35729/livereload.js'></script>
-    <style>
-    body {
-      text-align: center;
-      margin: 0;
-      font-family: 'Helvetica Neue', sans-serif;
-    }
-
-    a {
-      color: #38afd4;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 0;
-    }
-
-    .zebra {
-      background: #efefef;
-    }
-
-    td {
-      padding: 5px;
-      height: 20px;
-      overflow: hidden;
-    }
-
-    #contained-uniform,
-    #contained-variable {
-      margin: 10px auto;
-      border: 10px solid red;
-      width: 50%;
-      height: 400px;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    </style>
   </head>
 
   <body>
-    <h1>react-list</h1>
-    <a href='https://github.com/orgsync/react-list'>Source</a><br>
-    <a href='#contained-uniform'>Contained Uniform</a><br>
-    <a href='#window-uniform'>Window Uniform</a><br>
-    <a href='#contained-variable'>Contained Variable</a><br>
-    <a href='#window-variable'>Window Variable</a>
-
-    <h2>Contained Uniform</h2>
-    <div id='contained-uniform'></div>
-
-    <h2>Window Uniform</h2>
-    <div id='window-uniform'></div>
-
-    <h2>Contained Variable</h2>
-    <div id='contained-variable'></div>
-
-    <h2>Window Variable</h2>
-    <div id='window-variable'></div>
+    <div id='main'></div>
     <script>
-      var renderRow = function (i, key) {
-        return React.createElement('tr',
-          {
-            key: key,
-            className: i % 2 ? null : 'zebra'
-          },
-          React.createElement('td', null, 'This'),
-          React.createElement('td', null, 'is'),
-          React.createElement('td', null, 'table'),
-          React.createElement('td', null, 'row'),
-          React.createElement('td', null, '#' + (i + 1))
-        );
-      };
-
-      var renderTable = function (items, ref) {
-        return React.createElement('table', null,
-          React.createElement('tbody', {ref: ref}, items)
-        )
-      };
-
-      var renderVariedItem = function (i, key) {
-        return React.createElement('div', {
-          key: key,
-          className: i % 2 ? null : 'zebra',
-          style: {height: 20 + ((i % 20) * 10) + ((i % 100) * 10)}
-        }, 'This is variable height item #' + (i + 1))
-      };
-
-      ['contained', 'window'].forEach(function (env) {
-        ['uniform', 'variable'].forEach(function (type) {
-          var factory = React.createFactory(
-            reactList[type === 'uniform' ? 'UniformList' : 'List']
-          );
-          window[env + '_' + type] = React.render(factory({
-            itemRenderer: type === 'uniform' ? renderRow : renderVariedItem,
-            itemsRenderer: type === 'uniform' ? renderTable : undefined,
-            length: type === 'uniform' ? 100000 : 1000
-          }), document.getElementById(env + '-' + type));
-        });
-      });
+      window.React.render(
+        window.React.createFactory(window.index)(),
+        document.getElementById('main')
+      );
     </script>
   </body>
 </html>

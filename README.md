@@ -1,4 +1,4 @@
-# react-list
+# ReactList
 
 A versatile infinite scroll [React] component.
 
@@ -12,20 +12,19 @@ bower install react-list
 npm install react-list
 ```
 
-`react-list` depends on React **with addons**. `react-list` leverages the
-[PureRenderMixin] to make updates more efficient.
+ReactList depends on React.
 
 ## Examples
 
-Check out [the test page] (and the [the test page source]) for examples of both
-the `List` and `UniformList` components in action.
+Check out [the test page] (and the [the test page source]) for examples of
+different configurations.
 
 Here's another simple example to get you started.
 
 ```js
-import React from 'react';
-import {UniformList} from 'react-list';
 import loadAccount from 'my-account-loader';
+import React from 'react';
+import ReactList from 'react-list';
 
 class MyComponent extends React.Component {
   state = {
@@ -55,9 +54,10 @@ class MyComponent extends React.Component {
             maxHeight: 400
           }}
         >
-          <UniformList
+          <ReactList
             itemRenderer={this.renderItem}
             length={this.state.accounts.length}
+            uniform={true}
           />
         </div>
       </div>
@@ -66,21 +66,16 @@ class MyComponent extends React.Component {
 }
 ```
 
-## API
-
-### `reactList.List`
-
-The `List` component is best used when rendering items of variable heights. This
-component will only attempt to draw elements once they are above the fold or
-near it.
-
-#### Props
+## Props
 
 ##### initialIndex
 
-Optionally specify an index to scroll to after mounting. For the `UniformList`,
-this can be any index less than `length`. For the variable height `List`,
-however, this value must be less than `pageSize`.
+An index to scroll to after mounting.
+
+##### itemHeightGetter(index)
+
+A function that receives an item index and returns the height of that item at
+that index.
 
 ##### itemRenderer(index, key)
 
@@ -90,11 +85,11 @@ rendered for the item at that index.
 ##### itemsRenderer(items, ref)
 
 A function that receives the rendered items and a ref. By default this element
-is just a `<div>`. Generally it only needs to be overriden for use in a
+is just a `<div>`. Generally it only needs to be overridden for use in a
 `<table>` or other special case. **NOTE: You must set ref={ref} on the component
 that contains the `items` so the correct item sizing calculations can be made.**
 
-##### length
+##### length (defaults to `0`)
 
 The number of items in the list.
 
@@ -102,49 +97,31 @@ The number of items in the list.
 
 The number of items to batch up for new renders.
 
-##### threshold (defaults to `500`)
+##### type (one of `simple`, `variable`, or `uniform`, defaults to `simple`)
 
-The number of pixels to ensure the list is buffered with.
+- `simple` This type is...simple. It will not cache item heights or remove items
+that are above the viewport. This type is sufficient for many cases when the
+only requirement is incremental rendering when scrolling.
 
-#### Methods
+- `variable` This type is preferred when the heights of the items in the list
+vary. Supply the `itemHeightGetter` when possible so the entire length of the
+list can be established beforehand. Otherwise, the item heights will be cached
+as they are rendered so that items that are above the viewport can be removed as
+the list is scrolled.
 
-##### scrollTo(index)
-
-Put the element at `index` at the top of the viewport. **NOTE: Unlike with the
-UniformList, you can only scroll to elements that have been rendered.**
-
----
-
-### `reactList.UniformList`
-
-The `UniformList` component is preferred when you can guarantee all of your
+- `uniform` This type is preferred when you can guarantee all of your
 elements will be the same height. The advantage here is that the height of the
 entire list can be calculated ahead of time and only enough items to fill the
-viewport ever need to be drawn.
+viewport ever need to be drawn. The height of the first item will be used to
+infer the height of every other item. Multiple items per row are also supported
+with this type.
 
-`UniformList` has the same properties as `List`, but `pageSize` is calculated
-automatically. It also supports two more optional properties.
+##### threshold (defaults to `500`)
 
-#### Props
+The number of pixels to buffer at the beginning and end of the rendered list
+items.
 
-##### itemHeight (defaults to automatic calculation)
-
-While not necessary, providing the exact rendered height of each item can
-improve performance. If not provided, the height of the first rendered element
-will be used to assume the height of all items.
-
-##### itemsPerRow (defaults to automatic calculation)
-
-Similar to `itemHeight`, providing the number of items that render per row of
-items (columns) can improve performance. This is also not required and if not
-provided will be calculated by counting the number of rendered items in the
-first row.
-
-**NOTE: `itemHeight` and `itemsPerRow` should always both be defined or both not
-be defined. If one is defined but not the other, the automatic calculation will
-take over.**
-
-#### Methods
+## Methods
 
 ##### scrollTo(index)
 
@@ -152,9 +129,16 @@ Put the element at `index` at the top of the viewport.
 
 ##### scrollAround(index)
 
-Scroll the viewport so that the element at `index` is visible.
+Scroll the viewport so that the element at `index` is visible, but not
+necessarily at the top.
+
+## Development
+
+```bash
+open index.html
+make
+```
 
 [React]: https://github.com/facebook/react
-[PureRenderMixin]: https://facebook.github.io/react/docs/pure-render-mixin.html
 [the test page]: https://orgsync.github.io/react-list/
-[the test page source]: index.html
+[the test page source]: index.js

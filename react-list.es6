@@ -1,32 +1,49 @@
 import React from 'react';
 
-export class List extends React.Component {
+const isEqualSubset = (a, b) => {
+  for (let key in a) if (a[key] !== b[key]) return false;
+  return true;
+};
+
+const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
+
+export default class extends React.Component {
   static propTypes = {
     initialIndex: React.PropTypes.number,
+    itemHeightGetter: React.PropTypes.func,
     itemRenderer: React.PropTypes.func,
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
     pageSize: React.PropTypes.number,
-    threshold: React.PropTypes.number
+    simple: React.PropTypes.bool,
+    threshold: React.PropTypes.number,
+    type: React.PropTypes.oneOf(['simple', 'variable', 'uniform'])
   };
 
   static defaultProps = {
-    itemRenderer: (i, j) => <div key={j}>{i}</div>,
+    itemRenderer: (index, key) => <div key={key}>{index}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
     pageSize: 10,
-    threshold: 500
+    threshold: 500,
+    type: 'simple'
   };
 
   state = {
-    from: 0,
+    from: this.props.initialIndex || 0,
+    itemHeight: 0,
+    itemsPerRow: 1,
     size: this.props.pageSize
   };
 
+  cache = {};
+
   componentWillReceiveProps(next) {
-    const {size} = this.state;
-    const {length, pageSize} = next;
-    this.setState({size: Math.min(Math.max(size, pageSize), length)});
+    let {itemsPerRow, from, size} = this.state;
+    const {length} = next;
+    from = Math.max(Math.min(from, this.getMaxFrom(length, itemsPerRow)), 0);
+    size = Math.min(Math.max(size, 1), length - from);
+    this.setState({from, size});
   }
 
   componentDidMount() {
@@ -38,6 +55,10 @@ export class List extends React.Component {
     const {initialIndex} = this.props;
     if (initialIndex == null) return;
     this.afId = requestAnimationFrame(this.scrollTo.bind(this, initialIndex));
+  }
+
+  shouldComponentUpdate(props, state) {
+    return !isEqual(props, this.props) || !isEqual(state, this.state);
   }
 
   componentDidUpdate() {
@@ -77,29 +98,183 @@ export class List extends React.Component {
     scrollParent.scrollTop += y - this.getScroll();
   }
 
-  scrollTo(i) {
-    const itemEl = React.findDOMNode(this.items).children[i];
-    if (!itemEl) return;
-    const itemElTop = itemEl.getBoundingClientRect().top;
-    const elTop = React.findDOMNode(this).getBoundingClientRect().top;
-    this.setScroll(itemElTop - elTop);
-  }
-
   getViewportHeight() {
     const {scrollParent} = this;
     const {innerHeight, clientHeight} = scrollParent;
     return scrollParent === window ? innerHeight : clientHeight;
   }
 
+  getTopAndBottom() {
+    const {threshold} = this.props;
+    const top = Math.max(0, this.getScroll() - threshold);
+    const bottom = top + this.getViewportHeight() + (threshold * 2);
+    return {top, bottom};
+  }
+
+  getItemHeightAndItemsPerRow() {
+    const itemEls = React.findDOMNode(this.items).children;
+    if (!itemEls.length) return {};
+
+    const firstRect = itemEls[0].getBoundingClientRect();
+
+    // Firefox has a problem where it will return a *slightly* (less than
+    // thousandths of a pixel) different height for the same element between
+    // renders. This can cause an infinite render loop, so only change the
+    // itemHeight when it is significantly different.
+    let itemHeight = this.state.itemHeight;
+    if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
+      itemHeight = firstRect.height;
+    }
+
+    if (!itemHeight) return {};
+
+    const firstRowBottom = Math.round(firstRect.bottom);
+    let itemsPerRow = 1;
+    for (
+      let item = itemEls[itemsPerRow];
+      item && Math.round(item.getBoundingClientRect().top) < firstRowBottom;
+      item = itemEls[itemsPerRow]
+    ) ++itemsPerRow;
+
+    return {itemHeight, itemsPerRow};
+  }
+
   updateFrame() {
-    const frameBottom = this.getScroll() + this.getViewportHeight();
-    const elBottom = React.findDOMNode(this).getBoundingClientRect().height;
-    const {pageSize, length, threshold} = this.props;
-    if (elBottom >= frameBottom + threshold) return;
+    switch (this.props.type) {
+    case 'simple': return this.updateSimpleFrame();
+    case 'variable': return this.updateVariableFrame();
+    case 'uniform': return this.updateUniformFrame();
+    }
+  }
+
+  updateSimpleFrame() {
+    const {bottom} = this.getTopAndBottom();
+    const elHeight = React.findDOMNode(this).getBoundingClientRect().height;
+
+    if (elHeight > bottom) return;
+
+    const {pageSize, length} = this.props;
     this.setState({size: Math.min(this.state.size + pageSize, length)});
   }
 
-  render() {
+  updateVariableFrame() {
+    if (!this.props.itemHeightGetter) this.cacheHeights();
+
+    const {top, bottom} = this.getTopAndBottom();
+    const {length, pageSize} = this.props;
+    let space = 0;
+    let from = 0;
+    let size = 0;
+    const maxFrom = length - 1;
+
+    while (from < maxFrom) {
+      const height = this.getHeightOf(from);
+      if (isNaN(height) || space + height > top) break;
+      space += height;
+      ++from;
+    }
+
+    const maxSize = length - from;
+
+    while (size < maxSize && space < bottom) {
+      const height = this.getHeightOf(from + size);
+      if (isNaN(height)) {
+        size += pageSize;
+        break;
+      }
+      space += height;
+      ++size;
+    }
+
+    this.setState({from, size});
+  }
+
+  updateUniformFrame() {
+    let {itemHeight, itemsPerRow} = this.getItemHeightAndItemsPerRow();
+
+    if (!itemHeight || !itemsPerRow) return;
+
+    const {length} = this.props;
+    const {top, bottom} = this.getTopAndBottom();
+
+    const from = Math.min(
+      Math.floor(top / itemHeight) * itemsPerRow,
+      this.getMaxFrom(length, itemsPerRow)
+    );
+
+    const size = Math.min(
+      (Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow,
+      length - from
+    );
+
+    return this.setState({itemsPerRow, from, itemHeight, size});
+  }
+
+  getSpaceBefore(index) {
+
+    // Try the static itemHeight.
+    const {itemHeight, itemsPerRow} = this.state;
+    if (itemHeight) return Math.ceil(index / itemsPerRow) * itemHeight;
+
+    // Finally, accumulate heights of items 0 - index.
+    let height = 0;
+    for (let i = 0; i < index; ++i) {
+      const itemHeight = this.getHeightOf(i);
+      if (isNaN(itemHeight)) break;
+      height += itemHeight;
+    }
+    return height;
+  }
+
+  cacheHeights() {
+    const {cache} = this;
+    const {from} = this.state;
+    const itemEls = React.findDOMNode(this.items).children;
+    for (let i = 0, l = itemEls.length; i < l; ++i) {
+      const index = from + i;
+      if (cache[index]) continue;
+      cache[index] = itemEls[i].getBoundingClientRect().height;
+    }
+  }
+
+  getHeightOf(index) {
+
+    // Try the static itemHeight.
+    const {itemHeight} = this.state;
+    if (itemHeight) return itemHeight;
+
+    // Try the itemHeightGetter.
+    const {itemHeightGetter} = this.props;
+    if (itemHeightGetter) return itemHeightGetter(index);
+
+    // Try the cache.
+    const {cache} = this;
+    if (cache[index]) return cache[index];
+
+    // We don't know the height.
+    return NaN;
+  }
+
+  getMaxFrom(length, itemsPerRow) {
+    if (this.props.type === 'simple') return 0;
+    return Math.max(0, length - itemsPerRow - (length % itemsPerRow));
+  }
+
+  scrollTo(index) {
+    this.setScroll(this.getSpaceBefore(index));
+  }
+
+  scrollAround(index) {
+    const current = this.getScroll();
+
+    const max = this.getSpaceBefore(index);
+    if (current > max) return this.setScroll(max);
+
+    const min = max - this.getViewportHeight() + this.getHeightOf(index);
+    if (current < min) this.setScroll(min);
+  }
+
+  renderItems() {
     const {from, size} = this.state;
     const items = [];
     for (let i = 0; i < size; ++i) {
@@ -107,122 +282,17 @@ export class List extends React.Component {
     }
     return this.props.itemsRenderer(items, c => this.items = c);
   }
-}
-
-List.prototype.shouldComponentUpdate =
-  React.addons.PureRenderMixin.shouldComponentUpdate;
-
-export class UniformList extends List {
-  static propTypes = {
-    initialIndex: React.PropTypes.number,
-    itemHeight: React.PropTypes.number,
-    itemRenderer: React.PropTypes.func,
-    itemsPerRow: React.PropTypes.number,
-    itemsRenderer: React.PropTypes.func,
-    length: React.PropTypes.number,
-    pageSize: React.PropTypes.number,
-    threshold: React.PropTypes.number
-  };
-
-  static defaultProps = {
-    itemRenderer: (i, j) => <div key={j}>{i}</div>,
-    itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
-    length: 0,
-    pageSize: 1,
-    threshold: 500
-  };
-
-  state = {
-    from: 0,
-    itemHeight: this.props.itemHeight || 0,
-    itemsPerRow: this.props.itemsPerRow || 1,
-    size: this.props.pageSize
-  };
-
-  componentWillReceiveProps(next) {
-    let {itemsPerRow, from, size} = this.state;
-    const {length} = next;
-    from = Math.max(Math.min(from, this.getMaxFrom(length, itemsPerRow)), 0);
-    size = Math.min(Math.max(size, 1), length - from);
-    this.setState({from, size});
-  }
-
-  getMaxScrollFor(index) {
-    const {itemHeight, itemsPerRow} = this.state;
-    return Math.floor(index / itemsPerRow) * itemHeight;
-  }
-
-  scrollTo(index) {
-    this.setScroll(this.getMaxScrollFor(index));
-  }
-
-  scrollAround(index) {
-    const {itemHeight} = this.state;
-    const current = this.getScroll();
-    const max = this.getMaxScrollFor(index);
-    if (current > max) return this.setScroll(max);
-    const min = max - this.getViewportHeight() + itemHeight;
-    if (current < min) this.setScroll(min);
-  }
-
-  updateFrame() {
-    let {itemHeight, itemsPerRow} = this.props;
-
-    if (itemHeight == null || itemsPerRow == null) {
-      const itemEls = React.findDOMNode(this.items).children;
-      if (!itemEls.length) return;
-
-      const firstRect = itemEls[0].getBoundingClientRect();
-      itemHeight = this.state.itemHeight;
-      if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
-        itemHeight = firstRect.height;
-      }
-      if (!itemHeight) return;
-
-      const firstRowBottom = Math.round(firstRect.bottom);
-      itemsPerRow = 1;
-      for (
-        let item = itemEls[itemsPerRow];
-        item && Math.round(item.getBoundingClientRect().top) < firstRowBottom;
-        item = itemEls[itemsPerRow]
-      ) ++itemsPerRow;
-    }
-
-    if (!itemHeight || !itemsPerRow) return;
-
-    const {threshold} = this.props;
-    const top = Math.max(0, this.getScroll() - threshold);
-    const from = Math.min(
-      Math.floor(top / itemHeight) * itemsPerRow,
-      this.getMaxFrom(this.props.length, itemsPerRow)
-    );
-
-    const viewportHeight = this.getViewportHeight() + (threshold * 2);
-    const size = Math.min(
-      (Math.ceil(viewportHeight / itemHeight) + 1) * itemsPerRow,
-      this.props.length - from
-    );
-
-    this.setState({itemsPerRow, from, itemHeight, size});
-  }
-
-  getMaxFrom(length, itemsPerRow) {
-    return Math.max(0, length - itemsPerRow - (length % itemsPerRow));
-  }
-
-  getSpace(n) {
-    return Math.ceil(n / this.state.itemsPerRow) * this.state.itemHeight;
-  }
 
   render() {
-    const transform = `translate(0, ${this.getSpace(this.state.from)}px)`;
+    const items = this.renderItems();
+    if (this.props.type === 'simple') return items;
+
+    const height = this.getSpaceBefore(this.props.length);
+    const offset = this.getSpaceBefore(this.state.from);
+    const transform = `translate(0, ${offset}px)`;
     return (
-      <div
-        style={{position: 'relative', height: this.getSpace(this.props.length)}}
-      >
-        <div style={{WebkitTransform: transform, transform}}>
-          {super.render()}
-        </div>
+      <div style={{position: 'relative', height}}>
+        <div style={{WebkitTransform: transform, transform}}>{items}</div>
       </div>
     );
   }

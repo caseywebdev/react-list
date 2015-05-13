@@ -5,4 +5,4 @@ COGS=$(BIN)cogs
 dev:
 	npm install
 	$(BOWER) install
-	$(COGS) -w react-list.es6
+	$(COGS) -w index.es6,react-list.es6
