@@ -290,9 +290,7 @@
 
         var itemEls = _React.findDOMNode(this.items).children;
         for (var i = 0, l = itemEls.length; i < l; ++i) {
-          var index = from + i;
-          if (cache[index]) continue;
-          cache[index] = itemEls[i].getBoundingClientRect().height;
+          cache[from + i] = itemEls[i].getBoundingClientRect().height;
         }
       }
     }, {

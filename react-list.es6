@@ -231,9 +231,7 @@ export default class extends React.Component {
     const {from} = this.state;
     const itemEls = React.findDOMNode(this.items).children;
     for (let i = 0, l = itemEls.length; i < l; ++i) {
-      const index = from + i;
-      if (cache[index]) continue;
-      cache[index] = itemEls[i].getBoundingClientRect().height;
+      cache[from + i] = itemEls[i].getBoundingClientRect().height;
     }
   }
 
