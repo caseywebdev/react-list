@@ -215,7 +215,7 @@
         from: 0,
         itemHeight: this.props.itemHeight || 0,
         itemsPerRow: this.props.itemsPerRow || 1,
-        size: 1
+        size: this.props.pageSize
       };
     }
 
@@ -331,6 +331,7 @@
         itemsPerRow: _React.PropTypes.number,
         itemsRenderer: _React.PropTypes.func,
         length: _React.PropTypes.number,
+        pageSize: _React.PropTypes.number,
         threshold: _React.PropTypes.number
       },
       enumerable: true
@@ -352,6 +353,7 @@
           );
         },
         length: 0,
+        pageSize: 1,
         threshold: 500
       },
       enumerable: true
