@@ -15,6 +15,10 @@
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { desc = parent = getter = undefined; _again = false; var object = _x,
+    property = _x2,
+    receiver = _x3; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
   function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -34,19 +38,19 @@
   };
 
   var _default = (function (_React$Component) {
-    var _class = function _default() {
+    var _class = function _default(props) {
       _classCallCheck(this, _class);
 
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
+      _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
+      var _props = this.props;
+      var initialIndex = _props.initialIndex;
+      var length = _props.length;
+      var pageSize = _props.pageSize;
 
-      this.state = {
-        from: this.props.initialIndex || 0,
-        itemHeight: 0,
-        itemsPerRow: 1,
-        size: this.props.pageSize
-      };
+      var itemsPerRow = 1;
+      var from = this.constrainFrom(initialIndex, length, itemsPerRow);
+      var size = this.constrainSize(pageSize, length, pageSize, from);
+      this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       this.cache = {};
     };
 
@@ -62,8 +66,8 @@
         var length = next.length;
         var pageSize = next.pageSize;
 
-        from = Math.max(Math.min(from, this.getMaxFrom(length, itemsPerRow)), 0);
-        size = Math.min(Math.max(size, pageSize), length - from);
+        from = this.constrainFrom(from, length, itemsPerRow);
+        size = this.constrainSize(size, length, pageSize, from);
         this.setState({ from: from, size: size });
       }
     }, {
@@ -194,9 +198,9 @@
 
         if (elHeight > bottom) return;
 
-        var _props = this.props;
-        var pageSize = _props.pageSize;
-        var length = _props.length;
+        var _props2 = this.props;
+        var pageSize = _props2.pageSize;
+        var length = _props2.length;
 
         this.setState({ size: Math.min(this.state.size + pageSize, length) });
       }
@@ -209,9 +213,9 @@
 
         var top = _getTopAndBottom2.top;
         var bottom = _getTopAndBottom2.bottom;
-        var _props2 = this.props;
-        var length = _props2.length;
-        var pageSize = _props2.pageSize;
+        var _props3 = this.props;
+        var length = _props3.length;
+        var pageSize = _props3.pageSize;
 
         var space = 0;
         var from = 0;
@@ -249,16 +253,18 @@
 
         if (!itemHeight || !itemsPerRow) return;
 
-        var length = this.props.length;
+        var _props4 = this.props;
+        var length = _props4.length;
+        var pageSize = _props4.pageSize;
 
         var _getTopAndBottom3 = this.getTopAndBottom();
 
         var top = _getTopAndBottom3.top;
         var bottom = _getTopAndBottom3.bottom;
 
-        var from = Math.min(Math.floor(top / itemHeight) * itemsPerRow, this.getMaxFrom(length, itemsPerRow));
+        var from = this.constrainFrom(Math.floor(top / itemHeight) * itemsPerRow, length, itemsPerRow);
 
-        var size = Math.min((Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow, length - from);
+        var size = this.constrainSize((Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow, length, pageSize, from);
 
         return this.setState({ itemsPerRow: itemsPerRow, from: from, itemHeight: itemHeight, size: size });
       }
@@ -316,10 +322,16 @@
         return NaN;
       }
     }, {
-      key: 'getMaxFrom',
-      value: function getMaxFrom(length, itemsPerRow) {
+      key: 'constrainFrom',
+      value: function constrainFrom(from, length, itemsPerRow) {
         if (this.props.type === 'simple') return 0;
-        return Math.max(0, length - itemsPerRow - length % itemsPerRow);
+        if (!from) return 0;
+        return Math.max(Math.min(from, length - itemsPerRow - length % itemsPerRow), 0);
+      }
+    }, {
+      key: 'constrainSize',
+      value: function constrainSize(size, length, pageSize, from) {
+        return Math.min(Math.max(size, pageSize), length - from);
       }
     }, {
       key: 'scrollTo',
@@ -340,7 +352,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this = this;
+        var _this2 = this;
 
         var _state3 = this.state;
         var from = _state3.from;
@@ -351,7 +363,7 @@
           items.push(this.props.itemRenderer(from + i, i));
         }
         return this.props.itemsRenderer(items, function (c) {
-          return _this.items = c;
+          return _this2.items = c;
         });
       }
     }, {

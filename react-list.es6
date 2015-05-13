@@ -29,20 +29,21 @@ export default class extends React.Component {
     type: 'simple'
   };
 
-  state = {
-    from: this.props.initialIndex || 0,
-    itemHeight: 0,
-    itemsPerRow: 1,
-    size: this.props.pageSize
-  };
-
-  cache = {};
+  constructor(props) {
+    super(props);
+    const {initialIndex, length, pageSize} = this.props;
+    const itemsPerRow = 1;
+    const from = this.constrainFrom(initialIndex, length, itemsPerRow);
+    const size = this.constrainSize(pageSize, length, pageSize, from);
+    this.state = {from, size, itemsPerRow};
+    this.cache = {};
+  }
 
   componentWillReceiveProps(next) {
     let {itemsPerRow, from, size} = this.state;
     const {length, pageSize} = next;
-    from = Math.max(Math.min(from, this.getMaxFrom(length, itemsPerRow)), 0);
-    size = Math.min(Math.max(size, pageSize), length - from);
+    from = this.constrainFrom(from, length, itemsPerRow);
+    size = this.constrainSize(size, length, pageSize, from);
     this.setState({from, size});
   }
 
@@ -194,17 +195,20 @@ export default class extends React.Component {
 
     if (!itemHeight || !itemsPerRow) return;
 
-    const {length} = this.props;
+    const {length, pageSize} = this.props;
     const {top, bottom} = this.getTopAndBottom();
 
-    const from = Math.min(
+    const from = this.constrainFrom(
       Math.floor(top / itemHeight) * itemsPerRow,
-      this.getMaxFrom(length, itemsPerRow)
+      length,
+      itemsPerRow
     );
 
-    const size = Math.min(
+    const size = this.constrainSize(
       (Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow,
-      length - from
+      length,
+      pageSize,
+      from
     );
 
     return this.setState({itemsPerRow, from, itemHeight, size});
@@ -253,9 +257,17 @@ export default class extends React.Component {
     return NaN;
   }
 
-  getMaxFrom(length, itemsPerRow) {
+  constrainFrom(from, length, itemsPerRow) {
     if (this.props.type === 'simple') return 0;
-    return Math.max(0, length - itemsPerRow - (length % itemsPerRow));
+    if (!from) return 0;
+    return Math.max(
+      Math.min(from, length - itemsPerRow - (length % itemsPerRow)),
+      0
+    );
+  }
+
+  constrainSize(size, length, pageSize, from) {
+    return Math.min(Math.max(size, pageSize), length - from);
   }
 
   scrollTo(index) {

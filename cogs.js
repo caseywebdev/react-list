@@ -7,10 +7,7 @@ module.exports = {
           name: 'babel',
           options: {modules: 'umd', optional: ['es7.classProperties']}
         },
-        {
-          name: 'transformers/rename-global',
-          only: 'react-list.es6'
-        }
+        {name: 'transformers/rename-global', only: 'react-list.es6'}
       ]
     }
   },
