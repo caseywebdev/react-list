@@ -32,7 +32,6 @@
       index
     );
   };
-
   renderItem.toJSON = function () {
     return renderItem.toString();
   };
@@ -44,7 +43,6 @@
       index
     );
   };
-
   renderSquareItem.toJSON = function () {
     return renderSquareItem.toString();
   };
@@ -52,12 +50,18 @@
   var getHeight = function getHeight(index) {
     return 30 + 10 * (index % 10);
   };
-
   getHeight.toJSON = function () {
     return getHeight.toString();
   };
 
-  var renderVariableItem = function renderVariableItem(index, key) {
+  var getWidth = function getWidth(index) {
+    return 100 + 10 * (index % 10);
+  };
+  getWidth.toJSON = function () {
+    return getWidth.toString();
+  };
+
+  var renderVariableHeightItem = function renderVariableHeightItem(index, key) {
     return _React.createElement(
       'div',
       {
@@ -68,30 +72,80 @@
       index
     );
   };
+  renderVariableHeightItem.toJSON = function () {
+    return renderVariableHeightItem.toString();
+  };
 
-  renderVariableItem.toJSON = function () {
-    return renderVariableItem.toString();
+  var renderVariableWidthItem = function renderVariableWidthItem(index, key) {
+    return _React.createElement(
+      'div',
+      {
+        key: key,
+        className: 'item' + (index % 2 ? '' : ' even'),
+        style: { width: '' + getWidth(index) + 'px' }
+      },
+      index
+    );
+  };
+  renderVariableWidthItem.toJSON = function () {
+    return renderVariableWidthItem.toString();
+  };
+
+  var renderGridLine = function renderGridLine(row, key) {
+    return _React.createElement(_ReactList, {
+      axis: 'x',
+      key: key,
+      length: 10000,
+      itemRenderer: function (column, key) {
+        return renderSquareItem(column + 10000 * row, key);
+      },
+      type: 'uniform'
+    });
+  };
+  renderGridLine.toJSON = function () {
+    return renderGridLine.toString();
   };
 
   var examples = [{
     length: 10000,
-    itemRenderer: renderVariableItem
+    itemRenderer: renderVariableHeightItem
+  }, {
+    axis: 'x',
+    length: 10000,
+    itemRenderer: renderVariableWidthItem
   }, {
     length: 10000,
-    itemRenderer: renderVariableItem,
+    itemRenderer: renderVariableHeightItem,
+    type: 'variable'
+  }, {
+    axis: 'x',
+    length: 10000,
+    itemRenderer: renderVariableWidthItem,
     type: 'variable'
   }, {
     length: 10000,
-    itemHeightGetter: getHeight,
-    itemRenderer: renderVariableItem,
+    itemRenderer: renderVariableHeightItem,
+    itemSizeGetter: getHeight,
+    type: 'variable'
+  }, {
+    axis: 'x',
+    length: 10000,
+    itemRenderer: renderVariableWidthItem,
+    itemSizeGetter: getWidth,
+    threshold: 0,
     type: 'variable'
   }, {
     length: 10000,
     initialIndex: 5000,
-    itemHeightGetter: getHeight,
-    itemRenderer: renderVariableItem,
+    itemRenderer: renderVariableHeightItem,
+    itemSizeGetter: getHeight,
     type: 'variable'
   }, {
+    length: 10000,
+    itemRenderer: renderItem,
+    type: 'uniform'
+  }, {
+    axis: 'x',
     length: 10000,
     itemRenderer: renderItem,
     type: 'uniform'
@@ -103,6 +157,10 @@
     length: 10000,
     initialIndex: 5000,
     itemRenderer: renderItem,
+    type: 'uniform'
+  }, {
+    length: 10000,
+    itemRenderer: renderGridLine,
     type: 'uniform'
   }];
 
@@ -123,7 +181,7 @@
         return examples.map(function (props, key) {
           return _React.createElement(
             'div',
-            { key: key, className: 'example' },
+            { key: key, className: 'example axis-' + props.axis },
             _React.createElement(
               'strong',
               null,
@@ -155,7 +213,7 @@
           { className: 'index' },
           _React.createElement('style', {
             dangerouslySetInnerHTML: {
-              __html: '\n              body {\n                margin: 0;\n                font-family: \'Helvetica Neue\', sans-serif;\n              }\n\n              a {\n                color: #38afd4;\n                text-decoration: none;\n              }\n\n              a:hover {\n                text-decoration: underline;\n              }\n\n              .header {\n                text-align: center;\n              }\n\n              .example {\n                padding: 25px;\n              }\n\n              .props {\n                overflow: auto;\n              }\n\n              .component {\n                border: 10px solid #38afd4;\n                border-radius: 5px;\n                height: 300px;\n                overflow: auto;\n                -webkit-overflow-scrolling: touch;\n              }\n\n              .item {\n                background: linear-gradient(#fff, #eee);\n                line-height: 30px;\n                padding: 0 10px;\n              }\n\n              .square-item {\n                background: linear-gradient(#fff, #eee);\n                display: inline-block;\n                line-height: 100px;\n                text-align: center;\n                width: 100px;\n              }\n\n              .even {\n                background: linear-gradient(#ddd, #ccc);\n              }\n            '
+              __html: '\n              body {\n                margin: 0;\n                font-family: \'Helvetica Neue\', sans-serif;\n              }\n\n              a {\n                color: #38afd4;\n                text-decoration: none;\n              }\n\n              a:hover {\n                text-decoration: underline;\n              }\n\n              .header {\n                text-align: center;\n              }\n\n              .example {\n                padding: 25px;\n              }\n\n              .props {\n                overflow: auto;\n              }\n\n              .component {\n                border: 10px solid #38afd4;\n                border-radius: 5px;\n                height: 300px;\n                overflow: auto;\n                -webkit-overflow-scrolling: touch;\n              }\n\n              .item {\n                background: linear-gradient(#fff, #eee);\n                line-height: 30px;\n                padding: 0 10px;\n              }\n\n              .axis-x .item {\n                display: inline-block;\n                line-height: 300px;\n                padding: 0;\n                text-align: center;\n                width: 150px;\n              }\n\n              .axis-x .component {\n                white-space: nowrap;\n              }\n\n              .square-item {\n                background: linear-gradient(#fff, #eee);\n                display: inline-block;\n                line-height: 100px;\n                text-align: center;\n                width: 100px;\n              }\n\n              .even {\n                background: linear-gradient(#ddd, #ccc);\n              }\n            '
             }
           }),
           _React.createElement(

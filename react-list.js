@@ -37,6 +37,15 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
+  var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
+  var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
+  var END_KEYS = { x: 'right', y: 'bottom' };
+  var INNER_SIZE_KEYS = { x: 'innerWidth', y: 'innerHeight' };
+  var OVERFLOW_KEYS = { x: 'overflowX', y: 'overflowY' };
+  var SCROLL_KEYS = { x: 'scrollLeft', y: 'scrollTop' };
+  var SIZE_KEYS = { x: 'width', y: 'height' };
+  var START_KEYS = { x: 'left', y: 'top' };
+
   var _default = (function (_React$Component) {
     var _class = function _default(props) {
       _classCallCheck(this, _class);
@@ -104,9 +113,10 @@
       key: 'getScrollParent',
       value: function getScrollParent() {
         var el = _React.findDOMNode(this);
+        var overflowKey = OVERFLOW_KEYS[this.props.axis];
         while (el = el.parentElement) {
-          var overflowY = window.getComputedStyle(el).overflowY;
-          if (overflowY === 'auto' || overflowY === 'scroll') return el;
+          var overflow = window.getComputedStyle(el)[overflowKey];
+          if (overflow === 'auto' || overflow === 'scroll') return el;
         }
         return window;
       }
@@ -114,66 +124,75 @@
       key: 'getScroll',
       value: function getScroll() {
         var scrollParent = this.scrollParent;
+        var axis = this.props.axis;
 
-        var elTop = _React.findDOMNode(this).getBoundingClientRect().top;
-        if (scrollParent === window) return -elTop;
-        var scrollParentTop = scrollParent.getBoundingClientRect().top;
-        return scrollParentTop + scrollParent.clientTop - elTop;
+        var startKey = START_KEYS[axis];
+        var elStart = _React.findDOMNode(this).getBoundingClientRect()[startKey];
+        if (scrollParent === window) return -elStart;
+        var scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
+        var scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
+        return scrollParentStart + scrollParentClientStart - elStart;
       }
     }, {
       key: 'setScroll',
-      value: function setScroll(y) {
+      value: function setScroll(offset) {
         var scrollParent = this.scrollParent;
+        var axis = this.props.axis;
 
+        var startKey = START_KEYS[axis];
         if (scrollParent === window) {
-          var elTop = _React.findDOMNode(this).getBoundingClientRect().top;
-          var windowTop = document.documentElement.getBoundingClientRect().top;
-          return window.scrollTo(0, Math.round(elTop) - windowTop + y);
+          var elStart = _React.findDOMNode(this).getBoundingClientRect()[startKey];
+          var windowStart = document.documentElement.getBoundingClientRect()[startKey];
+          return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
         }
-        scrollParent.scrollTop += y - this.getScroll();
+        scrollParent[SCROLL_KEYS[axis]] += offset - this.getScroll();
       }
     }, {
-      key: 'getViewportHeight',
-      value: function getViewportHeight() {
+      key: 'getViewportSize',
+      value: function getViewportSize() {
         var scrollParent = this.scrollParent;
-        var innerHeight = scrollParent.innerHeight;
-        var clientHeight = scrollParent.clientHeight;
+        var axis = this.props.axis;
 
-        return scrollParent === window ? innerHeight : clientHeight;
+        return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
       }
     }, {
-      key: 'getTopAndBottom',
-      value: function getTopAndBottom() {
+      key: 'getStartAndEnd',
+      value: function getStartAndEnd() {
         var threshold = this.props.threshold;
 
-        var top = Math.max(0, this.getScroll() - threshold);
-        var bottom = top + this.getViewportHeight() + threshold * 2;
-        return { top: top, bottom: bottom };
+        var start = Math.max(0, this.getScroll() - threshold);
+        var end = start + this.getViewportSize() + threshold * 2;
+        return { start: start, end: end };
       }
     }, {
-      key: 'getItemHeightAndItemsPerRow',
-      value: function getItemHeightAndItemsPerRow() {
+      key: 'getItemSizeAndItemsPerRow',
+      value: function getItemSizeAndItemsPerRow() {
         var itemEls = _React.findDOMNode(this.items).children;
         if (!itemEls.length) return {};
 
         var firstRect = itemEls[0].getBoundingClientRect();
 
         // Firefox has a problem where it will return a *slightly* (less than
-        // thousandths of a pixel) different height for the same element between
+        // thousandths of a pixel) different size for the same element between
         // renders. This can cause an infinite render loop, so only change the
-        // itemHeight when it is significantly different.
-        var itemHeight = this.state.itemHeight;
-        if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
-          itemHeight = firstRect.height;
+        // itemSize when it is significantly different.
+        var itemSize = this.state.itemSize;
+        var axis = this.props.axis;
+
+        var sizeKey = SIZE_KEYS[axis];
+        var firstRectSize = firstRect[sizeKey];
+        if (Math.round(firstRectSize) !== Math.round(itemSize)) {
+          itemSize = firstRectSize;
         }
 
-        if (!itemHeight) return {};
+        if (!itemSize) return {};
 
-        var firstRowBottom = Math.round(firstRect.bottom);
+        var startKey = START_KEYS[axis];
+        var firstRowEnd = Math.round(firstRect[END_KEYS[axis]]);
         var itemsPerRow = 1;
-        for (var item = itemEls[itemsPerRow]; item && Math.round(item.getBoundingClientRect().top) < firstRowBottom; item = itemEls[itemsPerRow]) {
+        for (var item = itemEls[itemsPerRow]; item && Math.round(item.getBoundingClientRect()[startKey]) < firstRowEnd; item = itemEls[itemsPerRow]) {
           ++itemsPerRow;
-        }return { itemHeight: itemHeight, itemsPerRow: itemsPerRow };
+        }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
     }, {
       key: 'updateFrame',
@@ -190,13 +209,22 @@
     }, {
       key: 'updateSimpleFrame',
       value: function updateSimpleFrame() {
-        var _getTopAndBottom = this.getTopAndBottom();
+        var _getStartAndEnd = this.getStartAndEnd();
 
-        var bottom = _getTopAndBottom.bottom;
+        var end = _getStartAndEnd.end;
 
-        var elHeight = _React.findDOMNode(this).getBoundingClientRect().height;
+        var itemEls = _React.findDOMNode(this).children;
+        var elEnd = 0;
 
-        if (elHeight > bottom) return;
+        if (itemEls.length) {
+          var axis = this.props.axis;
+
+          var firstItemEl = itemEls[0];
+          var lastItemEl = itemEls[itemEls.length - 1];
+          elEnd = lastItemEl.getBoundingClientRect()[END_KEYS[axis]] - firstItemEl.getBoundingClientRect()[START_KEYS[axis]];
+        }
+
+        if (elEnd > end) return;
 
         var _props2 = this.props;
         var pageSize = _props2.pageSize;
@@ -207,12 +235,12 @@
     }, {
       key: 'updateVariableFrame',
       value: function updateVariableFrame() {
-        if (!this.props.itemHeightGetter) this.cacheHeights();
+        if (!this.props.itemSizeGetter) this.cacheSizes();
 
-        var _getTopAndBottom2 = this.getTopAndBottom();
+        var _getStartAndEnd2 = this.getStartAndEnd();
 
-        var top = _getTopAndBottom2.top;
-        var bottom = _getTopAndBottom2.bottom;
+        var start = _getStartAndEnd2.start;
+        var end = _getStartAndEnd2.end;
         var _props3 = this.props;
         var length = _props3.length;
         var pageSize = _props3.pageSize;
@@ -223,21 +251,21 @@
         var maxFrom = length - 1;
 
         while (from < maxFrom) {
-          var height = this.getHeightOf(from);
-          if (isNaN(height) || space + height > top) break;
-          space += height;
+          var itemSize = this.getSizeOf(from);
+          if (isNaN(itemSize) || space + itemSize > start) break;
+          space += itemSize;
           ++from;
         }
 
         var maxSize = length - from;
 
-        while (size < maxSize && space < bottom) {
-          var height = this.getHeightOf(from + size);
-          if (isNaN(height)) {
-            size += pageSize;
+        while (size < maxSize && space < end) {
+          var itemSize = this.getSizeOf(from + size);
+          if (isNaN(itemSize)) {
+            size = Math.min(size + pageSize, maxSize);
             break;
           }
-          space += height;
+          space += itemSize;
           ++size;
         }
 
@@ -246,79 +274,80 @@
     }, {
       key: 'updateUniformFrame',
       value: function updateUniformFrame() {
-        var _getItemHeightAndItemsPerRow = this.getItemHeightAndItemsPerRow();
+        var _getItemSizeAndItemsPerRow = this.getItemSizeAndItemsPerRow();
 
-        var itemHeight = _getItemHeightAndItemsPerRow.itemHeight;
-        var itemsPerRow = _getItemHeightAndItemsPerRow.itemsPerRow;
+        var itemSize = _getItemSizeAndItemsPerRow.itemSize;
+        var itemsPerRow = _getItemSizeAndItemsPerRow.itemsPerRow;
 
-        if (!itemHeight || !itemsPerRow) return;
+        if (!itemSize || !itemsPerRow) return;
 
         var _props4 = this.props;
         var length = _props4.length;
         var pageSize = _props4.pageSize;
 
-        var _getTopAndBottom3 = this.getTopAndBottom();
+        var _getStartAndEnd3 = this.getStartAndEnd();
 
-        var top = _getTopAndBottom3.top;
-        var bottom = _getTopAndBottom3.bottom;
+        var start = _getStartAndEnd3.start;
+        var end = _getStartAndEnd3.end;
 
-        var from = this.constrainFrom(Math.floor(top / itemHeight) * itemsPerRow, length, itemsPerRow);
+        var from = this.constrainFrom(Math.floor(start / itemSize) * itemsPerRow, length, itemsPerRow);
 
-        var size = this.constrainSize((Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow, length, pageSize, from);
+        var size = this.constrainSize((Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, length, pageSize, from);
 
-        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemHeight: itemHeight, size: size });
+        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size });
       }
     }, {
       key: 'getSpaceBefore',
       value: function getSpaceBefore(index) {
 
-        // Try the static itemHeight.
+        // Try the static itemSize.
         var _state2 = this.state;
-        var itemHeight = _state2.itemHeight;
+        var itemSize = _state2.itemSize;
         var itemsPerRow = _state2.itemsPerRow;
 
-        if (itemHeight) return Math.ceil(index / itemsPerRow) * itemHeight;
+        if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
 
-        // Finally, accumulate heights of items 0 - index.
-        var height = 0;
+        // Finally, accumulate sizes of items 0 - index.
+        var space = 0;
         for (var i = 0; i < index; ++i) {
-          var _itemHeight = this.getHeightOf(i);
-          if (isNaN(_itemHeight)) break;
-          height += _itemHeight;
+          var _itemSize = this.getSizeOf(i);
+          if (isNaN(_itemSize)) break;
+          space += _itemSize;
         }
-        return height;
+        return space;
       }
     }, {
-      key: 'cacheHeights',
-      value: function cacheHeights() {
+      key: 'cacheSizes',
+      value: function cacheSizes() {
         var cache = this.cache;
         var from = this.state.from;
 
         var itemEls = _React.findDOMNode(this.items).children;
+        var sizeKey = SIZE_KEYS[this.props.axis];
         for (var i = 0, l = itemEls.length; i < l; ++i) {
-          cache[from + i] = itemEls[i].getBoundingClientRect().height;
+          cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
         }
       }
     }, {
-      key: 'getHeightOf',
-      value: function getHeightOf(index) {
+      key: 'getSizeOf',
+      value: function getSizeOf(index) {
 
-        // Try the static itemHeight.
-        var itemHeight = this.state.itemHeight;
+        // Try the static itemSize.
+        var itemSize = this.state.itemSize;
 
-        if (itemHeight) return itemHeight;
+        if (itemSize) return itemSize;
 
-        // Try the itemHeightGetter.
-        var itemHeightGetter = this.props.itemHeightGetter;
+        // Try the itemSizeGetter.
+        var itemSizeGetter = this.props.itemSizeGetter;
 
-        if (itemHeightGetter) return itemHeightGetter(index);
+        if (itemSizeGetter) return itemSizeGetter(index);
 
         // Try the cache.
         var cache = this.cache;
 
         if (cache[index]) return cache[index];
 
-        // We don't know the height.
+        // We don't know the size.
         return NaN;
       }
     }, {
@@ -346,7 +375,7 @@
         var max = this.getSpaceBefore(index);
         if (current > max) return this.setScroll(max);
 
-        var min = max - this.getViewportHeight() + this.getHeightOf(index);
+        var min = max - this.getViewportSize() + this.getSizeOf(index);
         if (current < min) this.setScroll(min);
       }
     }, {
@@ -372,12 +401,19 @@
         var items = this.renderItems();
         if (this.props.type === 'simple') return items;
 
-        var height = this.getSpaceBefore(this.props.length);
+        var axis = this.props.axis;
+
+        var style = { position: 'relative' };
+        var size = this.getSpaceBefore(this.props.length);
+        style[SIZE_KEYS[axis]] = size;
+        if (size && axis === 'x') style.overflowX = 'hidden';
         var offset = this.getSpaceBefore(this.state.from);
-        var transform = 'translate(0, ' + offset + 'px)';
+        var x = axis === 'x' ? offset : 0;
+        var y = axis === 'y' ? offset : 0;
+        var transform = 'translate(' + x + 'px, ' + y + 'px)';
         return _React.createElement(
           'div',
-          { style: { position: 'relative', height: height } },
+          { style: style },
           _React.createElement(
             'div',
             { style: { WebkitTransform: transform, transform: transform } },
@@ -388,8 +424,9 @@
     }], [{
       key: 'propTypes',
       value: {
+        axis: _React.PropTypes.oneOf(['x', 'y']),
         initialIndex: _React.PropTypes.number,
-        itemHeightGetter: _React.PropTypes.func,
+        itemSizeGetter: _React.PropTypes.func,
         itemRenderer: _React.PropTypes.func,
         itemsRenderer: _React.PropTypes.func,
         length: _React.PropTypes.number,
@@ -402,6 +439,7 @@
     }, {
       key: 'defaultProps',
       value: {
+        axis: 'y',
         itemRenderer: function itemRenderer(index, key) {
           return _React.createElement(
             'div',
@@ -418,7 +456,7 @@
         },
         length: 0,
         pageSize: 10,
-        threshold: 500,
+        threshold: 100,
         type: 'simple'
       },
       enumerable: true

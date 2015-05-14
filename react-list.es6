@@ -7,10 +7,20 @@ const isEqualSubset = (a, b) => {
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
+const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
+const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
+const END_KEYS = {x: 'right', y: 'bottom'};
+const INNER_SIZE_KEYS = {x: 'innerWidth', y: 'innerHeight'};
+const OVERFLOW_KEYS = {x: 'overflowX', y: 'overflowY'};
+const SCROLL_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
+const SIZE_KEYS = {x: 'width', y: 'height'};
+const START_KEYS = {x: 'left', y: 'top'};
+
 export default class extends React.Component {
   static propTypes = {
+    axis: React.PropTypes.oneOf(['x', 'y']),
     initialIndex: React.PropTypes.number,
-    itemHeightGetter: React.PropTypes.func,
+    itemSizeGetter: React.PropTypes.func,
     itemRenderer: React.PropTypes.func,
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
@@ -21,11 +31,12 @@ export default class extends React.Component {
   };
 
   static defaultProps = {
+    axis: 'y',
     itemRenderer: (index, key) => <div key={key}>{index}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
     pageSize: 10,
-    threshold: 500,
+    threshold: 100,
     type: 'simple'
   };
 
@@ -74,70 +85,83 @@ export default class extends React.Component {
 
   getScrollParent() {
     let el = React.findDOMNode(this);
+    const overflowKey = OVERFLOW_KEYS[this.props.axis];
     while (el = el.parentElement) {
-      const overflowY = window.getComputedStyle(el).overflowY;
-      if (overflowY === 'auto' || overflowY === 'scroll') return el;
+      const overflow = window.getComputedStyle(el)[overflowKey];
+      if (overflow === 'auto' || overflow === 'scroll') return el;
     }
     return window;
   }
 
   getScroll() {
     const {scrollParent} = this;
-    const elTop = React.findDOMNode(this).getBoundingClientRect().top;
-    if (scrollParent === window) return -elTop;
-    const scrollParentTop = scrollParent.getBoundingClientRect().top;
-    return scrollParentTop + scrollParent.clientTop - elTop;
+    const {axis} = this.props;
+    const startKey = START_KEYS[axis];
+    const elStart = React.findDOMNode(this).getBoundingClientRect()[startKey];
+    if (scrollParent === window) return -elStart;
+    const scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
+    const scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
+    return scrollParentStart + scrollParentClientStart - elStart;
   }
 
-  setScroll(y) {
+  setScroll(offset) {
     const {scrollParent} = this;
+    const {axis} = this.props;
+    const startKey = START_KEYS[axis];
     if (scrollParent === window) {
-      const elTop = React.findDOMNode(this).getBoundingClientRect().top;
-      const windowTop = document.documentElement.getBoundingClientRect().top;
-      return window.scrollTo(0, Math.round(elTop) - windowTop + y);
+      const elStart = React.findDOMNode(this).getBoundingClientRect()[startKey];
+      const windowStart =
+        document.documentElement.getBoundingClientRect()[startKey];
+      return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
     }
-    scrollParent.scrollTop += y - this.getScroll();
+    scrollParent[SCROLL_KEYS[axis]] += offset - this.getScroll();
   }
 
-  getViewportHeight() {
+  getViewportSize() {
     const {scrollParent} = this;
-    const {innerHeight, clientHeight} = scrollParent;
-    return scrollParent === window ? innerHeight : clientHeight;
+    const {axis} = this.props;
+    return scrollParent === window ?
+      window[INNER_SIZE_KEYS[axis]] :
+      scrollParent[CLIENT_SIZE_KEYS[axis]];
   }
 
-  getTopAndBottom() {
+  getStartAndEnd() {
     const {threshold} = this.props;
-    const top = Math.max(0, this.getScroll() - threshold);
-    const bottom = top + this.getViewportHeight() + (threshold * 2);
-    return {top, bottom};
+    const start = Math.max(0, this.getScroll() - threshold);
+    const end = start + this.getViewportSize() + (threshold * 2);
+    return {start, end};
   }
 
-  getItemHeightAndItemsPerRow() {
+  getItemSizeAndItemsPerRow() {
     const itemEls = React.findDOMNode(this.items).children;
     if (!itemEls.length) return {};
 
     const firstRect = itemEls[0].getBoundingClientRect();
 
     // Firefox has a problem where it will return a *slightly* (less than
-    // thousandths of a pixel) different height for the same element between
+    // thousandths of a pixel) different size for the same element between
     // renders. This can cause an infinite render loop, so only change the
-    // itemHeight when it is significantly different.
-    let itemHeight = this.state.itemHeight;
-    if (Math.round(firstRect.height) !== Math.round(itemHeight)) {
-      itemHeight = firstRect.height;
+    // itemSize when it is significantly different.
+    let {itemSize} = this.state;
+    const {axis} = this.props;
+    const sizeKey = SIZE_KEYS[axis];
+    const firstRectSize = firstRect[sizeKey];
+    if (Math.round(firstRectSize) !== Math.round(itemSize)) {
+      itemSize = firstRectSize;
     }
 
-    if (!itemHeight) return {};
+    if (!itemSize) return {};
 
-    const firstRowBottom = Math.round(firstRect.bottom);
+    const startKey = START_KEYS[axis];
+    const firstRowEnd = Math.round(firstRect[END_KEYS[axis]]);
     let itemsPerRow = 1;
     for (
       let item = itemEls[itemsPerRow];
-      item && Math.round(item.getBoundingClientRect().top) < firstRowBottom;
+      item && Math.round(item.getBoundingClientRect()[startKey]) < firstRowEnd;
       item = itemEls[itemsPerRow]
     ) ++itemsPerRow;
 
-    return {itemHeight, itemsPerRow};
+    return {itemSize, itemsPerRow};
   }
 
   updateFrame() {
@@ -149,19 +173,28 @@ export default class extends React.Component {
   }
 
   updateSimpleFrame() {
-    const {bottom} = this.getTopAndBottom();
-    const elHeight = React.findDOMNode(this).getBoundingClientRect().height;
+    const {end} = this.getStartAndEnd();
+    const itemEls = React.findDOMNode(this).children;
+    let elEnd = 0;
 
-    if (elHeight > bottom) return;
+    if (itemEls.length) {
+      const {axis} = this.props;
+      const firstItemEl = itemEls[0];
+      const lastItemEl = itemEls[itemEls.length - 1];
+      elEnd = lastItemEl.getBoundingClientRect()[END_KEYS[axis]] -
+        firstItemEl.getBoundingClientRect()[START_KEYS[axis]];
+    }
+
+    if (elEnd > end) return;
 
     const {pageSize, length} = this.props;
     this.setState({size: Math.min(this.state.size + pageSize, length)});
   }
 
   updateVariableFrame() {
-    if (!this.props.itemHeightGetter) this.cacheHeights();
+    if (!this.props.itemSizeGetter) this.cacheSizes();
 
-    const {top, bottom} = this.getTopAndBottom();
+    const {start, end} = this.getStartAndEnd();
     const {length, pageSize} = this.props;
     let space = 0;
     let from = 0;
@@ -169,21 +202,21 @@ export default class extends React.Component {
     const maxFrom = length - 1;
 
     while (from < maxFrom) {
-      const height = this.getHeightOf(from);
-      if (isNaN(height) || space + height > top) break;
-      space += height;
+      const itemSize = this.getSizeOf(from);
+      if (isNaN(itemSize) || space + itemSize > start) break;
+      space += itemSize;
       ++from;
     }
 
     const maxSize = length - from;
 
-    while (size < maxSize && space < bottom) {
-      const height = this.getHeightOf(from + size);
-      if (isNaN(height)) {
-        size += pageSize;
+    while (size < maxSize && space < end) {
+      const itemSize = this.getSizeOf(from + size);
+      if (isNaN(itemSize)) {
+        size = Math.min(size + pageSize, maxSize);
         break;
       }
-      space += height;
+      space += itemSize;
       ++size;
     }
 
@@ -191,69 +224,70 @@ export default class extends React.Component {
   }
 
   updateUniformFrame() {
-    let {itemHeight, itemsPerRow} = this.getItemHeightAndItemsPerRow();
+    let {itemSize, itemsPerRow} = this.getItemSizeAndItemsPerRow();
 
-    if (!itemHeight || !itemsPerRow) return;
+    if (!itemSize || !itemsPerRow) return;
 
     const {length, pageSize} = this.props;
-    const {top, bottom} = this.getTopAndBottom();
+    const {start, end} = this.getStartAndEnd();
 
     const from = this.constrainFrom(
-      Math.floor(top / itemHeight) * itemsPerRow,
+      Math.floor(start / itemSize) * itemsPerRow,
       length,
       itemsPerRow
     );
 
     const size = this.constrainSize(
-      (Math.ceil((bottom - top) / itemHeight) + 1) * itemsPerRow,
+      (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
       length,
       pageSize,
       from
     );
 
-    return this.setState({itemsPerRow, from, itemHeight, size});
+    return this.setState({itemsPerRow, from, itemSize, size});
   }
 
   getSpaceBefore(index) {
 
-    // Try the static itemHeight.
-    const {itemHeight, itemsPerRow} = this.state;
-    if (itemHeight) return Math.ceil(index / itemsPerRow) * itemHeight;
+    // Try the static itemSize.
+    const {itemSize, itemsPerRow} = this.state;
+    if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
 
-    // Finally, accumulate heights of items 0 - index.
-    let height = 0;
+    // Finally, accumulate sizes of items 0 - index.
+    let space = 0;
     for (let i = 0; i < index; ++i) {
-      const itemHeight = this.getHeightOf(i);
-      if (isNaN(itemHeight)) break;
-      height += itemHeight;
+      const itemSize = this.getSizeOf(i);
+      if (isNaN(itemSize)) break;
+      space += itemSize;
     }
-    return height;
+    return space;
   }
 
-  cacheHeights() {
+  cacheSizes() {
     const {cache} = this;
     const {from} = this.state;
     const itemEls = React.findDOMNode(this.items).children;
+    const sizeKey = SIZE_KEYS[this.props.axis];
     for (let i = 0, l = itemEls.length; i < l; ++i) {
-      cache[from + i] = itemEls[i].getBoundingClientRect().height;
+      cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
     }
   }
 
-  getHeightOf(index) {
+  getSizeOf(index) {
 
-    // Try the static itemHeight.
-    const {itemHeight} = this.state;
-    if (itemHeight) return itemHeight;
+    // Try the static itemSize.
+    const {itemSize} = this.state;
+    if (itemSize) return itemSize;
 
-    // Try the itemHeightGetter.
-    const {itemHeightGetter} = this.props;
-    if (itemHeightGetter) return itemHeightGetter(index);
+    // Try the itemSizeGetter.
+    const {itemSizeGetter} = this.props;
+    if (itemSizeGetter) return itemSizeGetter(index);
 
     // Try the cache.
     const {cache} = this;
     if (cache[index]) return cache[index];
 
-    // We don't know the height.
+    // We don't know the size.
     return NaN;
   }
 
@@ -280,7 +314,7 @@ export default class extends React.Component {
     const max = this.getSpaceBefore(index);
     if (current > max) return this.setScroll(max);
 
-    const min = max - this.getViewportHeight() + this.getHeightOf(index);
+    const min = max - this.getViewportSize() + this.getSizeOf(index);
     if (current < min) this.setScroll(min);
   }
 
@@ -297,11 +331,17 @@ export default class extends React.Component {
     const items = this.renderItems();
     if (this.props.type === 'simple') return items;
 
-    const height = this.getSpaceBefore(this.props.length);
+    const {axis} = this.props;
+    const style = {position: 'relative'};
+    const size = this.getSpaceBefore(this.props.length);
+    style[SIZE_KEYS[axis]] = size;
+    if (size && axis === 'x') style.overflowX = 'hidden';
     const offset = this.getSpaceBefore(this.state.from);
-    const transform = `translate(0, ${offset}px)`;
+    const x = axis === 'x' ? offset : 0;
+    const y = axis === 'y' ? offset : 0;
+    const transform = `translate(${x}px, ${y}px)`;
     return (
-      <div style={{position: 'relative', height}}>
+      <div {...{style}}>
         <div style={{WebkitTransform: transform, transform}}>{items}</div>
       </div>
     );

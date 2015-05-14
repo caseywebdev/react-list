@@ -68,14 +68,18 @@ class MyComponent extends React.Component {
 
 ## Props
 
+##### axis (defaults to `x`)
+
+The axis that this list scrolls on.
+
 ##### initialIndex
 
 An index to scroll to after mounting.
 
-##### itemHeightGetter(index)
+##### itemSizeGetter(index)
 
-A function that receives an item index and returns the height of that item at
-that index.
+A function that receives an item index and returns the size (height for y-axis
+lists and width for x-axis lists) of that item at that index.
 
 ##### itemRenderer(index, key)
 
@@ -99,21 +103,21 @@ The number of items to batch up for new renders.
 
 ##### type (one of `simple`, `variable`, or `uniform`, defaults to `simple`)
 
-- `simple` This type is...simple. It will not cache item heights or remove items
+- `simple` This type is...simple. It will not cache item sizes or remove items
 that are above the viewport. This type is sufficient for many cases when the
 only requirement is incremental rendering when scrolling.
 
-- `variable` This type is preferred when the heights of the items in the list
-vary. Supply the `itemHeightGetter` when possible so the entire length of the
-list can be established beforehand. Otherwise, the item heights will be cached
+- `variable` This type is preferred when the sizes of the items in the list
+vary. Supply the `itemSizeGetter` when possible so the entire length of the
+list can be established beforehand. Otherwise, the item sizes will be cached
 as they are rendered so that items that are above the viewport can be removed as
 the list is scrolled.
 
 - `uniform` This type is preferred when you can guarantee all of your
-elements will be the same height. The advantage here is that the height of the
+elements will be the same size. The advantage here is that the size of the
 entire list can be calculated ahead of time and only enough items to fill the
-viewport ever need to be drawn. The height of the first item will be used to
-infer the height of every other item. Multiple items per row are also supported
+viewport ever need to be drawn. The size of the first item will be used to
+infer the size of every other item. Multiple items per row are also supported
 with this type.
 
 ##### threshold (defaults to `500`)
