@@ -68,7 +68,7 @@ class MyComponent extends React.Component {
 
 ## Props
 
-##### axis (defaults to `x`)
+##### axis (defaults to `y`)
 
 The axis that this list scrolls on.
 
