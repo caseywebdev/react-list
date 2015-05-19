@@ -57,7 +57,7 @@ class MyComponent extends React.Component {
           <ReactList
             itemRenderer={this.renderItem}
             length={this.state.accounts.length}
-            uniform={true}
+            type='uniform'
           />
         </div>
       </div>
@@ -129,12 +129,14 @@ items.
 
 ##### scrollTo(index)
 
-Put the element at `index` at the top of the viewport.
+Put the element at `index` at the top of the viewport. Note that if you aren't
+using `type='uniform'` or an `itemSizeGetter`, you will only be able to scroll
+to an element that has already been rendered.
 
 ##### scrollAround(index)
 
 Scroll the viewport so that the element at `index` is visible, but not
-necessarily at the top.
+necessarily at the top. The `scrollTo` note above also applies to this method.
 
 ## Development
 
