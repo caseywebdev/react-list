@@ -25,7 +25,6 @@ export default class extends React.Component {
     itemsRenderer: React.PropTypes.func,
     length: React.PropTypes.number,
     pageSize: React.PropTypes.number,
-    simple: React.PropTypes.bool,
     threshold: React.PropTypes.number,
     type: React.PropTypes.oneOf(['simple', 'variable', 'uniform'])
   };

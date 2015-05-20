@@ -431,7 +431,6 @@
         itemsRenderer: _React.PropTypes.func,
         length: _React.PropTypes.number,
         pageSize: _React.PropTypes.number,
-        simple: _React.PropTypes.bool,
         threshold: _React.PropTypes.number,
         type: _React.PropTypes.oneOf(['simple', 'variable', 'uniform'])
       },
