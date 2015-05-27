@@ -145,9 +145,8 @@ export default class extends React.Component {
     const {axis} = this.props;
     const sizeKey = SIZE_KEYS[axis];
     const firstRectSize = firstRect[sizeKey];
-    if (Math.round(firstRectSize) !== Math.round(itemSize)) {
-      itemSize = firstRectSize;
-    }
+    const delta = Math.abs(firstRectSize - itemSize);
+    if (isNaN(delta) || delta >= 1) itemSize = firstRectSize;
 
     if (!itemSize) return {};
 

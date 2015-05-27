@@ -181,9 +181,8 @@
 
         var sizeKey = SIZE_KEYS[axis];
         var firstRectSize = firstRect[sizeKey];
-        if (Math.round(firstRectSize) !== Math.round(itemSize)) {
-          itemSize = firstRectSize;
-        }
+        var delta = Math.abs(firstRectSize - itemSize);
+        if (isNaN(delta) || delta >= 1) itemSize = firstRectSize;
 
         if (!itemSize) return {};
 
