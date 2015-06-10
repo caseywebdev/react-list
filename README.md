@@ -47,13 +47,7 @@ class MyComponent extends React.Component {
     return (
       <div>
         <h1>Accounts</h1>
-        <div
-          style={{
-            position: 'relative',
-            overflow: 'auto',
-            maxHeight: 400
-          }}
-        >
+        <div style={{overflow: 'auto', maxHeight: 400}}>
           <ReactList
             itemRenderer={this.renderItem}
             length={this.state.accounts.length}
