@@ -141,4 +141,4 @@ make
 
 [React]: https://github.com/facebook/react
 [the test page]: https://orgsync.github.io/react-list/
-[the test page source]: index.js
+[the test page source]: index.es6
