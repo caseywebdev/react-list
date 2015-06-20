@@ -16,7 +16,7 @@ ReactList depends on React.
 
 ## Examples
 
-Check out [the test page] (and the [the test page source]) for examples of
+Check out [the test page] and the [the test page source] for examples of
 different configurations.
 
 Here's another simple example to get you started.
