@@ -114,7 +114,7 @@ viewport ever need to be drawn. The size of the first item will be used to
 infer the size of every other item. Multiple items per row are also supported
 with this type.
 
-##### threshold (defaults to `500`)
+##### threshold (defaults to `100`)
 
 The number of pixels to buffer at the beginning and end of the rendered list
 items.
