@@ -421,6 +421,10 @@
         );
       }
     }], [{
+      key: 'displayName',
+      value: 'ReactList',
+      enumerable: true
+    }, {
       key: 'propTypes',
       value: {
         axis: _React.PropTypes.oneOf(['x', 'y']),
