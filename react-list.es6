@@ -18,7 +18,7 @@ const START_KEYS = {x: 'left', y: 'top'};
 
 export default class extends React.Component {
   static displayName = 'ReactList';
-  
+
   static propTypes = {
     axis: React.PropTypes.oneOf(['x', 'y']),
     initialIndex: React.PropTypes.number,
