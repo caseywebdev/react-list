@@ -5,14 +5,17 @@ module.exports = {
       transformers: [
         {
           name: 'babel',
-          options: {modules: 'umd', optional: ['es7.classProperties']}
+          options: {modules: 'umd', stage: 0}
         },
-        {name: 'transformers/rename-global', only: 'react-list.es6'}
+        {
+          name: 'replace',
+          only: 'react-list.es6',
+          options: {patterns: {reactList: 'ReactList'}}}
       ]
     }
   },
   builds: {
     'react-list.es6': '.',
-    'index.es6': '.'
+    'examples/index.es6': 'examples'
   }
 };

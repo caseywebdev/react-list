@@ -2,7 +2,7 @@
   "name": "react-list",
   "version": "0.6.1",
   "author": "Casey Foster <c@sey.me>",
-  "licence": "MIT",
+  "license": "MIT",
   "main": "react-list.js",
   "repository": {
     "type": "git",
@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "bower": "1.4.1",
-    "cogs": "1.0.4",
-    "cogs-transformer-babel": "1.0.10"
+    "cogs": "1.0.5",
+    "cogs-transformer-babel": "1.0.12",
+    "cogs-transformer-replace": "1.0.1"
   }
 }

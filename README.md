@@ -16,7 +16,7 @@ ReactList depends on React.
 
 ## Examples
 
-Check out [the test page] and the [the test page source] for examples of
+Check out [the example page] and the [the example page source] for examples of
 different configurations.
 
 Here's another simple example to get you started.
@@ -32,7 +32,7 @@ class MyComponent extends React.Component {
   };
 
   componentWillMount() {
-    loadAccounts(this.handleAccounts.bind(this));
+    loadAccounts(::this.handleAccounts);
   }
 
   handleAccounts(accounts) {
@@ -49,7 +49,7 @@ class MyComponent extends React.Component {
         <h1>Accounts</h1>
         <div style={{overflow: 'auto', maxHeight: 400}}>
           <ReactList
-            itemRenderer={this.renderItem}
+            itemRenderer={::this.renderItem}
             length={this.state.accounts.length}
             type='uniform'
           />
@@ -140,5 +140,5 @@ make
 ```
 
 [React]: https://github.com/facebook/react
-[the test page]: https://orgsync.github.io/react-list/
-[the test page source]: index.es6
+[the example page]: https://orgsync.github.io/react-list/
+[the example page source]: examples/index.es6

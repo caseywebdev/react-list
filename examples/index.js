@@ -211,11 +211,6 @@
         return _React.createElement(
           'div',
           { className: 'index' },
-          _React.createElement('style', {
-            dangerouslySetInnerHTML: {
-              __html: '\n              body {\n                margin: 0;\n                font-family: \'Helvetica Neue\', sans-serif;\n              }\n\n              a {\n                color: #38afd4;\n                text-decoration: none;\n              }\n\n              a:hover {\n                text-decoration: underline;\n              }\n\n              .header {\n                text-align: center;\n              }\n\n              .example {\n                padding: 25px;\n              }\n\n              .props {\n                overflow: auto;\n              }\n\n              .component {\n                border: 10px solid #38afd4;\n                border-radius: 5px;\n                height: 300px;\n                overflow: auto;\n                -webkit-overflow-scrolling: touch;\n              }\n\n              .item {\n                background: linear-gradient(#fff, #eee);\n                line-height: 30px;\n                padding: 0 10px;\n              }\n\n              .axis-x .item {\n                display: inline-block;\n                line-height: 300px;\n                padding: 0;\n                text-align: center;\n                width: 150px;\n              }\n\n              .axis-x .component {\n                white-space: nowrap;\n              }\n\n              .square-item {\n                background: linear-gradient(#fff, #eee);\n                display: inline-block;\n                line-height: 100px;\n                text-align: center;\n                width: 100px;\n              }\n\n              .even {\n                background: linear-gradient(#ddd, #ccc);\n              }\n            '
-            }
-          }),
           _React.createElement(
             'div',
             { className: 'header' },

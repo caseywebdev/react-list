@@ -8,7 +8,7 @@ const renderItem = (index, key) =>
 renderItem.toJSON = () => renderItem.toString();
 
 const renderSquareItem = (index, key) =>
-  <div key={key} className={'square-item' + (index % 2 ? '': ' even')}>
+  <div key={key} className={'square-item' + (index % 2 ? '' : ' even')}>
     {index}
   </div>;
 renderSquareItem.toJSON = () => renderSquareItem.toString();
@@ -137,75 +137,6 @@ export default class extends React.Component {
   render() {
     return (
       <div className='index'>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              body {
-                margin: 0;
-                font-family: 'Helvetica Neue', sans-serif;
-              }
-
-              a {
-                color: #38afd4;
-                text-decoration: none;
-              }
-
-              a:hover {
-                text-decoration: underline;
-              }
-
-              .header {
-                text-align: center;
-              }
-
-              .example {
-                padding: 25px;
-              }
-
-              .props {
-                overflow: auto;
-              }
-
-              .component {
-                border: 10px solid #38afd4;
-                border-radius: 5px;
-                height: 300px;
-                overflow: auto;
-                -webkit-overflow-scrolling: touch;
-              }
-
-              .item {
-                background: linear-gradient(#fff, #eee);
-                line-height: 30px;
-                padding: 0 10px;
-              }
-
-              .axis-x .item {
-                display: inline-block;
-                line-height: 300px;
-                padding: 0;
-                text-align: center;
-                width: 150px;
-              }
-
-              .axis-x .component {
-                white-space: nowrap;
-              }
-
-              .square-item {
-                background: linear-gradient(#fff, #eee);
-                display: inline-block;
-                line-height: 100px;
-                text-align: center;
-                width: 100px;
-              }
-
-              .even {
-                background: linear-gradient(#ddd, #ccc);
-              }
-            `
-          }}
-        />
         <div className='header'>
           <h1>ReactList</h1>
           <a href='https://github.com/orgsync/react-list'>on GitHub</a>
