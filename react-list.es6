@@ -339,7 +339,7 @@ export default class extends React.Component {
     const offset = this.getSpaceBefore(this.state.from);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;
-    const transform = `translate(${x}px, ${y}px)`;
+    const transform = `translate3d(${x}px, ${y}px, 0)`;
     return (
       <div {...{style}}>
         <div style={{WebkitTransform: transform, transform}}>{items}</div>

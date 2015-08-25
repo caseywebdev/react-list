@@ -409,7 +409,7 @@
         var offset = this.getSpaceBefore(this.state.from);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
-        var transform = 'translate(' + x + 'px, ' + y + 'px)';
+        var transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
         return _React.createElement(
           'div',
           { style: style },
