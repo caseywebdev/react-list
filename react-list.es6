@@ -28,17 +28,21 @@ export default class extends React.Component {
     length: React.PropTypes.number,
     pageSize: React.PropTypes.number,
     threshold: React.PropTypes.number,
-    type: React.PropTypes.oneOf(['simple', 'variable', 'uniform'])
+    type: React.PropTypes.oneOf(['simple', 'variable', 'uniform']),
+    useTranslate3d: React.PropTypes.bool
   };
 
   static defaultProps = {
     axis: 'y',
+    initialIndex: null,
+    itemSizeGetter: null,
     itemRenderer: (index, key) => <div key={key}>{index}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
     pageSize: 10,
     threshold: 100,
-    type: 'simple'
+    type: 'simple',
+    useTranslate3d: false
   };
 
   constructor(props) {
@@ -331,7 +335,7 @@ export default class extends React.Component {
     const items = this.renderItems();
     if (this.props.type === 'simple') return items;
 
-    const {axis} = this.props;
+    const {axis, useTranslate3d} = this.props;
     const style = {position: 'relative'};
     const size = this.getSpaceBefore(this.props.length);
     style[SIZE_KEYS[axis]] = size;
@@ -339,11 +343,15 @@ export default class extends React.Component {
     const offset = this.getSpaceBefore(this.state.from);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;
-    const transform = `translate3d(${x}px, ${y}px, 0)`;
-    return (
-      <div {...{style}}>
-        <div style={{WebkitTransform: transform, transform}}>{items}</div>
-      </div>
-    );
+    const transform =
+      useTranslate3d ?
+      `translate3d(${x}px, ${y}px, 0)` :
+      `translate(${x}px, ${y}px)`;
+    const listStyle = {
+      MsTransform: transform,
+      WebkitTransform: transform,
+      transform
+    };
+    return <div {...{style}}><div style={listStyle}>{items}</div></div>;
   }
 }

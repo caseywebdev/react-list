@@ -400,7 +400,9 @@
         var items = this.renderItems();
         if (this.props.type === 'simple') return items;
 
-        var axis = this.props.axis;
+        var _props5 = this.props;
+        var axis = _props5.axis;
+        var useTranslate3d = _props5.useTranslate3d;
 
         var style = { position: 'relative' };
         var size = this.getSpaceBefore(this.props.length);
@@ -409,13 +411,18 @@
         var offset = this.getSpaceBefore(this.state.from);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
-        var transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+        var transform = useTranslate3d ? 'translate3d(' + x + 'px, ' + y + 'px, 0)' : 'translate(' + x + 'px, ' + y + 'px)';
+        var listStyle = {
+          MsTransform: transform,
+          WebkitTransform: transform,
+          transform: transform
+        };
         return _React.createElement(
           'div',
           { style: style },
           _React.createElement(
             'div',
-            { style: { WebkitTransform: transform, transform: transform } },
+            { style: listStyle },
             items
           )
         );
@@ -435,13 +442,16 @@
         length: _React.PropTypes.number,
         pageSize: _React.PropTypes.number,
         threshold: _React.PropTypes.number,
-        type: _React.PropTypes.oneOf(['simple', 'variable', 'uniform'])
+        type: _React.PropTypes.oneOf(['simple', 'variable', 'uniform']),
+        useTranslate3d: _React.PropTypes.bool
       },
       enumerable: true
     }, {
       key: 'defaultProps',
       value: {
         axis: 'y',
+        initialIndex: null,
+        itemSizeGetter: null,
         itemRenderer: function itemRenderer(index, key) {
           return _React.createElement(
             'div',
@@ -459,7 +469,8 @@
         length: 0,
         pageSize: 10,
         threshold: 100,
-        type: 'simple'
+        type: 'simple',
+        useTranslate3d: false
       },
       enumerable: true
     }]);

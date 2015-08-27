@@ -161,7 +161,8 @@
   }, {
     length: 10000,
     itemRenderer: renderGridLine,
-    type: 'uniform'
+    type: 'uniform',
+    useTranslate3d: true
   }];
 
   var _default = (function (_React$Component) {

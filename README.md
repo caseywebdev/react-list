@@ -95,6 +95,11 @@ The number of items in the list.
 
 The number of items to batch up for new renders.
 
+##### threshold (defaults to `100`)
+
+The number of pixels to buffer at the beginning and end of the rendered list
+items.
+
 ##### type (one of `simple`, `variable`, or `uniform`, defaults to `simple`)
 
 - `simple` This type is...simple. It will not cache item sizes or remove items
@@ -114,10 +119,11 @@ viewport ever need to be drawn. The size of the first item will be used to
 infer the size of every other item. Multiple items per row are also supported
 with this type.
 
-##### threshold (defaults to `100`)
+##### useTranslate3d (defaults to `false`)
 
-The number of pixels to buffer at the beginning and end of the rendered list
-items.
+A boolean to determine whether the `translate3d` CSS property should be used for
+positioning instead of the default `translate`. This can help performance on
+mobile devices, but is supported by fewer browsers.
 
 ## Methods
 

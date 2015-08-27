@@ -118,7 +118,8 @@ const examples = [
   {
     length: 10000,
     itemRenderer: renderGridLine,
-    type: 'uniform'
+    type: 'uniform',
+    useTranslate3d: true
   }
 ];
 
