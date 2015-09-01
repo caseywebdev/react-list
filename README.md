@@ -138,6 +138,20 @@ to an element that has already been rendered.
 Scroll the viewport so that the element at `index` is visible, but not
 necessarily at the top. The `scrollTo` note above also applies to this method.
 
+## Troubleshooting
+
+This is a place to share common problems and solutions to them.  
+
+#### I have a stack overflow with type=`uniform`
+
+This is probably because the items you are rendering don't have a fixed height.
+react-list will end up in an unstable state. He will call `setState` to display the correct items.
+which will trigger `componentDidUpdate`, which will trigger `setState` and so on.
+
+To fix it
+ - either set an height to item your render `<div style={{height: 100}} />`
+ - or use a different `type`
+
 ## Development
 
 ```bash
