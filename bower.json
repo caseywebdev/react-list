@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "main": "react-list.js",
   "ignore": [
     "/.gitignore",
@@ -14,6 +14,6 @@
     "/transformers"
   ],
   "dependencies": {
-    "react": "0.13.x"
+    "react": ">= 0.13.0 < 0.15.0"
   }
 }

@@ -37,6 +37,10 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
+  var getEl = function getEl(ref) {
+    return _React.version < '0.14.0' ? _React.findDOMNode(ref) : ref;
+  };
+
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var END_KEYS = { x: 'right', y: 'bottom' };
@@ -112,7 +116,7 @@
     }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
-        var el = _React.findDOMNode(this);
+        var el = getEl(this.el);
         var overflowKey = OVERFLOW_KEYS[this.props.axis];
         while (el = el.parentElement) {
           var overflow = window.getComputedStyle(el)[overflowKey];
@@ -127,7 +131,7 @@
         var axis = this.props.axis;
 
         var startKey = START_KEYS[axis];
-        var elStart = _React.findDOMNode(this).getBoundingClientRect()[startKey];
+        var elStart = getEl(this.el).getBoundingClientRect()[startKey];
         if (scrollParent === window) return -elStart;
         var scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
         var scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
@@ -141,7 +145,7 @@
 
         var startKey = START_KEYS[axis];
         if (scrollParent === window) {
-          var elStart = _React.findDOMNode(this).getBoundingClientRect()[startKey];
+          var elStart = getEl(this.el).getBoundingClientRect()[startKey];
           var windowStart = document.documentElement.getBoundingClientRect()[startKey];
           return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
         }
@@ -167,7 +171,7 @@
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
-        var itemEls = _React.findDOMNode(this.items).children;
+        var itemEls = getEl(this.items).children;
         if (!itemEls.length) return {};
 
         var firstRect = itemEls[0].getBoundingClientRect();
@@ -212,7 +216,7 @@
 
         var end = _getStartAndEnd.end;
 
-        var itemEls = _React.findDOMNode(this).children;
+        var itemEls = getEl(this.items).children;
         var elEnd = 0;
 
         if (itemEls.length) {
@@ -321,7 +325,7 @@
         var cache = this.cache;
         var from = this.state.from;
 
-        var itemEls = _React.findDOMNode(this.items).children;
+        var itemEls = getEl(this.items).children;
         var sizeKey = SIZE_KEYS[this.props.axis];
         for (var i = 0, l = itemEls.length; i < l; ++i) {
           cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
@@ -382,33 +386,45 @@
       value: function renderItems() {
         var _this2 = this;
 
+        var _props5 = this.props;
+        var itemRenderer = _props5.itemRenderer;
+        var itemsRenderer = _props5.itemsRenderer;
+        var type = _props5.type;
         var _state3 = this.state;
         var from = _state3.from;
         var size = _state3.size;
 
         var items = [];
         for (var i = 0; i < size; ++i) {
-          items.push(this.props.itemRenderer(from + i, i));
-        }
-        return this.props.itemsRenderer(items, function (c) {
-          return _this2.items = c;
+          items.push(itemRenderer(from + i, i));
+        }return itemsRenderer(items, function (c) {
+          if (type === 'simple') _this2.el = c;
+          _this2.items = c;
         });
       }
     }, {
       key: 'render',
       value: function render() {
+        var _this3 = this;
+
+        var _props6 = this.props;
+        var axis = _props6.axis;
+        var length = _props6.length;
+        var type = _props6.type;
+        var useTranslate3d = _props6.useTranslate3d;
+        var from = this.state.from;
+
         var items = this.renderItems();
-        if (this.props.type === 'simple') return items;
+        if (type === 'simple') return items;
 
-        var _props5 = this.props;
-        var axis = _props5.axis;
-        var useTranslate3d = _props5.useTranslate3d;
-
+        var ref = function ref(c) {
+          return _this3.el = c;
+        };
         var style = { position: 'relative' };
-        var size = this.getSpaceBefore(this.props.length);
+        var size = this.getSpaceBefore(length);
         style[SIZE_KEYS[axis]] = size;
         if (size && axis === 'x') style.overflowX = 'hidden';
-        var offset = this.getSpaceBefore(this.state.from);
+        var offset = this.getSpaceBefore(from);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
         var transform = useTranslate3d ? 'translate3d(' + x + 'px, ' + y + 'px, 0)' : 'translate(' + x + 'px, ' + y + 'px)';
@@ -419,7 +435,7 @@
         };
         return _React.createElement(
           'div',
-          { style: style },
+          { ref: ref, style: style },
           _React.createElement(
             'div',
             { style: listStyle },

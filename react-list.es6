@@ -7,6 +7,8 @@ const isEqualSubset = (a, b) => {
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
+const getEl = ref => React.version < '0.14.0' ? React.findDOMNode(ref) : ref;
+
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const END_KEYS = {x: 'right', y: 'bottom'};
@@ -89,7 +91,7 @@ export default class extends React.Component {
   }
 
   getScrollParent() {
-    let el = React.findDOMNode(this);
+    let el = getEl(this.el);
     const overflowKey = OVERFLOW_KEYS[this.props.axis];
     while (el = el.parentElement) {
       const overflow = window.getComputedStyle(el)[overflowKey];
@@ -102,7 +104,7 @@ export default class extends React.Component {
     const {scrollParent} = this;
     const {axis} = this.props;
     const startKey = START_KEYS[axis];
-    const elStart = React.findDOMNode(this).getBoundingClientRect()[startKey];
+    const elStart = getEl(this.el).getBoundingClientRect()[startKey];
     if (scrollParent === window) return -elStart;
     const scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
     const scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
@@ -114,7 +116,7 @@ export default class extends React.Component {
     const {axis} = this.props;
     const startKey = START_KEYS[axis];
     if (scrollParent === window) {
-      const elStart = React.findDOMNode(this).getBoundingClientRect()[startKey];
+      const elStart = getEl(this.el).getBoundingClientRect()[startKey];
       const windowStart =
         document.documentElement.getBoundingClientRect()[startKey];
       return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
@@ -138,7 +140,7 @@ export default class extends React.Component {
   }
 
   getItemSizeAndItemsPerRow() {
-    const itemEls = React.findDOMNode(this.items).children;
+    const itemEls = getEl(this.items).children;
     if (!itemEls.length) return {};
 
     const firstRect = itemEls[0].getBoundingClientRect();
@@ -178,7 +180,7 @@ export default class extends React.Component {
 
   updateSimpleFrame() {
     const {end} = this.getStartAndEnd();
-    const itemEls = React.findDOMNode(this).children;
+    const itemEls = getEl(this.items).children;
     let elEnd = 0;
 
     if (itemEls.length) {
@@ -270,7 +272,7 @@ export default class extends React.Component {
   cacheSizes() {
     const {cache} = this;
     const {from} = this.state;
-    const itemEls = React.findDOMNode(this.items).children;
+    const itemEls = getEl(this.items).children;
     const sizeKey = SIZE_KEYS[this.props.axis];
     for (let i = 0, l = itemEls.length; i < l; ++i) {
       cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
@@ -323,24 +325,29 @@ export default class extends React.Component {
   }
 
   renderItems() {
+    const {itemRenderer, itemsRenderer, type} = this.props;
     const {from, size} = this.state;
     const items = [];
-    for (let i = 0; i < size; ++i) {
-      items.push(this.props.itemRenderer(from + i, i));
-    }
-    return this.props.itemsRenderer(items, c => this.items = c);
+    for (let i = 0; i < size; ++i) items.push(itemRenderer(from + i, i));
+    return itemsRenderer(items, c => {
+      if (type === 'simple') this.el = c;
+      this.items = c;
+    });
   }
 
   render() {
-    const items = this.renderItems();
-    if (this.props.type === 'simple') return items;
+    const {axis, length, type, useTranslate3d} = this.props;
+    const {from} = this.state;
 
-    const {axis, useTranslate3d} = this.props;
+    const items = this.renderItems();
+    if (type === 'simple') return items;
+
+    const ref = c => this.el = c;
     const style = {position: 'relative'};
-    const size = this.getSpaceBefore(this.props.length);
+    const size = this.getSpaceBefore(length);
     style[SIZE_KEYS[axis]] = size;
     if (size && axis === 'x') style.overflowX = 'hidden';
-    const offset = this.getSpaceBefore(this.state.from);
+    const offset = this.getSpaceBefore(from);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;
     const transform =
@@ -352,6 +359,6 @@ export default class extends React.Component {
       WebkitTransform: transform,
       transform
     };
-    return <div {...{style}}><div style={listStyle}>{items}</div></div>;
+    return <div {...{ref, style}}><div style={listStyle}>{items}</div></div>;
   }
 }
