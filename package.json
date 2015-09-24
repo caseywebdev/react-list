@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
@@ -12,9 +12,9 @@
     "react": ">= 0.13.0 < 0.15.0 || ^0.14.0-alpha"
   },
   "devDependencies": {
-    "bower": "1.4.1",
-    "cogs": "1.0.5",
+    "cogs": "1.0.7",
     "cogs-transformer-babel": "1.0.12",
-    "cogs-transformer-replace": "1.0.1"
+    "cogs-transformer-replace": "1.0.1",
+    "react": "0.14.0-rc1"
   }
 }

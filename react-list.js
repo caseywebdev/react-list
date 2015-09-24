@@ -15,17 +15,15 @@
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { desc = parent = getter = undefined; _again = false; var object = _x,
-    property = _x2,
-    receiver = _x3; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-  function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-  var _React = _interopRequire(_react);
+  var _React = _interopRequireDefault(_react);
 
   var isEqualSubset = function isEqualSubset(a, b) {
     for (var key in a) {
@@ -37,9 +35,9 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
-  var getEl = function getEl(ref) {
-    return _React.version < '0.14.0' ? _React.findDOMNode(ref) : ref;
-  };
+  var _ref = _React['default'].version < '0.14.0' ? _React['default'] : typeof window === 'object' && window.ReactDOM ? window.ReactDOM : typeof require === 'function' ? require('react-dom') : _React['default'];
+
+  var findDOMNode = _ref.findDOMNode;
 
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
@@ -51,10 +49,60 @@
   var START_KEYS = { x: 'left', y: 'top' };
 
   var _default = (function (_React$Component) {
-    var _class = function _default(props) {
-      _classCallCheck(this, _class);
+    _inherits(_default, _React$Component);
 
-      _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
+    _createClass(_default, null, [{
+      key: 'displayName',
+      value: 'ReactList',
+      enumerable: true
+    }, {
+      key: 'propTypes',
+      value: {
+        axis: _React['default'].PropTypes.oneOf(['x', 'y']),
+        initialIndex: _React['default'].PropTypes.number,
+        itemSizeGetter: _React['default'].PropTypes.func,
+        itemRenderer: _React['default'].PropTypes.func,
+        itemsRenderer: _React['default'].PropTypes.func,
+        length: _React['default'].PropTypes.number,
+        pageSize: _React['default'].PropTypes.number,
+        threshold: _React['default'].PropTypes.number,
+        type: _React['default'].PropTypes.oneOf(['simple', 'variable', 'uniform']),
+        useTranslate3d: _React['default'].PropTypes.bool
+      },
+      enumerable: true
+    }, {
+      key: 'defaultProps',
+      value: {
+        axis: 'y',
+        initialIndex: null,
+        itemSizeGetter: null,
+        itemRenderer: function itemRenderer(index, key) {
+          return _React['default'].createElement(
+            'div',
+            { key: key },
+            index
+          );
+        },
+        itemsRenderer: function itemsRenderer(items, ref) {
+          return _React['default'].createElement(
+            'div',
+            { ref: ref },
+            items
+          );
+        },
+        length: 0,
+        pageSize: 10,
+        threshold: 100,
+        type: 'simple',
+        useTranslate3d: false
+      },
+      enumerable: true
+    }]);
+
+    function _default(props) {
+      _classCallCheck(this, _default);
+
+      _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
       var _props = this.props;
       var initialIndex = _props.initialIndex;
       var length = _props.length;
@@ -65,11 +113,9 @@
       var size = this.constrainSize(pageSize, length, pageSize, from);
       this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       this.cache = {};
-    };
+    }
 
-    _inherits(_class, _React$Component);
-
-    _createClass(_class, [{
+    _createClass(_default, [{
       key: 'componentWillReceiveProps',
       value: function componentWillReceiveProps(next) {
         var _state = this.state;
@@ -116,7 +162,7 @@
     }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
-        var el = getEl(this.el);
+        var el = findDOMNode(this);
         var overflowKey = OVERFLOW_KEYS[this.props.axis];
         while (el = el.parentElement) {
           var overflow = window.getComputedStyle(el)[overflowKey];
@@ -131,7 +177,7 @@
         var axis = this.props.axis;
 
         var startKey = START_KEYS[axis];
-        var elStart = getEl(this.el).getBoundingClientRect()[startKey];
+        var elStart = findDOMNode(this).getBoundingClientRect()[startKey];
         if (scrollParent === window) return -elStart;
         var scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
         var scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
@@ -145,7 +191,7 @@
 
         var startKey = START_KEYS[axis];
         if (scrollParent === window) {
-          var elStart = getEl(this.el).getBoundingClientRect()[startKey];
+          var elStart = findDOMNode(this).getBoundingClientRect()[startKey];
           var windowStart = document.documentElement.getBoundingClientRect()[startKey];
           return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
         }
@@ -171,7 +217,7 @@
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
-        var itemEls = getEl(this.items).children;
+        var itemEls = findDOMNode(this.items).children;
         if (!itemEls.length) return {};
 
         var firstRect = itemEls[0].getBoundingClientRect();
@@ -216,7 +262,7 @@
 
         var end = _getStartAndEnd.end;
 
-        var itemEls = getEl(this.items).children;
+        var itemEls = findDOMNode(this.items).children;
         var elEnd = 0;
 
         if (itemEls.length) {
@@ -325,7 +371,7 @@
         var cache = this.cache;
         var from = this.state.from;
 
-        var itemEls = getEl(this.items).children;
+        var itemEls = findDOMNode(this.items).children;
         var sizeKey = SIZE_KEYS[this.props.axis];
         for (var i = 0, l = itemEls.length; i < l; ++i) {
           cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
@@ -384,12 +430,11 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this2 = this;
+        var _this = this;
 
         var _props5 = this.props;
         var itemRenderer = _props5.itemRenderer;
         var itemsRenderer = _props5.itemsRenderer;
-        var type = _props5.type;
         var _state3 = this.state;
         var from = _state3.from;
         var size = _state3.size;
@@ -398,15 +443,12 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          if (type === 'simple') _this2.el = c;
-          _this2.items = c;
+          return _this.items = c;
         });
       }
     }, {
       key: 'render',
       value: function render() {
-        var _this3 = this;
-
         var _props6 = this.props;
         var axis = _props6.axis;
         var length = _props6.length;
@@ -417,9 +459,6 @@
         var items = this.renderItems();
         if (type === 'simple') return items;
 
-        var ref = function ref(c) {
-          return _this3.el = c;
-        };
         var style = { position: 'relative' };
         var size = this.getSpaceBefore(length);
         style[SIZE_KEYS[axis]] = size;
@@ -433,66 +472,20 @@
           WebkitTransform: transform,
           transform: transform
         };
-        return _React.createElement(
+        return _React['default'].createElement(
           'div',
-          { ref: ref, style: style },
-          _React.createElement(
+          { style: style },
+          _React['default'].createElement(
             'div',
             { style: listStyle },
             items
           )
         );
       }
-    }], [{
-      key: 'displayName',
-      value: 'ReactList',
-      enumerable: true
-    }, {
-      key: 'propTypes',
-      value: {
-        axis: _React.PropTypes.oneOf(['x', 'y']),
-        initialIndex: _React.PropTypes.number,
-        itemSizeGetter: _React.PropTypes.func,
-        itemRenderer: _React.PropTypes.func,
-        itemsRenderer: _React.PropTypes.func,
-        length: _React.PropTypes.number,
-        pageSize: _React.PropTypes.number,
-        threshold: _React.PropTypes.number,
-        type: _React.PropTypes.oneOf(['simple', 'variable', 'uniform']),
-        useTranslate3d: _React.PropTypes.bool
-      },
-      enumerable: true
-    }, {
-      key: 'defaultProps',
-      value: {
-        axis: 'y',
-        initialIndex: null,
-        itemSizeGetter: null,
-        itemRenderer: function itemRenderer(index, key) {
-          return _React.createElement(
-            'div',
-            { key: key },
-            index
-          );
-        },
-        itemsRenderer: function itemsRenderer(items, ref) {
-          return _React.createElement(
-            'div',
-            { ref: ref },
-            items
-          );
-        },
-        length: 0,
-        pageSize: 10,
-        threshold: 100,
-        type: 'simple',
-        useTranslate3d: false
-      },
-      enumerable: true
     }]);
 
-    return _class;
-  })(_React.Component);
+    return _default;
+  })(_React['default'].Component);
 
   module.exports = _default;
 });

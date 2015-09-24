@@ -7,7 +7,11 @@ const isEqualSubset = (a, b) => {
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
-const getEl = ref => React.version < '0.14.0' ? React.findDOMNode(ref) : ref;
+const {findDOMNode} =
+  React.version < '0.14.0' ? React :
+  typeof window === 'object' && window.ReactDOM ? window.ReactDOM :
+  typeof require === 'function' ? require('react-dom') :
+  React;
 
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
@@ -91,7 +95,7 @@ export default class extends React.Component {
   }
 
   getScrollParent() {
-    let el = getEl(this.el);
+    let el = findDOMNode(this);
     const overflowKey = OVERFLOW_KEYS[this.props.axis];
     while (el = el.parentElement) {
       const overflow = window.getComputedStyle(el)[overflowKey];
@@ -104,7 +108,7 @@ export default class extends React.Component {
     const {scrollParent} = this;
     const {axis} = this.props;
     const startKey = START_KEYS[axis];
-    const elStart = getEl(this.el).getBoundingClientRect()[startKey];
+    const elStart = findDOMNode(this).getBoundingClientRect()[startKey];
     if (scrollParent === window) return -elStart;
     const scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
     const scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
@@ -116,7 +120,7 @@ export default class extends React.Component {
     const {axis} = this.props;
     const startKey = START_KEYS[axis];
     if (scrollParent === window) {
-      const elStart = getEl(this.el).getBoundingClientRect()[startKey];
+      const elStart = findDOMNode(this).getBoundingClientRect()[startKey];
       const windowStart =
         document.documentElement.getBoundingClientRect()[startKey];
       return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
@@ -140,7 +144,7 @@ export default class extends React.Component {
   }
 
   getItemSizeAndItemsPerRow() {
-    const itemEls = getEl(this.items).children;
+    const itemEls = findDOMNode(this.items).children;
     if (!itemEls.length) return {};
 
     const firstRect = itemEls[0].getBoundingClientRect();
@@ -180,7 +184,7 @@ export default class extends React.Component {
 
   updateSimpleFrame() {
     const {end} = this.getStartAndEnd();
-    const itemEls = getEl(this.items).children;
+    const itemEls = findDOMNode(this.items).children;
     let elEnd = 0;
 
     if (itemEls.length) {
@@ -272,7 +276,7 @@ export default class extends React.Component {
   cacheSizes() {
     const {cache} = this;
     const {from} = this.state;
-    const itemEls = getEl(this.items).children;
+    const itemEls = findDOMNode(this.items).children;
     const sizeKey = SIZE_KEYS[this.props.axis];
     for (let i = 0, l = itemEls.length; i < l; ++i) {
       cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
@@ -325,14 +329,11 @@ export default class extends React.Component {
   }
 
   renderItems() {
-    const {itemRenderer, itemsRenderer, type} = this.props;
+    const {itemRenderer, itemsRenderer} = this.props;
     const {from, size} = this.state;
     const items = [];
     for (let i = 0; i < size; ++i) items.push(itemRenderer(from + i, i));
-    return itemsRenderer(items, c => {
-      if (type === 'simple') this.el = c;
-      this.items = c;
-    });
+    return itemsRenderer(items, c => this.items = c);
   }
 
   render() {
@@ -342,7 +343,6 @@ export default class extends React.Component {
     const items = this.renderItems();
     if (type === 'simple') return items;
 
-    const ref = c => this.el = c;
     const style = {position: 'relative'};
     const size = this.getSpaceBefore(length);
     style[SIZE_KEYS[axis]] = size;
@@ -359,6 +359,6 @@ export default class extends React.Component {
       WebkitTransform: transform,
       transform
     };
-    return <div {...{ref, style}}><div style={listStyle}>{items}</div></div>;
+    return <div {...{style}}><div style={listStyle}>{items}</div></div>;
   }
 }

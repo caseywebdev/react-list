@@ -1,7 +1,6 @@
 /.gitignore
 /Makefile
 /bower.json
-/bower_components
 /cogs.js
 /index.*
 /react-list.es6
