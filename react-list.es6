@@ -10,7 +10,7 @@ const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 const {findDOMNode} =
   React.version < '0.14.0' ? React :
   typeof window === 'object' && window.ReactDOM ? window.ReactDOM :
-  typeof require === 'function' ? require('react-dom') :
+  typeof require === 'function' ? eval('require')('react-dom') :
   React;
 
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};

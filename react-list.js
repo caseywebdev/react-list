@@ -35,7 +35,7 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
-  var _ref = _React['default'].version < '0.14.0' ? _React['default'] : typeof window === 'object' && window.ReactDOM ? window.ReactDOM : typeof require === 'function' ? require('react-dom') : _React['default'];
+  var _ref = _React['default'].version < '0.14.0' ? _React['default'] : typeof window === 'object' && window.ReactDOM ? window.ReactDOM : typeof require === 'function' ? eval('require')('react-dom') : _React['default'];
 
   var findDOMNode = _ref.findDOMNode;
 
