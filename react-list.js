@@ -166,7 +166,7 @@
         var overflowKey = OVERFLOW_KEYS[this.props.axis];
         while (el = el.parentElement) {
           var overflow = window.getComputedStyle(el)[overflowKey];
-          if (overflow === 'auto' || overflow === 'scroll') return el;
+          if (overflow === 'auto' || overflow === 'scroll' || overflow === 'overlay') return el;
         }
         return window;
       }
