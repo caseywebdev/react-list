@@ -99,7 +99,7 @@ export default class extends React.Component {
     const overflowKey = OVERFLOW_KEYS[this.props.axis];
     while (el = el.parentElement) {
       const overflow = window.getComputedStyle(el)[overflowKey];
-      if (overflow === 'auto' || overflow === 'scroll') return el;
+      if (overflow === 'auto' || overflow === 'scroll' || overflow === 'overlay') return el;
     }
     return window;
   }
