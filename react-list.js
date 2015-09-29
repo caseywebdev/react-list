@@ -35,9 +35,12 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
-  var _ref = _React['default'].version < '0.14.0' ? _React['default'] : typeof window === 'object' && window.ReactDOM ? window.ReactDOM : typeof require === 'function' ? eval('require')('react-dom') : _React['default'];
-
-  var findDOMNode = _ref.findDOMNode;
+  var ReactDOM = typeof window === 'object' && window.ReactDOM || _React['default'];
+  try {
+    ReactDOM = require('react-dom');
+  } catch (er) {}
+  var _ReactDOM = ReactDOM;
+  var findDOMNode = _ReactDOM.findDOMNode;
 
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
