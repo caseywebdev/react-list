@@ -7,11 +7,17 @@ const isEqualSubset = (a, b) => {
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
-const {findDOMNode} =
-  React.version < '0.14.0' ? React :
-  typeof window === 'object' && window.ReactDOM ? window.ReactDOM :
-  typeof require === 'function' ? eval('require')('react-dom') :
-  React;
+let ReactDOM;
+if (React.version < '0.14.0') {
+  ReactDOM = React;
+} else {
+  try {
+    ReactDOM = require('react-dom');
+  } catch(e) {
+    ReactDOM = React;
+  }
+}
+const {findDOMNode} = ReactDOM;
 
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
