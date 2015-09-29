@@ -2,8 +2,9 @@
 
 <html>
   <head>
-    <title>ReactList</title>
-    <script src='bower_components/react/react.js'></script>
+    <title>ReactList Examples</title>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0-rc1/react.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0-rc1/react-dom.min.js'></script>
     <script src='react-list.js'></script>
     <script src='examples/index.js'></script>
     <script src='http://localhost:35729/livereload.js'></script>
@@ -22,8 +23,18 @@
         text-decoration: underline;
       }
 
+      .banner {
+        border: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
       .header {
-        text-align: center;
+        background: #fff;
+        color: #ec7720;
+        font-size: 50px;
+        padding: 40px;
       }
 
       .example {
@@ -77,7 +88,7 @@
   <body>
     <div id='main'></div>
     <script>
-      window.React.render(
+      window.ReactDOM.render(
         window.React.createFactory(window.index)(),
         document.getElementById('main')
       );

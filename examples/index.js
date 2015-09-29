@@ -15,18 +15,20 @@
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-  var _React = _interopRequire(_react);
+  var _React = _interopRequireDefault(_react);
 
-  var _ReactList = _interopRequire(_reactList);
+  var _ReactList = _interopRequireDefault(_reactList);
 
   var renderItem = function renderItem(index, key) {
-    return _React.createElement(
+    return _React['default'].createElement(
       'div',
       { key: key, className: 'item' + (index % 2 ? '' : ' even') },
       index
@@ -37,7 +39,7 @@
   };
 
   var renderSquareItem = function renderSquareItem(index, key) {
-    return _React.createElement(
+    return _React['default'].createElement(
       'div',
       { key: key, className: 'square-item' + (index % 2 ? '' : ' even') },
       index
@@ -62,12 +64,12 @@
   };
 
   var renderVariableHeightItem = function renderVariableHeightItem(index, key) {
-    return _React.createElement(
+    return _React['default'].createElement(
       'div',
       {
         key: key,
         className: 'item' + (index % 2 ? '' : ' even'),
-        style: { lineHeight: '' + getHeight(index) + 'px' }
+        style: { lineHeight: getHeight(index) + 'px' }
       },
       index
     );
@@ -77,12 +79,12 @@
   };
 
   var renderVariableWidthItem = function renderVariableWidthItem(index, key) {
-    return _React.createElement(
+    return _React['default'].createElement(
       'div',
       {
         key: key,
         className: 'item' + (index % 2 ? '' : ' even'),
-        style: { width: '' + getWidth(index) + 'px' }
+        style: { width: getWidth(index) + 'px' }
       },
       index
     );
@@ -92,7 +94,7 @@
   };
 
   var renderGridLine = function renderGridLine(row, key) {
-    return _React.createElement(_ReactList, {
+    return _React['default'].createElement(_ReactList['default'], {
       axis: 'x',
       key: key,
       length: 10000,
@@ -166,42 +168,40 @@
   }];
 
   var _default = (function (_React$Component) {
-    var _class = function _default() {
-      _classCallCheck(this, _class);
+    _inherits(_default, _React$Component);
 
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
-    };
+    function _default() {
+      _classCallCheck(this, _default);
 
-    _inherits(_class, _React$Component);
+      _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).apply(this, arguments);
+    }
 
-    _createClass(_class, [{
+    _createClass(_default, [{
       key: 'renderExamples',
       value: function renderExamples() {
         return examples.map(function (props, key) {
-          return _React.createElement(
+          return _React['default'].createElement(
             'div',
             { key: key, className: 'example axis-' + props.axis },
-            _React.createElement(
+            _React['default'].createElement(
               'strong',
               null,
               'Props'
             ),
-            _React.createElement(
+            _React['default'].createElement(
               'pre',
               { className: 'props' },
               JSON.stringify(props, null, 2)
             ),
-            _React.createElement(
+            _React['default'].createElement(
               'strong',
               null,
               'Component'
             ),
-            _React.createElement(
+            _React['default'].createElement(
               'div',
               { className: 'component' },
-              _React.createElement(_ReactList, props)
+              _React['default'].createElement(_ReactList['default'], props)
             )
           );
         });
@@ -209,35 +209,33 @@
     }, {
       key: 'render',
       value: function render() {
-        return _React.createElement(
+        return _React['default'].createElement(
           'div',
           { className: 'index' },
-          _React.createElement(
+          _React['default'].createElement(
+            'a',
+            { className: 'banner', href: 'https://github.com/orgsync/react-list' },
+            _React['default'].createElement('img', {
+              src: 'https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67',
+              alt: 'Fork me on GitHub'
+            })
+          ),
+          _React['default'].createElement(
             'div',
             { className: 'header' },
-            _React.createElement(
-              'h1',
-              null,
-              'ReactList'
-            ),
-            _React.createElement(
-              'a',
-              { href: 'https://github.com/orgsync/react-list' },
-              'on GitHub'
-            ),
-            _React.createElement(
-              'h2',
-              null,
-              'Examples'
-            )
+            'ReactList'
           ),
-          this.renderExamples()
+          _React['default'].createElement(
+            'div',
+            { className: 'examples' },
+            this.renderExamples()
+          )
         );
       }
     }]);
 
-    return _class;
-  })(_React.Component);
+    return _default;
+  })(_React['default'].Component);
 
   module.exports = _default;
 });
