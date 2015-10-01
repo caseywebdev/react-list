@@ -9,7 +9,7 @@
     "url": "https://github.com/orgsync/react-list"
   },
   "peerDependencies": {
-    "react": ">= 0.13.0 < 0.15.0 || ^0.14.0-alpha"
+    "react": ">= 0.13.0 < 0.15.0 || ^0.14.0-rc1"
   },
   "devDependencies": {
     "cogs": "1.0.7",
