@@ -161,11 +161,11 @@ export default class extends React.Component {
     if (!itemSize) return {};
 
     const startKey = START_KEYS[axis];
-    const firstRowEnd = Math.round(firstRect[END_KEYS[axis]]);
+    const firstStart = firstRect[startKey];
     let itemsPerRow = 1;
     for (
       let item = itemEls[itemsPerRow];
-      item && Math.round(item.getBoundingClientRect()[startKey]) < firstRowEnd;
+      item && item.getBoundingClientRect()[startKey] === firstStart;
       item = itemEls[itemsPerRow]
     ) ++itemsPerRow;
 

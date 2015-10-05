@@ -240,9 +240,9 @@
         if (!itemSize) return {};
 
         var startKey = START_KEYS[axis];
-        var firstRowEnd = Math.round(firstRect[END_KEYS[axis]]);
+        var firstStart = firstRect[startKey];
         var itemsPerRow = 1;
-        for (var item = itemEls[itemsPerRow]; item && Math.round(item.getBoundingClientRect()[startKey]) < firstRowEnd; item = itemEls[itemsPerRow]) {
+        for (var item = itemEls[itemsPerRow]; item && item.getBoundingClientRect()[startKey] === firstStart; item = itemEls[itemsPerRow]) {
           ++itemsPerRow;
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
