@@ -1,4 +1,7 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+
+const {findDOMNode} = ReactDOM;
 
 const isEqualSubset = (a, b) => {
   for (let key in a) if (a[key] !== b[key]) return false;
@@ -6,10 +9,6 @@ const isEqualSubset = (a, b) => {
 };
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
-
-let ReactDOM = typeof window === 'object' && window.ReactDOM || React;
-try { ReactDOM = require('react-dom'); } catch (er) {}
-const {findDOMNode} = ReactDOM;
 
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};

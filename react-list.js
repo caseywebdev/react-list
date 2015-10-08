@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'react'], factory);
+    define(['exports', 'module', 'react', 'react-dom'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('react'));
+    factory(exports, module, require('react'), require('react-dom'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.React);
+    factory(mod.exports, mod, global.React, global.ReactDOM);
     global.ReactList = mod.exports;
   }
-})(this, function (exports, module, _react) {
+})(this, function (exports, module, _react, _reactDom) {
   'use strict';
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -25,6 +25,10 @@
 
   var _React = _interopRequireDefault(_react);
 
+  var _ReactDOM = _interopRequireDefault(_reactDom);
+
+  var findDOMNode = _ReactDOM['default'].findDOMNode;
+
   var isEqualSubset = function isEqualSubset(a, b) {
     for (var key in a) {
       if (a[key] !== b[key]) return false;
@@ -34,13 +38,6 @@
   var isEqual = function isEqual(a, b) {
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
-
-  var ReactDOM = typeof window === 'object' && window.ReactDOM || _React['default'];
-  try {
-    ReactDOM = require('react-dom');
-  } catch (er) {}
-  var _ReactDOM = ReactDOM;
-  var findDOMNode = _ReactDOM.findDOMNode;
 
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
