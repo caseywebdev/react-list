@@ -1,7 +1,4 @@
-/.gitignore
-/Makefile
-/bower.json
-/cogs.js
-/index.*
-/react-list.es6
-/transformers
+/*
+!/LICENSE.txt
+!/react-list.js
+!/README.md
