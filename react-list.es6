@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 
 const {findDOMNode} = ReactDOM;
@@ -19,20 +19,20 @@ const SCROLL_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 const START_KEYS = {x: 'left', y: 'top'};
 
-export default class extends React.Component {
+export default class extends Component {
   static displayName = 'ReactList';
 
   static propTypes = {
-    axis: React.PropTypes.oneOf(['x', 'y']),
-    initialIndex: React.PropTypes.number,
-    itemSizeGetter: React.PropTypes.func,
-    itemRenderer: React.PropTypes.func,
-    itemsRenderer: React.PropTypes.func,
-    length: React.PropTypes.number,
-    pageSize: React.PropTypes.number,
-    threshold: React.PropTypes.number,
-    type: React.PropTypes.oneOf(['simple', 'variable', 'uniform']),
-    useTranslate3d: React.PropTypes.bool
+    axis: PropTypes.oneOf(['x', 'y']),
+    initialIndex: PropTypes.number,
+    itemSizeGetter: PropTypes.func,
+    itemRenderer: PropTypes.func,
+    itemsRenderer: PropTypes.func,
+    length: PropTypes.number,
+    pageSize: PropTypes.number,
+    threshold: PropTypes.number,
+    type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
+    useTranslate3d: PropTypes.bool
   };
 
   static defaultProps = {

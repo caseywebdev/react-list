@@ -48,8 +48,8 @@
   var SIZE_KEYS = { x: 'width', y: 'height' };
   var START_KEYS = { x: 'left', y: 'top' };
 
-  var _default = (function (_React$Component) {
-    _inherits(_default, _React$Component);
+  var _default = (function (_Component) {
+    _inherits(_default, _Component);
 
     _createClass(_default, null, [{
       key: 'displayName',
@@ -58,16 +58,16 @@
     }, {
       key: 'propTypes',
       value: {
-        axis: _React['default'].PropTypes.oneOf(['x', 'y']),
-        initialIndex: _React['default'].PropTypes.number,
-        itemSizeGetter: _React['default'].PropTypes.func,
-        itemRenderer: _React['default'].PropTypes.func,
-        itemsRenderer: _React['default'].PropTypes.func,
-        length: _React['default'].PropTypes.number,
-        pageSize: _React['default'].PropTypes.number,
-        threshold: _React['default'].PropTypes.number,
-        type: _React['default'].PropTypes.oneOf(['simple', 'variable', 'uniform']),
-        useTranslate3d: _React['default'].PropTypes.bool
+        axis: _react.PropTypes.oneOf(['x', 'y']),
+        initialIndex: _react.PropTypes.number,
+        itemSizeGetter: _react.PropTypes.func,
+        itemRenderer: _react.PropTypes.func,
+        itemsRenderer: _react.PropTypes.func,
+        length: _react.PropTypes.number,
+        pageSize: _react.PropTypes.number,
+        threshold: _react.PropTypes.number,
+        type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
+        useTranslate3d: _react.PropTypes.bool
       },
       enumerable: true
     }, {
@@ -485,7 +485,7 @@
     }]);
 
     return _default;
-  })(_React['default'].Component);
+  })(_react.Component);
 
   module.exports = _default;
 });
