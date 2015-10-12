@@ -138,6 +138,11 @@ to an element that has already been rendered.
 Scroll the viewport so that the element at `index` is visible, but not
 necessarily at the top. The `scrollTo` note above also applies to this method.
 
+##### getVisibleRange() => `[firstIndex, lastIndex]`
+
+Return the indices of the first and last items that are at all visible in the
+viewport.
+
 ## Development
 
 ```bash

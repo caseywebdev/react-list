@@ -137,9 +137,8 @@ export default class extends Component {
       scrollParent[CLIENT_SIZE_KEYS[axis]];
   }
 
-  getStartAndEnd() {
-    const {threshold} = this.props;
-    const start = Math.max(0, this.getScroll() - threshold);
+  getStartAndEnd(threshold = this.props.threshold) {
+    const start = this.getScroll() - threshold;
     const end = start + this.getViewportSize() + (threshold * 2);
     return {start, end};
   }
@@ -326,6 +325,24 @@ export default class extends Component {
 
     const min = max - this.getViewportSize() + this.getSizeOf(index);
     if (current < min) this.setScroll(min);
+  }
+
+  getVisibleRange() {
+    const el = findDOMNode(this);
+    const itemEls = el.children;
+    const top = this.getOffset(el);
+    const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
+    const {start, end} = this.getStartAndEnd(0);
+    let first = 0, last = 0;
+    for (let i = 0; i < itemEls.length; ++i) {
+      const itemEl = itemEls[i];
+      const itemStart = this.getOffset(itemEl) - top;
+      const itemEnd = itemStart + itemEl[sizeKey];
+      if (itemStart <= start && itemEnd > start) first = i;
+      if (itemStart < end && itemEnd >= end) last = i;
+    }
+    const {from} = this.state;
+    return [from + first, from + last];
   }
 
   renderItems() {
