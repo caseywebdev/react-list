@@ -39,14 +39,14 @@
     return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
-  var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
-  var END_KEYS = { x: 'right', y: 'bottom' };
+  var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var INNER_SIZE_KEYS = { x: 'innerWidth', y: 'innerHeight' };
+  var OFFSET_SIZE_KEYS = { x: 'offsetWidth', y: 'offsetHeight' };
+  var OFFSET_START_KEYS = { x: 'offsetLeft', y: 'offsetTop' };
   var OVERFLOW_KEYS = { x: 'overflowX', y: 'overflowY' };
   var SCROLL_KEYS = { x: 'scrollLeft', y: 'scrollTop' };
   var SIZE_KEYS = { x: 'width', y: 'height' };
-  var START_KEYS = { x: 'left', y: 'top' };
 
   var _default = (function (_Component) {
     _inherits(_default, _Component);
@@ -160,13 +160,25 @@
         cancelAnimationFrame(this.afId);
       }
     }, {
+      key: 'getOffset',
+      value: function getOffset(el) {
+        var axis = this.props.axis;
+
+        var offset = el[CLIENT_START_KEYS[axis]] || 0;
+        var offsetKey = OFFSET_START_KEYS[axis];
+        do offset += el[offsetKey] || 0; while (el = el.offsetParent);
+        return offset;
+      }
+    }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
         var el = findDOMNode(this);
         var overflowKey = OVERFLOW_KEYS[this.props.axis];
         while (el = el.parentElement) {
-          var overflow = window.getComputedStyle(el)[overflowKey];
-          if (overflow === 'auto' || overflow === 'scroll' || overflow === 'overlay') return el;
+          switch (window.getComputedStyle(el)[overflowKey]) {
+            case 'auto':case 'scroll':case 'overlay':
+              return el;
+          }
         }
         return window;
       }
@@ -176,26 +188,20 @@
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
-        var startKey = START_KEYS[axis];
-        var elStart = findDOMNode(this).getBoundingClientRect()[startKey];
-        if (scrollParent === window) return -elStart;
-        var scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
-        var scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
-        return scrollParentStart + scrollParentClientStart - elStart;
+        var scrollKey = SCROLL_KEYS[axis];
+        var scroll = scrollParent === window ? document.body[scrollKey] : scrollParent[scrollKey];
+        var el = findDOMNode(this);
+        return scroll - (this.getOffset(el) - this.getOffset(scrollParent));
       }
     }, {
       key: 'setScroll',
       value: function setScroll(offset) {
         var scrollParent = this.scrollParent;
-        var axis = this.props.axis;
 
-        var startKey = START_KEYS[axis];
         if (scrollParent === window) {
-          var elStart = findDOMNode(this).getBoundingClientRect()[startKey];
-          var windowStart = document.documentElement.getBoundingClientRect()[startKey];
-          return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
+          return window.scrollTo(0, this.getOffset(findDOMNode(this)) + offset);
         }
-        scrollParent[SCROLL_KEYS[axis]] += offset - this.getScroll();
+        scrollParent[SCROLL_KEYS[this.props.axis]] += offset - this.getScroll();
       }
     }, {
       key: 'getViewportSize',
@@ -220,7 +226,7 @@
         var itemEls = findDOMNode(this.items).children;
         if (!itemEls.length) return {};
 
-        var firstRect = itemEls[0].getBoundingClientRect();
+        var firstEl = itemEls[0];
 
         // Firefox has a problem where it will return a *slightly* (less than
         // thousandths of a pixel) different size for the same element between
@@ -229,17 +235,16 @@
         var itemSize = this.state.itemSize;
         var axis = this.props.axis;
 
-        var sizeKey = SIZE_KEYS[axis];
-        var firstRectSize = firstRect[sizeKey];
-        var delta = Math.abs(firstRectSize - itemSize);
-        if (isNaN(delta) || delta >= 1) itemSize = firstRectSize;
+        var firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
+        var delta = Math.abs(firstElSize - itemSize);
+        if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
 
         if (!itemSize) return {};
 
-        var startKey = START_KEYS[axis];
-        var firstStart = firstRect[startKey];
+        var startKey = OFFSET_START_KEYS[axis];
+        var firstStart = firstEl[startKey];
         var itemsPerRow = 1;
-        for (var item = itemEls[itemsPerRow]; item && item.getBoundingClientRect()[startKey] === firstStart; item = itemEls[itemsPerRow]) {
+        for (var item = itemEls[itemsPerRow]; item && item[startKey] === firstStart; item = itemEls[itemsPerRow]) {
           ++itemsPerRow;
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
@@ -270,7 +275,7 @@
 
           var firstItemEl = itemEls[0];
           var lastItemEl = itemEls[itemEls.length - 1];
-          elEnd = lastItemEl.getBoundingClientRect()[END_KEYS[axis]] - firstItemEl.getBoundingClientRect()[START_KEYS[axis]];
+          elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] - this.getOffset(firstItemEl);
         }
 
         if (elEnd > end) return;
@@ -372,9 +377,9 @@
         var from = this.state.from;
 
         var itemEls = findDOMNode(this.items).children;
-        var sizeKey = SIZE_KEYS[this.props.axis];
+        var sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
         for (var i = 0, l = itemEls.length; i < l; ++i) {
-          cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
+          cache[from + i] = itemEls[i][sizeKey];
         }
       }
     }, {

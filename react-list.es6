@@ -10,14 +10,14 @@ const isEqualSubset = (a, b) => {
 
 const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
-const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
-const END_KEYS = {x: 'right', y: 'bottom'};
+const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const INNER_SIZE_KEYS = {x: 'innerWidth', y: 'innerHeight'};
+const OFFSET_SIZE_KEYS = {x: 'offsetWidth', y: 'offsetHeight'};
+const OFFSET_START_KEYS = {x: 'offsetLeft', y: 'offsetTop'};
 const OVERFLOW_KEYS = {x: 'overflowX', y: 'overflowY'};
 const SCROLL_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
-const START_KEYS = {x: 'left', y: 'top'};
 
 export default class extends Component {
   static displayName = 'ReactList';
@@ -91,12 +91,21 @@ export default class extends Component {
     cancelAnimationFrame(this.afId);
   }
 
+  getOffset(el) {
+    const {axis} = this.props;
+    let offset = el[CLIENT_START_KEYS[axis]] || 0;
+    const offsetKey = OFFSET_START_KEYS[axis];
+    do offset += el[offsetKey] || 0; while (el = el.offsetParent);
+    return offset;
+  }
+
   getScrollParent() {
     let el = findDOMNode(this);
     const overflowKey = OVERFLOW_KEYS[this.props.axis];
     while (el = el.parentElement) {
-      const overflow = window.getComputedStyle(el)[overflowKey];
-      if (overflow === 'auto' || overflow === 'scroll' || overflow === 'overlay') return el;
+      switch (window.getComputedStyle(el)[overflowKey]) {
+      case 'auto': case 'scroll': case 'overlay': return el;
+      }
     }
     return window;
   }
@@ -104,25 +113,20 @@ export default class extends Component {
   getScroll() {
     const {scrollParent} = this;
     const {axis} = this.props;
-    const startKey = START_KEYS[axis];
-    const elStart = findDOMNode(this).getBoundingClientRect()[startKey];
-    if (scrollParent === window) return -elStart;
-    const scrollParentStart = scrollParent.getBoundingClientRect()[startKey];
-    const scrollParentClientStart = scrollParent[CLIENT_START_KEYS[axis]];
-    return scrollParentStart + scrollParentClientStart - elStart;
+    const scrollKey = SCROLL_KEYS[axis];
+    const scroll = scrollParent === window ?
+      document.body[scrollKey] :
+      scrollParent[scrollKey];
+    const el = findDOMNode(this);
+    return scroll - (this.getOffset(el) - this.getOffset(scrollParent));
   }
 
   setScroll(offset) {
     const {scrollParent} = this;
-    const {axis} = this.props;
-    const startKey = START_KEYS[axis];
     if (scrollParent === window) {
-      const elStart = findDOMNode(this).getBoundingClientRect()[startKey];
-      const windowStart =
-        document.documentElement.getBoundingClientRect()[startKey];
-      return window.scrollTo(0, Math.round(elStart) - windowStart + offset);
+      return window.scrollTo(0, this.getOffset(findDOMNode(this)) + offset);
     }
-    scrollParent[SCROLL_KEYS[axis]] += offset - this.getScroll();
+    scrollParent[SCROLL_KEYS[this.props.axis]] += offset - this.getScroll();
   }
 
   getViewportSize() {
@@ -144,7 +148,7 @@ export default class extends Component {
     const itemEls = findDOMNode(this.items).children;
     if (!itemEls.length) return {};
 
-    const firstRect = itemEls[0].getBoundingClientRect();
+    const firstEl = itemEls[0];
 
     // Firefox has a problem where it will return a *slightly* (less than
     // thousandths of a pixel) different size for the same element between
@@ -152,19 +156,18 @@ export default class extends Component {
     // itemSize when it is significantly different.
     let {itemSize} = this.state;
     const {axis} = this.props;
-    const sizeKey = SIZE_KEYS[axis];
-    const firstRectSize = firstRect[sizeKey];
-    const delta = Math.abs(firstRectSize - itemSize);
-    if (isNaN(delta) || delta >= 1) itemSize = firstRectSize;
+    const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
+    const delta = Math.abs(firstElSize - itemSize);
+    if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
 
     if (!itemSize) return {};
 
-    const startKey = START_KEYS[axis];
-    const firstStart = firstRect[startKey];
+    const startKey = OFFSET_START_KEYS[axis];
+    const firstStart = firstEl[startKey];
     let itemsPerRow = 1;
     for (
       let item = itemEls[itemsPerRow];
-      item && item.getBoundingClientRect()[startKey] === firstStart;
+      item && item[startKey] === firstStart;
       item = itemEls[itemsPerRow]
     ) ++itemsPerRow;
 
@@ -188,8 +191,8 @@ export default class extends Component {
       const {axis} = this.props;
       const firstItemEl = itemEls[0];
       const lastItemEl = itemEls[itemEls.length - 1];
-      elEnd = lastItemEl.getBoundingClientRect()[END_KEYS[axis]] -
-        firstItemEl.getBoundingClientRect()[START_KEYS[axis]];
+      elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] -
+        this.getOffset(firstItemEl);
     }
 
     if (elEnd > end) return;
@@ -274,9 +277,9 @@ export default class extends Component {
     const {cache} = this;
     const {from} = this.state;
     const itemEls = findDOMNode(this.items).children;
-    const sizeKey = SIZE_KEYS[this.props.axis];
+    const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
     for (let i = 0, l = itemEls.length; i < l; ++i) {
-      cache[from + i] = itemEls[i].getBoundingClientRect()[sizeKey];
+      cache[from + i] = itemEls[i][sizeKey];
     }
   }
 
