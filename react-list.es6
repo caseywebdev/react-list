@@ -115,7 +115,10 @@ export default class extends Component {
     const {axis} = this.props;
     const scrollKey = SCROLL_KEYS[axis];
     const scroll = scrollParent === window ?
-      document.body[scrollKey] :
+      // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
+      // always return document.documentElement[scrollKey] as 0, so take
+      // whichever has a value.
+      document.body[scrollKey] || document.documentElement[scrollKey] :
       scrollParent[scrollKey];
     const el = findDOMNode(this);
     return scroll - (this.getOffset(el) - this.getOffset(scrollParent));
