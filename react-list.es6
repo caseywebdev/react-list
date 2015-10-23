@@ -88,7 +88,9 @@ export default class extends Component {
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame);
-    cancelAnimationFrame(this.afId);
+    if (this.afId) {
+      cancelAnimationFrame(this.afId);
+    }
   }
 
   getOffset(el) {
