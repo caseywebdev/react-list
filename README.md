@@ -95,6 +95,14 @@ The number of items in the list.
 
 The number of items to batch up for new renders.
 
+##### scrollParentGetter parent)
+
+A function that returns a DOM Element or Window that will be treated as the
+scrolling container for the list. In most cases this does not need to be set for
+the list to work as intended. It is exposed as a prop for more complicated uses
+where the scrolling container may not initially have an overflow property that
+enables scrolling.
+
 ##### threshold (defaults to `100`)
 
 The number of pixels to buffer at the beginning and end of the rendered list

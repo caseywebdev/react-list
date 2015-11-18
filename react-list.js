@@ -67,6 +67,7 @@
         itemsRenderer: _react.PropTypes.func,
         length: _react.PropTypes.number,
         pageSize: _react.PropTypes.number,
+        scrollParentGetter: _react.PropTypes.func,
         threshold: _react.PropTypes.number,
         type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
         useTranslate3d: _react.PropTypes.bool
@@ -94,6 +95,7 @@
         },
         length: 0,
         pageSize: 10,
+        scrollParentGetter: null,
         threshold: 100,
         type: 'simple',
         useTranslate3d: false
@@ -134,7 +136,6 @@
     }, {
       key: 'componentDidMount',
       value: function componentDidMount() {
-        this.scrollParent = this.getScrollParent();
         this.updateFrame = this.updateFrame.bind(this);
         window.addEventListener('resize', this.updateFrame);
         this.scrollParent.addEventListener('scroll', this.updateFrame);
@@ -170,8 +171,13 @@
     }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
+        var _props2 = this.props;
+        var axis = _props2.axis;
+        var scrollParentGetter = _props2.scrollParentGetter;
+
+        if (scrollParentGetter) return scrollParentGetter();
         var el = findDOMNode(this);
-        var overflowKey = OVERFLOW_KEYS[this.props.axis];
+        var overflowKey = OVERFLOW_KEYS[axis];
         while (el = el.parentElement) {
           switch (window.getComputedStyle(el)[overflowKey]) {
             case 'auto':case 'scroll':case 'overlay':
@@ -253,6 +259,7 @@
     }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
+        this.updateScrollParent();
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
           case 'simple':
@@ -262,6 +269,15 @@
           case 'uniform':
             return this.updateUniformFrame(cb);
         }
+      }
+    }, {
+      key: 'updateScrollParent',
+      value: function updateScrollParent() {
+        var prev = this.scrollParent;
+        this.scrollParent = this.getScrollParent();
+        if (prev === this.scrollParent) return;
+        if (prev) prev.removeEventListener('scroll', this.updateFrame);
+        this.scrollParent.addEventListener('scroll', this.updateFrame);
       }
     }, {
       key: 'updateSimpleFrame',
@@ -283,9 +299,9 @@
 
         if (elEnd > end) return cb();
 
-        var _props2 = this.props;
-        var pageSize = _props2.pageSize;
-        var length = _props2.length;
+        var _props3 = this.props;
+        var pageSize = _props3.pageSize;
+        var length = _props3.length;
 
         this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
       }
@@ -298,9 +314,9 @@
 
         var start = _getStartAndEnd2.start;
         var end = _getStartAndEnd2.end;
-        var _props3 = this.props;
-        var length = _props3.length;
-        var pageSize = _props3.pageSize;
+        var _props4 = this.props;
+        var length = _props4.length;
+        var pageSize = _props4.pageSize;
 
         var space = 0;
         var from = 0;
@@ -338,9 +354,9 @@
 
         if (!itemSize || !itemsPerRow) return cb();
 
-        var _props4 = this.props;
-        var length = _props4.length;
-        var pageSize = _props4.pageSize;
+        var _props5 = this.props;
+        var length = _props5.length;
+        var pageSize = _props5.pageSize;
 
         var _getStartAndEnd3 = this.getStartAndEnd();
 
@@ -401,10 +417,10 @@
       value: function getSizeOf(index) {
         var cache = this.cache;
         var items = this.items;
-        var _props5 = this.props;
-        var axis = _props5.axis;
-        var itemSizeGetter = _props5.itemSizeGetter;
-        var type = _props5.type;
+        var _props6 = this.props;
+        var axis = _props6.axis;
+        var itemSizeGetter = _props6.itemSizeGetter;
+        var type = _props6.type;
         var _state3 = this.state;
         var from = _state3.from;
         var itemSize = _state3.itemSize;
@@ -481,9 +497,9 @@
       value: function renderItems() {
         var _this = this;
 
-        var _props6 = this.props;
-        var itemRenderer = _props6.itemRenderer;
-        var itemsRenderer = _props6.itemsRenderer;
+        var _props7 = this.props;
+        var itemRenderer = _props7.itemRenderer;
+        var itemsRenderer = _props7.itemsRenderer;
         var _state5 = this.state;
         var from = _state5.from;
         var size = _state5.size;
@@ -498,11 +514,11 @@
     }, {
       key: 'render',
       value: function render() {
-        var _props7 = this.props;
-        var axis = _props7.axis;
-        var length = _props7.length;
-        var type = _props7.type;
-        var useTranslate3d = _props7.useTranslate3d;
+        var _props8 = this.props;
+        var axis = _props8.axis;
+        var length = _props8.length;
+        var type = _props8.type;
+        var useTranslate3d = _props8.useTranslate3d;
         var from = this.state.from;
 
         var items = this.renderItems();
