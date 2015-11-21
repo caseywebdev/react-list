@@ -310,7 +310,7 @@
 
         while (from < maxFrom) {
           var itemSize = this.getSizeOf(from);
-          if (isNaN(itemSize) || space + itemSize > start) break;
+          if (itemSize == null || space + itemSize > start) break;
           space += itemSize;
           ++from;
         }
@@ -319,7 +319,7 @@
 
         while (size < maxSize && space < end) {
           var itemSize = this.getSizeOf(from + size);
-          if (isNaN(itemSize)) {
+          if (itemSize == null) {
             size = Math.min(size + pageSize, maxSize);
             break;
           }
@@ -356,7 +356,7 @@
       }
     }, {
       key: 'getSpaceBefore',
-      value: function getSpaceBefore(index) {
+      value: function getSpaceBefore(index, cache) {
 
         // Try the static itemSize.
         var _state2 = this.state;
@@ -366,12 +366,16 @@
         if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
 
         // Finally, accumulate sizes of items 0 - index.
-        var space = 0;
-        for (var i = 0; i < index; ++i) {
+        var cached = cache && cache[index - 1];
+        var space = cached == null ? 0 : cached;
+        for (var i = cached == null ? 0 : index - 1; i < index; ++i) {
           var _itemSize = this.getSizeOf(i);
-          if (isNaN(_itemSize)) break;
+          if (_itemSize == null) break;
           space += _itemSize;
         }
+
+        if (cache) cache[index] = space;
+
         return space;
       }
     }, {
@@ -389,24 +393,32 @@
     }, {
       key: 'getSizeOf',
       value: function getSizeOf(index) {
+        var cache = this.cache;
+        var _props5 = this.props;
+        var axis = _props5.axis;
+        var itemSizeGetter = _props5.itemSizeGetter;
+        var _state3 = this.state;
+        var from = _state3.from;
+        var itemSize = _state3.itemSize;
+        var size = _state3.size;
 
         // Try the static itemSize.
-        var itemSize = this.state.itemSize;
-
         if (itemSize) return itemSize;
 
         // Try the itemSizeGetter.
-        var itemSizeGetter = this.props.itemSizeGetter;
-
         if (itemSizeGetter) return itemSizeGetter(index);
 
         // Try the cache.
-        var cache = this.cache;
+        if (index in cache) return cache[index];
 
-        if (cache[index]) return cache[index];
-
-        // We don't know the size.
-        return NaN;
+        // Try the DOM.
+        if (index >= from && index < from + size) {
+          var itemsEl = findDOMNode(this.items);
+          if (itemsEl) {
+            var itemEl = itemsEl.children[index - from];
+            if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
+          }
+        }
       }
     }, {
       key: 'constrainFrom',
@@ -439,40 +451,37 @@
     }, {
       key: 'getVisibleRange',
       value: function getVisibleRange() {
-        var el = findDOMNode(this);
-        var itemEls = el.children;
-        var top = this.getOffset(el);
-        var sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
+        var _state4 = this.state;
+        var from = _state4.from;
+        var size = _state4.size;
 
         var _getStartAndEnd4 = this.getStartAndEnd(0);
 
         var start = _getStartAndEnd4.start;
         var end = _getStartAndEnd4.end;
 
-        var first = 0,
-            last = 0;
-        for (var i = 0; i < itemEls.length; ++i) {
-          var itemEl = itemEls[i];
-          var itemStart = this.getOffset(itemEl) - top;
-          var itemEnd = itemStart + itemEl[sizeKey];
-          if (itemStart <= start && itemEnd > start) first = i;
-          if (itemStart < end && itemEnd >= end) last = i;
+        var cache = {};
+        var first = undefined,
+            last = undefined;
+        for (var i = from; i < from + size; ++i) {
+          var itemStart = this.getSpaceBefore(i, cache);
+          var itemEnd = itemStart + this.getSizeOf(i);
+          if (first == null && itemEnd > start) first = i;
+          if (first != null && itemStart < end) last = i;
         }
-        var from = this.state.from;
-
-        return [from + first, from + last];
+        return [first, last];
       }
     }, {
       key: 'renderItems',
       value: function renderItems() {
         var _this = this;
 
-        var _props5 = this.props;
-        var itemRenderer = _props5.itemRenderer;
-        var itemsRenderer = _props5.itemsRenderer;
-        var _state3 = this.state;
-        var from = _state3.from;
-        var size = _state3.size;
+        var _props6 = this.props;
+        var itemRenderer = _props6.itemRenderer;
+        var itemsRenderer = _props6.itemsRenderer;
+        var _state5 = this.state;
+        var from = _state5.from;
+        var size = _state5.size;
 
         var items = [];
         for (var i = 0; i < size; ++i) {
@@ -484,11 +493,11 @@
     }, {
       key: 'render',
       value: function render() {
-        var _props6 = this.props;
-        var axis = _props6.axis;
-        var length = _props6.length;
-        var type = _props6.type;
-        var useTranslate3d = _props6.useTranslate3d;
+        var _props7 = this.props;
+        var axis = _props7.axis;
+        var length = _props7.length;
+        var type = _props7.type;
+        var useTranslate3d = _props7.useTranslate3d;
         var from = this.state.from;
 
         var items = this.renderItems();

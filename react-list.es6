@@ -215,7 +215,7 @@ export default class extends Component {
 
     while (from < maxFrom) {
       const itemSize = this.getSizeOf(from);
-      if (isNaN(itemSize) || space + itemSize > start) break;
+      if (itemSize == null || space + itemSize > start) break;
       space += itemSize;
       ++from;
     }
@@ -224,7 +224,7 @@ export default class extends Component {
 
     while (size < maxSize && space < end) {
       const itemSize = this.getSizeOf(from + size);
-      if (isNaN(itemSize)) {
+      if (itemSize == null) {
         size = Math.min(size + pageSize, maxSize);
         break;
       }
@@ -259,19 +259,23 @@ export default class extends Component {
     return this.setState({itemsPerRow, from, itemSize, size});
   }
 
-  getSpaceBefore(index) {
+  getSpaceBefore(index, cache) {
 
     // Try the static itemSize.
     const {itemSize, itemsPerRow} = this.state;
     if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
 
     // Finally, accumulate sizes of items 0 - index.
-    let space = 0;
-    for (let i = 0; i < index; ++i) {
+    const cached = cache && cache[index - 1];
+    let space = cached == null ? 0 : cached;
+    for (let i = cached == null ? 0 : index - 1; i < index; ++i) {
       const itemSize = this.getSizeOf(i);
-      if (isNaN(itemSize)) break;
+      if (itemSize == null) break;
       space += itemSize;
     }
+
+    if (cache) cache[index] = space;
+
     return space;
   }
 
@@ -286,21 +290,27 @@ export default class extends Component {
   }
 
   getSizeOf(index) {
+    const {cache} = this;
+    const {axis, itemSizeGetter} = this.props;
+    const {from, itemSize, size} = this.state;
 
     // Try the static itemSize.
-    const {itemSize} = this.state;
     if (itemSize) return itemSize;
 
     // Try the itemSizeGetter.
-    const {itemSizeGetter} = this.props;
     if (itemSizeGetter) return itemSizeGetter(index);
 
     // Try the cache.
-    const {cache} = this;
-    if (cache[index]) return cache[index];
+    if (index in cache) return cache[index];
 
-    // We don't know the size.
-    return NaN;
+    // Try the DOM.
+    if (index >= from && index < from + size) {
+      const itemsEl = findDOMNode(this.items)
+      if (itemsEl) {
+        const itemEl = itemsEl.children[index - from];
+        if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
+      }
+    }
   }
 
   constrainFrom(from, length, itemsPerRow) {
@@ -331,21 +341,17 @@ export default class extends Component {
   }
 
   getVisibleRange() {
-    const el = findDOMNode(this);
-    const itemEls = el.children;
-    const top = this.getOffset(el);
-    const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
+    const {from, size} = this.state;
     const {start, end} = this.getStartAndEnd(0);
-    let first = 0, last = 0;
-    for (let i = 0; i < itemEls.length; ++i) {
-      const itemEl = itemEls[i];
-      const itemStart = this.getOffset(itemEl) - top;
-      const itemEnd = itemStart + itemEl[sizeKey];
-      if (itemStart <= start && itemEnd > start) first = i;
-      if (itemStart < end && itemEnd >= end) last = i;
+    const cache = {};
+    let first, last;
+    for (let i = from; i < from + size; ++i) {
+      const itemStart = this.getSpaceBefore(i, cache);
+      const itemEnd = itemStart + this.getSizeOf(i);
+      if (first == null && itemEnd > start) first = i;
+      if (first != null && itemStart < end) last = i;
     }
-    const {from} = this.state;
-    return [from + first, from + last];
+    return [first, last];
   }
 
   renderItems() {
