@@ -304,12 +304,9 @@ export default class extends Component {
     if (index in cache) return cache[index];
 
     // Try the DOM.
-    if (index >= from && index < from + size) {
-      const itemsEl = findDOMNode(this.items)
-      if (itemsEl) {
-        const itemEl = itemsEl.children[index - from];
-        if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
-      }
+    if (index >= from && index < from + size && this.items) {
+      const itemEl = findDOMNode(this.items).children[index - from];
+      if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
     }
   }
 

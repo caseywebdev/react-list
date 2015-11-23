@@ -412,12 +412,9 @@
         if (index in cache) return cache[index];
 
         // Try the DOM.
-        if (index >= from && index < from + size) {
-          var itemsEl = findDOMNode(this.items);
-          if (itemsEl) {
-            var itemEl = itemsEl.children[index - from];
-            if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
-          }
+        if (index >= from && index < from + size && this.items) {
+          var itemEl = findDOMNode(this.items).children[index - from];
+          if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
         }
       }
     }, {
