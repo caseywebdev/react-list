@@ -259,24 +259,29 @@ export default class extends Component {
     return this.setState({itemsPerRow, from, itemSize, size});
   }
 
-  getSpaceBefore(index, cache) {
+  getSpaceBefore(index, cache = {}) {
+    if (cache[index] != null) return cache[index];
 
     // Try the static itemSize.
     const {itemSize, itemsPerRow} = this.state;
-    if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
+    if (itemSize) {
+      return cache[index] = Math.ceil(index / itemsPerRow) * itemSize;
+    }
 
-    // Finally, accumulate sizes of items 0 - index.
-    const cached = cache && cache[index - 1];
-    let space = cached == null ? 0 : cached;
-    for (let i = cached == null ? 0 : index - 1; i < index; ++i) {
+    // Find the closest space to index there is a cached value for.
+    let from = index;
+    while (from > 0 && cache[--from] == null);
+
+    // Finally, accumulate sizes of items from - index.
+    let space = cache[from] || 0;
+    for (let i = from; i < index; ++i) {
+      cache[i] = space;
       const itemSize = this.getSizeOf(i);
       if (itemSize == null) break;
       space += itemSize;
     }
 
-    if (cache) cache[index] = space;
-
-    return space;
+    return cache[index] = space;
   }
 
   cacheSizes() {
@@ -290,8 +295,8 @@ export default class extends Component {
   }
 
   getSizeOf(index) {
-    const {cache} = this;
-    const {axis, itemSizeGetter} = this.props;
+    const {cache, items} = this;
+    const {axis, itemSizeGetter, type} = this.props;
     const {from, itemSize, size} = this.state;
 
     // Try the static itemSize.
@@ -304,8 +309,8 @@ export default class extends Component {
     if (index in cache) return cache[index];
 
     // Try the DOM.
-    if (index >= from && index < from + size && this.items) {
-      const itemEl = findDOMNode(this.items).children[index - from];
+    if (type === 'simple' && index >= from && index < from + size && items) {
+      const itemEl = findDOMNode(items).children[index - from];
       if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
     }
   }
@@ -367,10 +372,11 @@ export default class extends Component {
     if (type === 'simple') return items;
 
     const style = {position: 'relative'};
-    const size = this.getSpaceBefore(length);
+    const cache = {};
+    const size = this.getSpaceBefore(length, cache);
     style[SIZE_KEYS[axis]] = size;
     if (size && axis === 'x') style.overflowX = 'hidden';
-    const offset = this.getSpaceBefore(from);
+    const offset = this.getSpaceBefore(from, cache);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;
     const transform =

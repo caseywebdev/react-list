@@ -15,7 +15,7 @@
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+  var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -356,27 +356,34 @@
       }
     }, {
       key: 'getSpaceBefore',
-      value: function getSpaceBefore(index, cache) {
+      value: function getSpaceBefore(index) {
+        var cache = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+        if (cache[index] != null) return cache[index];
 
         // Try the static itemSize.
         var _state2 = this.state;
         var itemSize = _state2.itemSize;
         var itemsPerRow = _state2.itemsPerRow;
 
-        if (itemSize) return Math.ceil(index / itemsPerRow) * itemSize;
+        if (itemSize) {
+          return cache[index] = Math.ceil(index / itemsPerRow) * itemSize;
+        }
 
-        // Finally, accumulate sizes of items 0 - index.
-        var cached = cache && cache[index - 1];
-        var space = cached == null ? 0 : cached;
-        for (var i = cached == null ? 0 : index - 1; i < index; ++i) {
+        // Find the closest space to index there is a cached value for.
+        var from = index;
+        while (from > 0 && cache[--from] == null);
+
+        // Finally, accumulate sizes of items from - index.
+        var space = cache[from] || 0;
+        for (var i = from; i < index; ++i) {
+          cache[i] = space;
           var _itemSize = this.getSizeOf(i);
           if (_itemSize == null) break;
           space += _itemSize;
         }
 
-        if (cache) cache[index] = space;
-
-        return space;
+        return cache[index] = space;
       }
     }, {
       key: 'cacheSizes',
@@ -394,9 +401,11 @@
       key: 'getSizeOf',
       value: function getSizeOf(index) {
         var cache = this.cache;
+        var items = this.items;
         var _props5 = this.props;
         var axis = _props5.axis;
         var itemSizeGetter = _props5.itemSizeGetter;
+        var type = _props5.type;
         var _state3 = this.state;
         var from = _state3.from;
         var itemSize = _state3.itemSize;
@@ -412,8 +421,8 @@
         if (index in cache) return cache[index];
 
         // Try the DOM.
-        if (index >= from && index < from + size && this.items) {
-          var itemEl = findDOMNode(this.items).children[index - from];
+        if (type === 'simple' && index >= from && index < from + size && items) {
+          var itemEl = findDOMNode(items).children[index - from];
           if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
         }
       }
@@ -501,10 +510,11 @@
         if (type === 'simple') return items;
 
         var style = { position: 'relative' };
-        var size = this.getSpaceBefore(length);
+        var cache = {};
+        var size = this.getSpaceBefore(length, cache);
         style[SIZE_KEYS[axis]] = size;
         if (size && axis === 'x') style.overflowX = 'hidden';
-        var offset = this.getSpaceBefore(from);
+        var offset = this.getSpaceBefore(from, cache);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
         var transform = useTranslate3d ? 'translate3d(' + x + 'px, ' + y + 'px, 0)' : 'translate(' + x + 'px, ' + y + 'px)';
