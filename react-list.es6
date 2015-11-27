@@ -384,7 +384,7 @@ export default class extends Component {
       `translate3d(${x}px, ${y}px, 0)` :
       `translate(${x}px, ${y}px)`;
     const listStyle = {
-      MsTransform: transform,
+      msTransform: transform,
       WebkitTransform: transform,
       transform
     };
