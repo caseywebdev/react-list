@@ -519,7 +519,7 @@
         var y = axis === 'y' ? offset : 0;
         var transform = useTranslate3d ? 'translate3d(' + x + 'px, ' + y + 'px, 0)' : 'translate(' + x + 'px, ' + y + 'px)';
         var listStyle = {
-          MsTransform: transform,
+          msTransform: transform,
           WebkitTransform: transform,
           transform: transform
         };
