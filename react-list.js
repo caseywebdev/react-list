@@ -48,6 +48,8 @@
   var SCROLL_KEYS = { x: 'scrollLeft', y: 'scrollTop' };
   var SIZE_KEYS = { x: 'width', y: 'height' };
 
+  var NOOP = function NOOP() {};
+
   var _default = (function (_Component) {
     _inherits(_default, _Component);
 
@@ -136,11 +138,7 @@
         this.updateFrame = this.updateFrame.bind(this);
         window.addEventListener('resize', this.updateFrame);
         this.scrollParent.addEventListener('scroll', this.updateFrame);
-        this.updateFrame();
-        var initialIndex = this.props.initialIndex;
-
-        if (initialIndex == null) return;
-        this.afId = requestAnimationFrame(this.scrollTo.bind(this, initialIndex));
+        this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
       key: 'shouldComponentUpdate',
@@ -254,19 +252,20 @@
       }
     }, {
       key: 'updateFrame',
-      value: function updateFrame() {
+      value: function updateFrame(cb) {
+        if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
           case 'simple':
-            return this.updateSimpleFrame();
+            return this.updateSimpleFrame(cb);
           case 'variable':
-            return this.updateVariableFrame();
+            return this.updateVariableFrame(cb);
           case 'uniform':
-            return this.updateUniformFrame();
+            return this.updateUniformFrame(cb);
         }
       }
     }, {
       key: 'updateSimpleFrame',
-      value: function updateSimpleFrame() {
+      value: function updateSimpleFrame(cb) {
         var _getStartAndEnd = this.getStartAndEnd();
 
         var end = _getStartAndEnd.end;
@@ -282,17 +281,17 @@
           elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] - this.getOffset(firstItemEl);
         }
 
-        if (elEnd > end) return;
+        if (elEnd > end) return cb();
 
         var _props2 = this.props;
         var pageSize = _props2.pageSize;
         var length = _props2.length;
 
-        this.setState({ size: Math.min(this.state.size + pageSize, length) });
+        this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
       }
     }, {
       key: 'updateVariableFrame',
-      value: function updateVariableFrame() {
+      value: function updateVariableFrame(cb) {
         if (!this.props.itemSizeGetter) this.cacheSizes();
 
         var _getStartAndEnd2 = this.getStartAndEnd();
@@ -327,17 +326,17 @@
           ++size;
         }
 
-        this.setState({ from: from, size: size });
+        this.setState({ from: from, size: size }, cb);
       }
     }, {
       key: 'updateUniformFrame',
-      value: function updateUniformFrame() {
+      value: function updateUniformFrame(cb) {
         var _getItemSizeAndItemsPerRow = this.getItemSizeAndItemsPerRow();
 
         var itemSize = _getItemSizeAndItemsPerRow.itemSize;
         var itemsPerRow = _getItemSizeAndItemsPerRow.itemsPerRow;
 
-        if (!itemSize || !itemsPerRow) return;
+        if (!itemSize || !itemsPerRow) return cb();
 
         var _props4 = this.props;
         var length = _props4.length;
@@ -352,7 +351,7 @@
 
         var size = this.constrainSize((Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, length, pageSize, from);
 
-        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size });
+        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
     }, {
       key: 'getSpaceBefore',
@@ -441,7 +440,7 @@
     }, {
       key: 'scrollTo',
       value: function scrollTo(index) {
-        this.setScroll(this.getSpaceBefore(index));
+        if (index != null) this.setScroll(this.getSpaceBefore(index));
       }
     }, {
       key: 'scrollAround',

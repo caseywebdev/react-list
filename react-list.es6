@@ -19,6 +19,8 @@ const OVERFLOW_KEYS = {x: 'overflowX', y: 'overflowY'};
 const SCROLL_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 
+const NOOP = () => {};
+
 export default class extends Component {
   static displayName = 'ReactList';
 
@@ -71,10 +73,7 @@ export default class extends Component {
     this.updateFrame = this.updateFrame.bind(this);
     window.addEventListener('resize', this.updateFrame);
     this.scrollParent.addEventListener('scroll', this.updateFrame);
-    this.updateFrame();
-    const {initialIndex} = this.props;
-    if (initialIndex == null) return;
-    this.afId = requestAnimationFrame(this.scrollTo.bind(this, initialIndex));
+    this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
   shouldComponentUpdate(props, state) {
@@ -176,15 +175,16 @@ export default class extends Component {
     return {itemSize, itemsPerRow};
   }
 
-  updateFrame() {
+  updateFrame(cb) {
+    if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
-    case 'simple': return this.updateSimpleFrame();
-    case 'variable': return this.updateVariableFrame();
-    case 'uniform': return this.updateUniformFrame();
+    case 'simple': return this.updateSimpleFrame(cb);
+    case 'variable': return this.updateVariableFrame(cb);
+    case 'uniform': return this.updateUniformFrame(cb);
     }
   }
 
-  updateSimpleFrame() {
+  updateSimpleFrame(cb) {
     const {end} = this.getStartAndEnd();
     const itemEls = findDOMNode(this.items).children;
     let elEnd = 0;
@@ -197,13 +197,13 @@ export default class extends Component {
         this.getOffset(firstItemEl);
     }
 
-    if (elEnd > end) return;
+    if (elEnd > end) return cb();
 
     const {pageSize, length} = this.props;
-    this.setState({size: Math.min(this.state.size + pageSize, length)});
+    this.setState({size: Math.min(this.state.size + pageSize, length)}, cb);
   }
 
-  updateVariableFrame() {
+  updateVariableFrame(cb) {
     if (!this.props.itemSizeGetter) this.cacheSizes();
 
     const {start, end} = this.getStartAndEnd();
@@ -232,13 +232,13 @@ export default class extends Component {
       ++size;
     }
 
-    this.setState({from, size});
+    this.setState({from, size}, cb);
   }
 
-  updateUniformFrame() {
+  updateUniformFrame(cb) {
     let {itemSize, itemsPerRow} = this.getItemSizeAndItemsPerRow();
 
-    if (!itemSize || !itemsPerRow) return;
+    if (!itemSize || !itemsPerRow) return cb();
 
     const {length, pageSize} = this.props;
     const {start, end} = this.getStartAndEnd();
@@ -256,7 +256,7 @@ export default class extends Component {
       from
     );
 
-    return this.setState({itemsPerRow, from, itemSize, size});
+    return this.setState({itemsPerRow, from, itemSize, size}, cb);
   }
 
   getSpaceBefore(index, cache = {}) {
@@ -329,7 +329,7 @@ export default class extends Component {
   }
 
   scrollTo(index) {
-    this.setScroll(this.getSpaceBefore(index));
+    if (index != null) this.setScroll(this.getSpaceBefore(index));
   }
 
   scrollAround(index) {
