@@ -138,7 +138,6 @@
       value: function componentDidMount() {
         this.updateFrame = this.updateFrame.bind(this);
         window.addEventListener('resize', this.updateFrame);
-        this.scrollParent.addEventListener('scroll', this.updateFrame);
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
