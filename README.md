@@ -95,7 +95,7 @@ The number of items in the list.
 
 The number of items to batch up for new renders.
 
-##### scrollParentGetter parent)
+##### scrollParentGetter (defaults to finding the nearest scrollable parent)
 
 A function that returns a DOM Element or Window that will be treated as the
 scrolling container for the list. In most cases this does not need to be set for
