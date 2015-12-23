@@ -153,15 +153,22 @@ export default class extends Component {
 
     const firstEl = itemEls[0];
 
-    // Firefox has a problem where it will return a *slightly* (less than
-    // thousandths of a pixel) different size for the same element between
-    // renders. This can cause an infinite render loop, so only change the
-    // itemSize when it is significantly different.
-    let {itemSize} = this.state;
-    const {axis} = this.props;
-    const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
-    const delta = Math.abs(firstElSize - itemSize);
-    if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
+    let itemSize;
+    
+    if( this.props.itemSizeGetter ) {
+      itemSize = this.props.itemSizeGetter(0);
+    }
+    else {
+      // Firefox has a problem where it will return a *slightly* (less than
+      // thousandths of a pixel) different size for the same element between
+      // renders. This can cause an infinite render loop, so only change the
+      // itemSize when it is significantly different.
+      itemSize = this.state.itemSize;
+      const {axis} = this.props;
+      const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
+      const delta = Math.abs(firstElSize - itemSize);
+      if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
+    }
 
     if (!itemSize) return {};
 
