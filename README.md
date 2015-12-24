@@ -152,6 +152,24 @@ necessarily at the top. The `scrollTo` note above also applies to this method.
 Return the indices of the first and last items that are at all visible in the
 viewport.
 
+## FAQ
+
+##### Why is the list freezing/overflowing the stack?
+
+This happens when specifying the `uniform` type without actually providing
+uniform size elements. The component attempts to draw only the minimum necessary
+elements at one time and that minimum element calculation is based off the first
+element in the list. When the first element does not match the other elements,
+the calculation will be wrong and the component will never be able to fully
+resolve the ideal necessary elements.
+
+##### Why doesn't it work with margins?
+
+The calculations to figure out element positioning and size get significantly
+more complicated with margins, so they are not supported. Use a transparent
+border or padding or an element with nested elements to achieve the desired
+spacing.
+
 ## Development
 
 ```bash
