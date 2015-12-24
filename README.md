@@ -73,7 +73,8 @@ An index to scroll to after mounting.
 ##### itemSizeGetter(index)
 
 A function that receives an item index and returns the size (height for y-axis
-lists and width for x-axis lists) of that item at that index.
+lists and width for x-axis lists) of that item at that index. This prop is only
+used when the prop `type` is set to `variable`.
 
 ##### itemRenderer(index, key)
 
