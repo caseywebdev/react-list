@@ -155,7 +155,6 @@
       value: function componentWillUnmount() {
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame);
-        cancelAnimationFrame(this.afId);
       }
     }, {
       key: 'getOffset',
