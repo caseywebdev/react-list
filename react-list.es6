@@ -384,8 +384,10 @@ export default class extends Component {
     const style = {position: 'relative'};
     const cache = {};
     const size = this.getSpaceBefore(length, cache);
-    style[SIZE_KEYS[axis]] = size;
-    if (size && axis === 'x') style.overflowX = 'hidden';
+    if (size) {
+      style[SIZE_KEYS[axis]] = size;
+      if (axis === 'x') style.overflowX = 'hidden';
+    }
     const offset = this.getSpaceBefore(from, cache);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;

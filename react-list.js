@@ -525,8 +525,10 @@
         var style = { position: 'relative' };
         var cache = {};
         var size = this.getSpaceBefore(length, cache);
-        style[SIZE_KEYS[axis]] = size;
-        if (size && axis === 'x') style.overflowX = 'hidden';
+        if (size) {
+          style[SIZE_KEYS[axis]] = size;
+          if (axis === 'x') style.overflowX = 'hidden';
+        }
         var offset = this.getSpaceBefore(from, cache);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
