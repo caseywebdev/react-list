@@ -86,7 +86,7 @@ export default class extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
-    this.scrollParent.removeEventListener('scroll', this.updateFrame);
+    this.scrollParent && this.scrollParent.removeEventListener('scroll', this.updateFrame);
   }
 
   getOffset(el) {
@@ -177,6 +177,9 @@ export default class extends Component {
   }
 
   updateFrame(cb) {
+    // We may have been unmounted on the 'resize' event. If so, this function will
+    // error so we skip the processing.
+    if (this.render) return;
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
