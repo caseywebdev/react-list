@@ -380,7 +380,7 @@
         var itemsPerRow = _state2.itemsPerRow;
 
         if (itemSize) {
-          return cache[index] = Math.ceil(index / itemsPerRow) * itemSize;
+          return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
         }
 
         // Find the closest space to index there is a cached value for.
