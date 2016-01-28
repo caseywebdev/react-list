@@ -275,7 +275,7 @@ export default class extends Component {
     // Try the static itemSize.
     const {itemSize, itemsPerRow} = this.state;
     if (itemSize) {
-      return cache[index] = Math.ceil(index / itemsPerRow) * itemSize;
+      return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
     }
 
     // Find the closest space to index there is a cached value for.
