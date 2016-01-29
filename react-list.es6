@@ -16,7 +16,8 @@ const INNER_SIZE_KEYS = {x: 'innerWidth', y: 'innerHeight'};
 const OFFSET_SIZE_KEYS = {x: 'offsetWidth', y: 'offsetHeight'};
 const OFFSET_START_KEYS = {x: 'offsetLeft', y: 'offsetTop'};
 const OVERFLOW_KEYS = {x: 'overflowX', y: 'overflowY'};
-const SCROLL_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
+const SCROLL_SIZE_KEYS = {x: 'scrollWidth', y: 'scrollHeight'};
+const SCROLL_START_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
@@ -112,29 +113,27 @@ export default class extends Component {
 
   getScroll() {
     const {scrollParent} = this;
-    const {axis, length} = this.props;
-    const scrollKey = SCROLL_KEYS[axis];
+    const {axis} = this.props;
+    const scrollKey = SCROLL_START_KEYS[axis];
     const scroll = scrollParent === window ?
       // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
       // always return document.documentElement[scrollKey] as 0, so take
       // whichever has a value.
       document.body[scrollKey] || document.documentElement[scrollKey] :
       scrollParent[scrollKey];
-
     const el = findDOMNode(this);
-    const viewportSize = this.getViewportSize();
-    const contentsSize = this.getSpaceBefore(length);
-    const maxScroll = contentsSize - viewportSize;
-    const result = scroll - (this.getOffset(el) - this.getOffset(scrollParent));
-    return Math.max(Math.min(result, maxScroll), 0);
+    const target = scroll - (this.getOffset(el) - this.getOffset(scrollParent));
+    const max = this.getScrollSize() - this.getViewportSize();
+    return Math.max(0, Math.min(target, max));
   }
 
   setScroll(offset) {
     const {scrollParent} = this;
+    const {axis} = this.props;
     if (scrollParent === window) {
       return window.scrollTo(0, this.getOffset(findDOMNode(this)) + offset);
     }
-    scrollParent[SCROLL_KEYS[this.props.axis]] += offset - this.getScroll();
+    scrollParent[SCROLL_START_KEYS[axis]] += offset - this.getScroll();
   }
 
   getViewportSize() {
@@ -143,6 +142,14 @@ export default class extends Component {
     return scrollParent === window ?
       window[INNER_SIZE_KEYS[axis]] :
       scrollParent[CLIENT_SIZE_KEYS[axis]];
+  }
+
+  getScrollSize() {
+    const {scrollParent} = this;
+    const {axis} = this.props;
+    return scrollParent === window ?
+      document.body[SCROLL_SIZE_KEYS[axis]] :
+      scrollParent[SCROLL_SIZE_KEYS[axis]];
   }
 
   getStartAndEnd(threshold = this.props.threshold) {
