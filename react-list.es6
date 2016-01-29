@@ -112,7 +112,7 @@ export default class extends Component {
 
   getScroll() {
     const {scrollParent} = this;
-    const {axis} = this.props;
+    const {axis, length} = this.props;
     const scrollKey = SCROLL_KEYS[axis];
     const scroll = scrollParent === window ?
       // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
@@ -120,8 +120,13 @@ export default class extends Component {
       // whichever has a value.
       document.body[scrollKey] || document.documentElement[scrollKey] :
       scrollParent[scrollKey];
+
     const el = findDOMNode(this);
-    return scroll - (this.getOffset(el) - this.getOffset(scrollParent));
+    const viewportSize = this.getViewportSize();
+    const contentsSize = this.getSpaceBefore(length);
+    const maxScroll = contentsSize - viewportSize;
+    const result = scroll - (this.getOffset(el) - this.getOffset(scrollParent));
+    return Math.max(Math.min(result, maxScroll), 0);
   }
 
   setScroll(offset) {
