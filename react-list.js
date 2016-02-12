@@ -529,14 +529,17 @@
         var length = _props8.length;
         var type = _props8.type;
         var useTranslate3d = _props8.useTranslate3d;
-        var from = this.state.from;
+        var _state6 = this.state;
+        var from = _state6.from;
+        var itemsPerRow = _state6.itemsPerRow;
 
         var items = this.renderItems();
         if (type === 'simple') return items;
 
         var style = { position: 'relative' };
         var cache = {};
-        var size = this.getSpaceBefore(length, cache);
+        var bottom = Math.ceil(length / itemsPerRow) * itemsPerRow;
+        var size = this.getSpaceBefore(bottom, cache);
         if (size) {
           style[SIZE_KEYS[axis]] = size;
           if (axis === 'x') style.overflowX = 'hidden';

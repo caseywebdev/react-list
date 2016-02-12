@@ -388,14 +388,15 @@ export default class extends Component {
 
   render() {
     const {axis, length, type, useTranslate3d} = this.props;
-    const {from} = this.state;
+    const {from, itemsPerRow} = this.state;
 
     const items = this.renderItems();
     if (type === 'simple') return items;
 
     const style = {position: 'relative'};
     const cache = {};
-    const size = this.getSpaceBefore(length, cache);
+    const bottom = Math.ceil(length / itemsPerRow) * itemsPerRow;
+    const size = this.getSpaceBefore(bottom, cache);
     if (size) {
       style[SIZE_KEYS[axis]] = size;
       if (axis === 'x') style.overflowX = 'hidden';

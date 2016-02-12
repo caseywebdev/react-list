@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.14
+- Fix regression introduced in #85 where the height of lists with multiple items
+  per row would be off by one.
+
 ## 0.7.13
 - Fixed a glitch where the list would sometimes flicker at the edge of iOS
   "rubber band" scrolling.
