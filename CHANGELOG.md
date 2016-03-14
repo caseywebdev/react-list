@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.15
+- Add React 15.0.0-rc.1 to dependency range.
+
 ## 0.7.14
 - Fix regression introduced in #85 where the height of lists with multiple items
   per row would be off by one.

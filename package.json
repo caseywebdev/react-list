@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.7.14",
+  "version": "0.7.15",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
@@ -9,8 +9,8 @@
     "url": "https://github.com/orgsync/react-list"
   },
   "peerDependencies": {
-    "react": ">= 0.14.0 < 0.15.0",
-    "react-dom": ">= 0.14.0 < 0.15.0"
+    "react": "0.14 || >= 15.0.0-rc.1 < 16",
+    "react-dom": "0.14 || >= 15.0.0-rc.1 < 16"
   },
   "devDependencies": {
     "cogs": "1.0.7",
