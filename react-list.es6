@@ -88,6 +88,7 @@ export default class extends Component {
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame);
+    this.scrollParent.removeEventListener('mousewheel', NOOP);
   }
 
   getOffset(el) {
@@ -202,8 +203,12 @@ export default class extends Component {
     const prev = this.scrollParent;
     this.scrollParent = this.getScrollParent();
     if (prev === this.scrollParent) return;
-    if (prev) prev.removeEventListener('scroll', this.updateFrame);
+    if (prev) {
+      prev.removeEventListener('scroll', this.updateFrame);
+      prev.removeEventListener('mousewheel', NOOP);
+    }
     this.scrollParent.addEventListener('scroll', this.updateFrame);
+    this.scrollParent.addEventListener('mousewheel', NOOP);
   }
 
   updateSimpleFrame(cb) {
