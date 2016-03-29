@@ -19,5 +19,8 @@
     "cogs": "1.0.7",
     "cogs-transformer-babel": "1.0.12",
     "cogs-transformer-replace": "1.0.1"
+  },
+  "dependencies": {
+    "raf": "^3.2.0"
   }
 }

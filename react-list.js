@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'react', 'react-dom'], factory);
+    define(['exports', 'module', 'react', 'react-dom', 'raf'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('react'), require('react-dom'));
+    factory(exports, module, require('react'), require('react-dom'), require('raf'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.React, global.ReactDOM);
+    factory(mod.exports, mod, global.React, global.ReactDOM, global.raf);
     global.ReactList = mod.exports;
   }
-})(this, function (exports, module, _react, _reactDom) {
+})(this, function (exports, module, _react, _reactDom, _raf) {
   'use strict';
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -26,6 +26,8 @@
   var _React = _interopRequireDefault(_react);
 
   var _ReactDOM = _interopRequireDefault(_reactDom);
+
+  var _raf2 = _interopRequireDefault(_raf);
 
   var findDOMNode = _ReactDOM['default'].findDOMNode;
 
@@ -270,6 +272,15 @@
     }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
+        var _this = this;
+
+        (0, _raf2['default'])(function () {
+          return _this.doUpdateFrame(cb);
+        });
+      }
+    }, {
+      key: 'doUpdateFrame',
+      value: function doUpdateFrame(cb) {
         this.updateScrollParent();
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
@@ -510,7 +521,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this = this;
+        var _this2 = this;
 
         var _props7 = this.props;
         var itemRenderer = _props7.itemRenderer;
@@ -523,7 +534,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this.items = c;
+          return _this2.items = c;
         });
       }
     }, {
