@@ -4,6 +4,9 @@
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
+  "scripts": {
+    "prepublish": "cogs"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/orgsync/react-list"
