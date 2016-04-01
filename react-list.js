@@ -71,7 +71,8 @@
         scrollParentGetter: _react.PropTypes.func,
         threshold: _react.PropTypes.number,
         type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
-        useTranslate3d: _react.PropTypes.bool
+        useTranslate3d: _react.PropTypes.bool,
+        onScroll: _react.PropTypes.func
       },
       enumerable: true
     }, {
@@ -99,15 +100,26 @@
         scrollParentGetter: null,
         threshold: 100,
         type: 'simple',
-        useTranslate3d: false
+        useTranslate3d: false,
+        onScroll: null
       },
       enumerable: true
     }]);
 
     function _default(props) {
+      var _this = this;
+
       _classCallCheck(this, _default);
 
       _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
+
+      this.onScroll = function (event) {
+        _this.updateFrame();
+        if (_this.props.onScroll) {
+          _this.props.onScroll(event);
+        }
+      };
+
       var _props = this.props;
       var initialIndex = _props.initialIndex;
       var length = _props.length;
@@ -155,7 +167,7 @@
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
         window.removeEventListener('resize', this.updateFrame);
-        this.scrollParent.removeEventListener('scroll', this.updateFrame);
+        this.scrollParent.removeEventListener('scroll', this.onScroll);
         this.scrollParent.removeEventListener('mousewheel', NOOP);
       }
     }, {
@@ -288,10 +300,10 @@
         this.scrollParent = this.getScrollParent();
         if (prev === this.scrollParent) return;
         if (prev) {
-          prev.removeEventListener('scroll', this.updateFrame);
+          prev.removeEventListener('scroll', this.onScroll);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame);
+        this.scrollParent.addEventListener('scroll', this.onScroll);
         this.scrollParent.addEventListener('mousewheel', NOOP);
       }
     }, {
@@ -510,7 +522,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this = this;
+        var _this2 = this;
 
         var _props7 = this.props;
         var itemRenderer = _props7.itemRenderer;
@@ -523,7 +535,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this.items = c;
+          return _this2.items = c;
         });
       }
     }, {
