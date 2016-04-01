@@ -36,7 +36,8 @@ export default class extends Component {
     scrollParentGetter: PropTypes.func,
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
-    useTranslate3d: PropTypes.bool
+    useTranslate3d: PropTypes.bool,
+    onScroll: PropTypes.func
   };
 
   static defaultProps = {
@@ -50,7 +51,8 @@ export default class extends Component {
     scrollParentGetter: null,
     threshold: 100,
     type: 'simple',
-    useTranslate3d: false
+    useTranslate3d: false,
+    onScroll: null
   };
 
   constructor(props) {
@@ -87,7 +89,7 @@ export default class extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
-    this.scrollParent.removeEventListener('scroll', this.updateFrame);
+    this.scrollParent.removeEventListener('scroll', this.onScroll);
     this.scrollParent.removeEventListener('mousewheel', NOOP);
   }
 
@@ -204,10 +206,10 @@ export default class extends Component {
     this.scrollParent = this.getScrollParent();
     if (prev === this.scrollParent) return;
     if (prev) {
-      prev.removeEventListener('scroll', this.updateFrame);
+      prev.removeEventListener('scroll', this.onScroll);
       prev.removeEventListener('mousewheel', NOOP);
     }
-    this.scrollParent.addEventListener('scroll', this.updateFrame);
+    this.scrollParent.addEventListener('scroll', this.onScroll);
     this.scrollParent.addEventListener('mousewheel', NOOP);
   }
 
@@ -381,6 +383,13 @@ export default class extends Component {
       if (first != null && itemStart < end) last = i;
     }
     return [first, last];
+  }
+
+  onScroll = (event) => {
+    this.updateFrame()
+    if (this.props.onScroll) {
+      this.props.onScroll(event)
+    }
   }
 
   renderItems() {
