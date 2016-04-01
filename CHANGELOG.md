@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.16
+- Fix Chrome rendering issues when scrolling very quickly. (#58, #96)
+
 ## 0.7.15
 - Add React 15.0.0-rc.1 to dependency range.
 
