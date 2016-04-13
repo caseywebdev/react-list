@@ -55,20 +55,17 @@ export default class extends Component {
 
   constructor(props) {
     super(props);
-    const {initialIndex, length, pageSize} = this.props;
+    const {initialIndex, pageSize} = this.props;
     const itemsPerRow = 1;
-    const from = this.constrainFrom(initialIndex, length, itemsPerRow);
-    const size = this.constrainSize(pageSize, length, pageSize, from);
+    const {from, size} =
+      this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
   }
 
   componentWillReceiveProps(next) {
-    let {itemsPerRow, from, size} = this.state;
-    const {length, pageSize} = next;
-    from = this.constrainFrom(from, length, itemsPerRow);
-    size = this.constrainSize(size, length, pageSize, from);
-    this.setState({from, size});
+    let {from, size, itemsPerRow} = this.state;
+    this.setState(this.constrain(from, size, itemsPerRow, next));
   }
 
   componentDidMount() {
@@ -116,25 +113,26 @@ export default class extends Component {
     const {scrollParent} = this;
     const {axis} = this.props;
     const scrollKey = SCROLL_START_KEYS[axis];
-    const scroll = scrollParent === window ?
+    const actual = scrollParent === window ?
       // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
       // always return document.documentElement[scrollKey] as 0, so take
       // whichever has a value.
       document.body[scrollKey] || document.documentElement[scrollKey] :
       scrollParent[scrollKey];
-    const el = findDOMNode(this);
-    const target = scroll - (this.getOffset(el) - this.getOffset(scrollParent));
     const max = this.getScrollSize() - this.getViewportSize();
-    return Math.max(0, Math.min(target, max));
+    const scroll = Math.max(0, Math.min(actual, max));
+    const el = findDOMNode(this);
+    return this.getOffset(scrollParent) + scroll - this.getOffset(el);
   }
 
   setScroll(offset) {
     const {scrollParent} = this;
     const {axis} = this.props;
-    if (scrollParent === window) {
-      return window.scrollTo(0, this.getOffset(findDOMNode(this)) + offset);
-    }
-    scrollParent[SCROLL_START_KEYS[axis]] += offset - this.getScroll();
+    offset += this.getOffset(findDOMNode(this));
+    if (scrollParent === window) return window.scrollTo(0, offset);
+
+    offset -= this.getOffset(this.scrollParent);
+    scrollParent[SCROLL_START_KEYS[axis]] = offset;
   }
 
   getViewportSize() {
@@ -154,8 +152,12 @@ export default class extends Component {
   }
 
   getStartAndEnd(threshold = this.props.threshold) {
-    const start = this.getScroll() - threshold;
-    const end = start + this.getViewportSize() + (threshold * 2);
+    const scroll = this.getScroll();
+    const start = Math.max(0, scroll - threshold);
+    const end = Math.min(
+      scroll + this.getViewportSize() + threshold,
+      this.getSpaceBefore(this.props.length)
+    );
     return {start, end};
   }
 
@@ -267,20 +269,13 @@ export default class extends Component {
 
     if (!itemSize || !itemsPerRow) return cb();
 
-    const {length, pageSize} = this.props;
     const {start, end} = this.getStartAndEnd();
 
-    const from = this.constrainFrom(
+    const {from, size} = this.constrain(
       Math.floor(start / itemSize) * itemsPerRow,
-      length,
-      itemsPerRow
-    );
-
-    const size = this.constrainSize(
       (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
-      length,
-      pageSize,
-      from
+      itemsPerRow,
+      this.props
     );
 
     return this.setState({itemsPerRow, from, itemSize, size}, cb);
@@ -342,17 +337,21 @@ export default class extends Component {
     }
   }
 
-  constrainFrom(from, length, itemsPerRow) {
-    if (this.props.type === 'simple') return 0;
-    if (!from) return 0;
-    return Math.max(
-      Math.min(from, length - itemsPerRow - (length % itemsPerRow)),
-      0
-    );
-  }
+  constrain(from, size, itemsPerRow, {length, pageSize, type}) {
+    size = Math.max(size, pageSize);
+    let mod = size % itemsPerRow;
+    if (mod) size += itemsPerRow - mod;
+    if (size > length) size = length;
+    from =
+      type === 'simple' || !from ? 0 :
+      Math.max(Math.min(from, length - size), 0);
 
-  constrainSize(size, length, pageSize, from) {
-    return Math.min(Math.max(size, pageSize), length - from);
+    if (mod = from % itemsPerRow) {
+      from -= mod;
+      size += mod;
+    }
+
+    return {from, size};
   }
 
   scrollTo(index) {
@@ -361,12 +360,12 @@ export default class extends Component {
 
   scrollAround(index) {
     const current = this.getScroll();
-
-    const max = this.getSpaceBefore(index);
+    const bottom = this.getSpaceBefore(index);
+    const top = bottom - this.getViewportSize() + this.getSizeOf(index);
+    const min = Math.min(top, bottom);
+    const max = Math.max(top, bottom);
+    if (current <= min) return this.setScroll(min);
     if (current > max) return this.setScroll(max);
-
-    const min = max - this.getViewportSize() + this.getSizeOf(index);
-    if (current < min) this.setScroll(min);
   }
 
   getVisibleRange() {

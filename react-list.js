@@ -110,12 +110,15 @@
       _get(Object.getPrototypeOf(_default.prototype), 'constructor', this).call(this, props);
       var _props = this.props;
       var initialIndex = _props.initialIndex;
-      var length = _props.length;
       var pageSize = _props.pageSize;
 
       var itemsPerRow = 1;
-      var from = this.constrainFrom(initialIndex, length, itemsPerRow);
-      var size = this.constrainSize(pageSize, length, pageSize, from);
+
+      var _constrain = this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
+
+      var from = _constrain.from;
+      var size = _constrain.size;
+
       this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       this.cache = {};
     }
@@ -124,15 +127,11 @@
       key: 'componentWillReceiveProps',
       value: function componentWillReceiveProps(next) {
         var _state = this.state;
-        var itemsPerRow = _state.itemsPerRow;
         var from = _state.from;
         var size = _state.size;
-        var length = next.length;
-        var pageSize = next.pageSize;
+        var itemsPerRow = _state.itemsPerRow;
 
-        from = this.constrainFrom(from, length, itemsPerRow);
-        size = this.constrainSize(size, length, pageSize, from);
-        this.setState({ from: from, size: size });
+        this.setState(this.constrain(from, size, itemsPerRow, next));
       }
     }, {
       key: 'componentDidMount',
@@ -193,15 +192,15 @@
         var axis = this.props.axis;
 
         var scrollKey = SCROLL_START_KEYS[axis];
-        var scroll = scrollParent === window ?
+        var actual = scrollParent === window ?
         // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
         // always return document.documentElement[scrollKey] as 0, so take
         // whichever has a value.
         document.body[scrollKey] || document.documentElement[scrollKey] : scrollParent[scrollKey];
-        var el = findDOMNode(this);
-        var target = scroll - (this.getOffset(el) - this.getOffset(scrollParent));
         var max = this.getScrollSize() - this.getViewportSize();
-        return Math.max(0, Math.min(target, max));
+        var scroll = Math.max(0, Math.min(actual, max));
+        var el = findDOMNode(this);
+        return this.getOffset(scrollParent) + scroll - this.getOffset(el);
       }
     }, {
       key: 'setScroll',
@@ -209,10 +208,11 @@
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
-        if (scrollParent === window) {
-          return window.scrollTo(0, this.getOffset(findDOMNode(this)) + offset);
-        }
-        scrollParent[SCROLL_START_KEYS[axis]] += offset - this.getScroll();
+        offset += this.getOffset(findDOMNode(this));
+        if (scrollParent === window) return window.scrollTo(0, offset);
+
+        offset -= this.getOffset(this.scrollParent);
+        scrollParent[SCROLL_START_KEYS[axis]] = offset;
       }
     }, {
       key: 'getViewportSize',
@@ -235,8 +235,9 @@
       value: function getStartAndEnd() {
         var threshold = arguments.length <= 0 || arguments[0] === undefined ? this.props.threshold : arguments[0];
 
-        var start = this.getScroll() - threshold;
-        var end = start + this.getViewportSize() + threshold * 2;
+        var scroll = this.getScroll();
+        var start = Math.max(0, scroll - threshold);
+        var end = Math.min(scroll + this.getViewportSize() + threshold, this.getSpaceBefore(this.props.length));
         return { start: start, end: end };
       }
     }, {
@@ -369,18 +370,15 @@
 
         if (!itemSize || !itemsPerRow) return cb();
 
-        var _props5 = this.props;
-        var length = _props5.length;
-        var pageSize = _props5.pageSize;
-
         var _getStartAndEnd3 = this.getStartAndEnd();
 
         var start = _getStartAndEnd3.start;
         var end = _getStartAndEnd3.end;
 
-        var from = this.constrainFrom(Math.floor(start / itemSize) * itemsPerRow, length, itemsPerRow);
+        var _constrain2 = this.constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props);
 
-        var size = this.constrainSize((Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, length, pageSize, from);
+        var from = _constrain2.from;
+        var size = _constrain2.size;
 
         return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
@@ -432,10 +430,10 @@
       value: function getSizeOf(index) {
         var cache = this.cache;
         var items = this.items;
-        var _props6 = this.props;
-        var axis = _props6.axis;
-        var itemSizeGetter = _props6.itemSizeGetter;
-        var type = _props6.type;
+        var _props5 = this.props;
+        var axis = _props5.axis;
+        var itemSizeGetter = _props5.itemSizeGetter;
+        var type = _props5.type;
         var _state3 = this.state;
         var from = _state3.from;
         var itemSize = _state3.itemSize;
@@ -457,16 +455,24 @@
         }
       }
     }, {
-      key: 'constrainFrom',
-      value: function constrainFrom(from, length, itemsPerRow) {
-        if (this.props.type === 'simple') return 0;
-        if (!from) return 0;
-        return Math.max(Math.min(from, length - itemsPerRow - length % itemsPerRow), 0);
-      }
-    }, {
-      key: 'constrainSize',
-      value: function constrainSize(size, length, pageSize, from) {
-        return Math.min(Math.max(size, pageSize), length - from);
+      key: 'constrain',
+      value: function constrain(from, size, itemsPerRow, _ref) {
+        var length = _ref.length;
+        var pageSize = _ref.pageSize;
+        var type = _ref.type;
+
+        size = Math.max(size, pageSize);
+        var mod = size % itemsPerRow;
+        if (mod) size += itemsPerRow - mod;
+        if (size > length) size = length;
+        from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
+
+        if (mod = from % itemsPerRow) {
+          from -= mod;
+          size += mod;
+        }
+
+        return { from: from, size: size };
       }
     }, {
       key: 'scrollTo',
@@ -477,12 +483,12 @@
       key: 'scrollAround',
       value: function scrollAround(index) {
         var current = this.getScroll();
-
-        var max = this.getSpaceBefore(index);
+        var bottom = this.getSpaceBefore(index);
+        var top = bottom - this.getViewportSize() + this.getSizeOf(index);
+        var min = Math.min(top, bottom);
+        var max = Math.max(top, bottom);
+        if (current <= min) return this.setScroll(min);
         if (current > max) return this.setScroll(max);
-
-        var min = max - this.getViewportSize() + this.getSizeOf(index);
-        if (current < min) this.setScroll(min);
       }
     }, {
       key: 'getVisibleRange',
@@ -512,9 +518,9 @@
       value: function renderItems() {
         var _this = this;
 
-        var _props7 = this.props;
-        var itemRenderer = _props7.itemRenderer;
-        var itemsRenderer = _props7.itemsRenderer;
+        var _props6 = this.props;
+        var itemRenderer = _props6.itemRenderer;
+        var itemsRenderer = _props6.itemsRenderer;
         var _state5 = this.state;
         var from = _state5.from;
         var size = _state5.size;
@@ -529,11 +535,11 @@
     }, {
       key: 'render',
       value: function render() {
-        var _props8 = this.props;
-        var axis = _props8.axis;
-        var length = _props8.length;
-        var type = _props8.type;
-        var useTranslate3d = _props8.useTranslate3d;
+        var _props7 = this.props;
+        var axis = _props7.axis;
+        var length = _props7.length;
+        var type = _props7.type;
+        var useTranslate3d = _props7.useTranslate3d;
         var _state6 = this.state;
         var from = _state6.from;
         var itemsPerRow = _state6.itemsPerRow;
