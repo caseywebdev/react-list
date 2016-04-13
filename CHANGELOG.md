@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.17
+- Fix issue where nested list positions were not scrolled to correctly. (#105)
+
 ## 0.7.16
 - Fix Chrome rendering issues when scrolling very quickly. (#58, #96)
 
