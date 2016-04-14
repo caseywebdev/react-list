@@ -151,13 +151,18 @@ export default class extends Component {
       scrollParent[SCROLL_SIZE_KEYS[axis]];
   }
 
+  hasDeterminateSize() {
+    const {itemSizeGetter, type} = this.props;
+    return type === 'uniform' || itemSizeGetter;
+  }
+
   getStartAndEnd(threshold = this.props.threshold) {
     const scroll = this.getScroll();
     const start = Math.max(0, scroll - threshold);
-    const end = Math.min(
-      scroll + this.getViewportSize() + threshold,
-      this.getSpaceBefore(this.props.length)
-    );
+    let end = scroll + this.getViewportSize() + threshold;
+    if (this.hasDeterminateSize()) {
+      end = Math.min(end, this.getSpaceBefore(this.props.length));
+    }
     return {start, end};
   }
 
