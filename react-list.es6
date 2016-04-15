@@ -1,5 +1,6 @@
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import raf from 'raf';
 
 const {findDOMNode} = ReactDOM;
 
@@ -197,6 +198,10 @@ export default class extends Component {
   }
 
   updateFrame(cb) {
+    raf(() => this.doUpdateFrame(cb));
+  }
+
+  doUpdateFrame(cb) {
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {

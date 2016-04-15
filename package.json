@@ -4,6 +4,9 @@
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
+  "scripts": {
+    "prepublish": "cogs"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/orgsync/react-list"
@@ -16,5 +19,8 @@
     "cogs": "1.0.7",
     "cogs-transformer-babel": "1.0.12",
     "cogs-transformer-replace": "1.0.1"
+  },
+  "dependencies": {
+    "raf": "^3.2.0"
   }
 }
