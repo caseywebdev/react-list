@@ -255,22 +255,22 @@
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
+        if (this.state.itemSize && this.state.itemsPerRow) {
+          // this function is only used for uniform type and hence can return the
+          // itemSize and itemsPerRow as it was calculated on first call
+          return {
+            itemSize: this.state.itemSize,
+            itemsPerRow: this.state.itemsPerRow
+          };
+        }
+
         var itemEls = findDOMNode(this.items).children;
         if (!itemEls.length) return {};
 
         var firstEl = itemEls[0];
-
-        // Firefox has a problem where it will return a *slightly* (less than
-        // thousandths of a pixel) different size for the same element between
-        // renders. This can cause an infinite render loop, so only change the
-        // itemSize when it is significantly different.
-        var itemSize = this.state.itemSize;
         var axis = this.props.axis;
 
-        var firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
-        var delta = Math.abs(firstElSize - itemSize);
-        if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
-
+        var itemSize = firstEl[OFFSET_SIZE_KEYS[axis]];
         if (!itemSize) return {};
 
         var startKey = OFFSET_START_KEYS[axis];
