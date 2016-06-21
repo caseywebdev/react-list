@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.19
+- Add `itemSizeEstimator` prop. (#113)
+- Add `useStaticSize` prop. (#116)
+
 ## 0.7.17
 - Fix issue where nested list positions were not scrolled to correctly. (#105)
 
