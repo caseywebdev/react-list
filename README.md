@@ -137,6 +137,14 @@ viewport ever need to be drawn. The size of the first item will be used to
 infer the size of every other item. Multiple items per row are also supported
 with this type.
 
+##### useStaticSize (defaults to `false`)
+
+Set to `true` if the item size will never change (as a result of responsive
+layout changing or otherwise). This prop is only used when the prop `type` is
+set to `uniform`. This is an opt-in optimization that will cause the very first
+element's size to be used for all elements for the duration of the component's
+life.
+
 ##### useTranslate3d (defaults to `false`)
 
 A boolean to determine whether the `translate3d` CSS property should be used for

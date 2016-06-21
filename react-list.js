@@ -72,6 +72,7 @@
         scrollParentGetter: _react.PropTypes.func,
         threshold: _react.PropTypes.number,
         type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
+        useStaticSize: _react.PropTypes.bool,
         useTranslate3d: _react.PropTypes.bool
       },
       enumerable: true
@@ -97,6 +98,7 @@
         pageSize: 10,
         threshold: 100,
         type: 'simple',
+        useStaticSize: false,
         useTranslate3d: false
       },
       enumerable: true
@@ -253,6 +255,17 @@
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
+        var _props4 = this.props;
+        var axis = _props4.axis;
+        var useStaticSize = _props4.useStaticSize;
+        var _state2 = this.state;
+        var itemSize = _state2.itemSize;
+        var itemsPerRow = _state2.itemsPerRow;
+
+        if (useStaticSize && itemSize && itemsPerRow) {
+          return { itemSize: itemSize, itemsPerRow: itemsPerRow };
+        }
+
         var itemEls = findDOMNode(this.items).children;
         if (!itemEls.length) return {};
 
@@ -262,9 +275,6 @@
         // thousandths of a pixel) different size for the same element between
         // renders. This can cause an infinite render loop, so only change the
         // itemSize when it is significantly different.
-        var itemSize = this.state.itemSize;
-        var axis = this.props.axis;
-
         var firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
         var delta = Math.abs(firstElSize - itemSize);
         if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
@@ -273,7 +283,7 @@
 
         var startKey = OFFSET_START_KEYS[axis];
         var firstStart = firstEl[startKey];
-        var itemsPerRow = 1;
+        itemsPerRow = 1;
         for (var item = itemEls[itemsPerRow]; item && item[startKey] === firstStart; item = itemEls[itemsPerRow]) {
           ++itemsPerRow;
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
@@ -325,9 +335,9 @@
 
         if (elEnd > end) return cb();
 
-        var _props4 = this.props;
-        var pageSize = _props4.pageSize;
-        var length = _props4.length;
+        var _props5 = this.props;
+        var pageSize = _props5.pageSize;
+        var length = _props5.length;
 
         this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
       }
@@ -340,9 +350,9 @@
 
         var start = _getStartAndEnd2.start;
         var end = _getStartAndEnd2.end;
-        var _props5 = this.props;
-        var length = _props5.length;
-        var pageSize = _props5.pageSize;
+        var _props6 = this.props;
+        var length = _props6.length;
+        var pageSize = _props6.pageSize;
 
         var space = 0;
         var from = 0;
@@ -400,9 +410,9 @@
         if (cache[index] != null) return cache[index];
 
         // Try the static itemSize.
-        var _state2 = this.state;
-        var itemSize = _state2.itemSize;
-        var itemsPerRow = _state2.itemsPerRow;
+        var _state3 = this.state;
+        var itemSize = _state3.itemSize;
+        var itemsPerRow = _state3.itemsPerRow;
 
         if (itemSize) {
           return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
@@ -440,15 +450,15 @@
       value: function getSizeOf(index) {
         var cache = this.cache;
         var items = this.items;
-        var _props6 = this.props;
-        var axis = _props6.axis;
-        var itemSizeGetter = _props6.itemSizeGetter;
-        var itemSizeEstimator = _props6.itemSizeEstimator;
-        var type = _props6.type;
-        var _state3 = this.state;
-        var from = _state3.from;
-        var itemSize = _state3.itemSize;
-        var size = _state3.size;
+        var _props7 = this.props;
+        var axis = _props7.axis;
+        var itemSizeGetter = _props7.itemSizeGetter;
+        var itemSizeEstimator = _props7.itemSizeEstimator;
+        var type = _props7.type;
+        var _state4 = this.state;
+        var from = _state4.from;
+        var itemSize = _state4.itemSize;
+        var size = _state4.size;
 
         // Try the static itemSize.
         if (itemSize) return itemSize;
@@ -507,9 +517,9 @@
     }, {
       key: 'getVisibleRange',
       value: function getVisibleRange() {
-        var _state4 = this.state;
-        var from = _state4.from;
-        var size = _state4.size;
+        var _state5 = this.state;
+        var from = _state5.from;
+        var size = _state5.size;
 
         var _getStartAndEnd4 = this.getStartAndEnd(0);
 
@@ -532,12 +542,12 @@
       value: function renderItems() {
         var _this = this;
 
-        var _props7 = this.props;
-        var itemRenderer = _props7.itemRenderer;
-        var itemsRenderer = _props7.itemsRenderer;
-        var _state5 = this.state;
-        var from = _state5.from;
-        var size = _state5.size;
+        var _props8 = this.props;
+        var itemRenderer = _props8.itemRenderer;
+        var itemsRenderer = _props8.itemsRenderer;
+        var _state6 = this.state;
+        var from = _state6.from;
+        var size = _state6.size;
 
         var items = [];
         for (var i = 0; i < size; ++i) {
@@ -549,14 +559,14 @@
     }, {
       key: 'render',
       value: function render() {
-        var _props8 = this.props;
-        var axis = _props8.axis;
-        var length = _props8.length;
-        var type = _props8.type;
-        var useTranslate3d = _props8.useTranslate3d;
-        var _state6 = this.state;
-        var from = _state6.from;
-        var itemsPerRow = _state6.itemsPerRow;
+        var _props9 = this.props;
+        var axis = _props9.axis;
+        var length = _props9.length;
+        var type = _props9.type;
+        var useTranslate3d = _props9.useTranslate3d;
+        var _state7 = this.state;
+        var from = _state7.from;
+        var itemsPerRow = _state7.itemsPerRow;
 
         var items = this.renderItems();
         if (type === 'simple') return items;
