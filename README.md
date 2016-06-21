@@ -70,12 +70,6 @@ The axis that this list scrolls on.
 
 An index to scroll to after mounting.
 
-##### itemSizeGetter(index)
-
-A function that receives an item index and returns the size (height for y-axis
-lists and width for x-axis lists) of that item at that index. This prop is only
-used when the prop `type` is set to `variable`.
-
 ##### itemRenderer(index, key)
 
 A function that receives an index and a key and returns the content to be
@@ -87,6 +81,21 @@ A function that receives the rendered items and a ref. By default this element
 is just a `<div>`. Generally it only needs to be overridden for use in a
 `<table>` or other special case. **NOTE: You must set ref={ref} on the component
 that contains the `items` so the correct item sizing calculations can be made.**
+
+##### itemSizeEstimator(index, cache)
+
+A function that receives an item index and the cached known item sizes and
+returns an estimated size (height for y-axis lists and width for x-axis lists)
+of that item at that index. This prop is only used when the prop `type` is set
+to `variable` and `itemSizeGetter` is not defined. Use this property when you
+can't know the exact size of an item before rendering it, but want it to take up
+space in the list regardless.
+
+##### itemSizeGetter(index)
+
+A function that receives an item index and returns the size (height for y-axis
+lists and width for x-axis lists) of that item at that index. This prop is only
+used when the prop `type` is set to `variable`.
 
 ##### length (defaults to `0`)
 

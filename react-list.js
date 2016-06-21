@@ -63,8 +63,9 @@
       value: {
         axis: _react.PropTypes.oneOf(['x', 'y']),
         initialIndex: _react.PropTypes.number,
-        itemSizeGetter: _react.PropTypes.func,
         itemRenderer: _react.PropTypes.func,
+        itemSizeEstimator: _react.PropTypes.func,
+        itemSizeGetter: _react.PropTypes.func,
         itemsRenderer: _react.PropTypes.func,
         length: _react.PropTypes.number,
         pageSize: _react.PropTypes.number,
@@ -78,8 +79,6 @@
       key: 'defaultProps',
       value: {
         axis: 'y',
-        initialIndex: null,
-        itemSizeGetter: null,
         itemRenderer: function itemRenderer(index, key) {
           return _React['default'].createElement(
             'div',
@@ -96,7 +95,6 @@
         },
         length: 0,
         pageSize: 10,
-        scrollParentGetter: null,
         threshold: 100,
         type: 'simple',
         useTranslate3d: false
@@ -445,6 +443,7 @@
         var _props6 = this.props;
         var axis = _props6.axis;
         var itemSizeGetter = _props6.itemSizeGetter;
+        var itemSizeEstimator = _props6.itemSizeEstimator;
         var type = _props6.type;
         var _state3 = this.state;
         var from = _state3.from;
@@ -465,6 +464,9 @@
           var itemEl = findDOMNode(items).children[index - from];
           if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
         }
+
+        // Try the itemSizeEstimator.
+        if (itemSizeEstimator) return itemSizeEstimator(index, cache);
       }
     }, {
       key: 'constrain',
