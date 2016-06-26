@@ -147,7 +147,7 @@ export default class extends Component {
     const {scrollParent} = this;
     const {axis} = this.props;
     return scrollParent === window ?
-      document.body[SCROLL_SIZE_KEYS[axis]] :
+      Math.max(document.body[SCROLL_SIZE_KEYS[axis]], document.documentElement[SCROLL_SIZE_KEYS[axis]]) :
       scrollParent[SCROLL_SIZE_KEYS[axis]];
   }
 
