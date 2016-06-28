@@ -145,10 +145,11 @@ export default class extends Component {
 
   getScrollSize() {
     const {scrollParent} = this;
-    const {axis} = this.props;
+    const {body, documentElement} = document;
+    const key = SCROLL_SIZE_KEYS[this.props.axis];
     return scrollParent === window ?
-      Math.max(document.body[SCROLL_SIZE_KEYS[axis]], document.documentElement[SCROLL_SIZE_KEYS[axis]]) :
-      scrollParent[SCROLL_SIZE_KEYS[axis]];
+      Math.max(body[key], documentElement[key]) :
+      scrollParent[key];
   }
 
   hasDeterminateSize() {

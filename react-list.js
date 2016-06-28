@@ -226,9 +226,11 @@
       key: 'getScrollSize',
       value: function getScrollSize() {
         var scrollParent = this.scrollParent;
-        var axis = this.props.axis;
+        var body = document.body;
+        var documentElement = document.documentElement;
 
-        return scrollParent === window ? Math.max(document.body[SCROLL_SIZE_KEYS[axis]], document.documentElement[SCROLL_SIZE_KEYS[axis]]) : scrollParent[SCROLL_SIZE_KEYS[axis]];
+        var key = SCROLL_SIZE_KEYS[this.props.axis];
+        return scrollParent === window ? Math.max(body[key], documentElement[key]) : scrollParent[key];
       }
     }, {
       key: 'hasDeterminateSize',

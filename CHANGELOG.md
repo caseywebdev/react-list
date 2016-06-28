@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.20
+- Fix body scroll size bug. (#117)
+
 ## 0.7.19
 - Add `itemSizeEstimator` prop. (#113)
 - Add `useStaticSize` prop. (#116)
