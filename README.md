@@ -151,6 +151,14 @@ A boolean to determine whether the `translate3d` CSS property should be used for
 positioning instead of the default `translate`. This can help performance on
 mobile devices, but is supported by fewer browsers.
 
+##### style (defaults to `{}`)
+
+Inline styling to apply to the container `div`. 
+
+##### listStyle (defaults to `{}`)
+
+Inline styling to apply to the list's container `div`.
+
 ## Methods
 
 ##### scrollTo(index)
