@@ -4,7 +4,11 @@ import ReactDOM from 'react-dom';
 const {findDOMNode} = ReactDOM;
 
 const isEqualSubset = (a, b) => {
-  for (let key in a) if (a[key] !== b[key]) return false;
+  for (let key in a) {
+    if (a[key] !== b[key]) {
+      return false;
+    }
+  }
   return true;
 };
 
@@ -38,7 +42,9 @@ export default class extends Component {
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: PropTypes.bool,
-    useTranslate3d: PropTypes.bool
+    useTranslate3d: PropTypes.bool,
+    style: React.PropTypes.object,
+    listStyle: React.PropTypes.object
   };
 
   static defaultProps = {
@@ -410,7 +416,10 @@ export default class extends Component {
     const items = this.renderItems();
     if (type === 'simple') return items;
 
-    const style = {position: 'relative'};
+    const style = {
+      position: 'relative',
+      ...(this.props.style || {})
+    };
     const cache = {};
     const bottom = Math.ceil(length / itemsPerRow) * itemsPerRow;
     const size = this.getSpaceBefore(bottom, cache);
@@ -428,8 +437,15 @@ export default class extends Component {
     const listStyle = {
       msTransform: transform,
       WebkitTransform: transform,
-      transform
+      transform,
+      ...(this.props.listStyle || {})
     };
-    return <div {...{style}}><div style={listStyle}>{items}</div></div>;
+    return (
+      <div style={style}>
+        <div style={listStyle}>
+          {items}
+        </div>
+      </div>
+    );
   }
 }

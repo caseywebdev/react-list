@@ -16,5 +16,9 @@
     "cogs": "1.0.7",
     "cogs-transformer-babel": "1.0.12",
     "cogs-transformer-replace": "1.0.1"
+  },
+  "dependencies": {
+    "minimatch": "^3.0.2",
+    "react-dom": "^15.3.0"
   }
 }
