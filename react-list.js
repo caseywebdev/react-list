@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'react', 'react-dom'], factory);
+    define(['exports', 'module', 'react', 'react-dom', 'react-addons-shallow-compare'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('react'), require('react-dom'));
+    factory(exports, module, require('react'), require('react-dom'), require('react-addons-shallow-compare'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.React, global.ReactDOM);
+    factory(mod.exports, mod, global.React, global.ReactDOM, global.shallowCompare);
     global.ReactList = mod.exports;
   }
-})(this, function (exports, module, _react, _reactDom) {
+})(this, function (exports, module, _react, _reactDom, _reactAddonsShallowCompare) {
   'use strict';
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -27,17 +27,9 @@
 
   var _ReactDOM = _interopRequireDefault(_reactDom);
 
+  var _shallowCompare = _interopRequireDefault(_reactAddonsShallowCompare);
+
   var findDOMNode = _ReactDOM['default'].findDOMNode;
-
-  var isEqualSubset = function isEqualSubset(a, b) {
-    for (var key in a) {
-      if (a[key] !== b[key]) return false;
-    }return true;
-  };
-
-  var isEqual = function isEqual(a, b) {
-    return isEqualSubset(a, b) && isEqualSubset(b, a);
-  };
 
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
@@ -143,7 +135,7 @@
     }, {
       key: 'shouldComponentUpdate',
       value: function shouldComponentUpdate(props, state) {
-        return !isEqual(props, this.props) || !isEqual(state, this.state);
+        return (0, _shallowCompare['default'])(this, props, state);
       }
     }, {
       key: 'componentDidUpdate',

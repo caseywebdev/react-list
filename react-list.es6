@@ -1,14 +1,8 @@
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import shallowCompare from 'react-addons-shallow-compare';
 
 const {findDOMNode} = ReactDOM;
-
-const isEqualSubset = (a, b) => {
-  for (let key in a) if (a[key] !== b[key]) return false;
-  return true;
-};
-
-const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
@@ -75,7 +69,7 @@ export default class extends Component {
   }
 
   shouldComponentUpdate(props, state) {
-    return !isEqual(props, this.props) || !isEqual(state, this.state);
+    return shallowCompare(this, props, state);
   }
 
   componentDidUpdate() {
