@@ -137,7 +137,7 @@
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrame = this.updateFrame.bind(this);
-        window.addEventListener('resize', this.updateFrame);
+        window.addEventListener('resize', this.updateFrame, { passive: true });
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
@@ -314,7 +314,7 @@
           prev.removeEventListener('scroll', this.updateFrame);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame);
+        this.scrollParent.addEventListener('scroll', this.updateFrame, { passive: true });
         this.scrollParent.addEventListener('mousewheel', NOOP);
       }
     }, {
