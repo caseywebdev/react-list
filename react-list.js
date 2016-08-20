@@ -42,6 +42,8 @@
   var SIZE_KEYS = { x: 'width', y: 'height' };
 
   var NOOP = function NOOP() {};
+  var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
   var _default = (function (_Component) {
     _inherits(_default, _Component);
@@ -113,6 +115,7 @@
 
       this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       this.cache = {};
+      this.rafId = null;
     }
 
     _createClass(_default, [{
@@ -148,6 +151,9 @@
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame);
         this.scrollParent.removeEventListener('mousewheel', NOOP);
+        if (this.rafId !== null) {
+          cancelAnimationFrame(this.rafId);
+        }
       }
     }, {
       key: 'getOffset',
@@ -310,6 +316,25 @@
         this.scrollParent.addEventListener('mousewheel', NOOP);
       }
     }, {
+      key: 'setNextState',
+      value: function setNextState(state, cb) {
+        var _this = this;
+
+        if (!requestAnimationFrame) {
+          this.setState(state, cb);
+          return;
+        }
+
+        if (this.rafId !== null) {
+          return;
+        }
+
+        this.rafId = requestAnimationFrame(function () {
+          _this.setState(state, cb);
+          _this.rafId = null;
+        });
+      }
+    }, {
       key: 'updateSimpleFrame',
       value: function updateSimpleFrame(cb) {
         var _getStartAndEnd = this.getStartAndEnd();
@@ -333,7 +358,7 @@
         var pageSize = _props5.pageSize;
         var length = _props5.length;
 
-        this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
+        this.setNextState({ size: Math.min(this.state.size + pageSize, length) }, cb);
       }
     }, {
       key: 'updateVariableFrame',
@@ -372,7 +397,7 @@
           ++size;
         }
 
-        this.setState({ from: from, size: size }, cb);
+        this.setNextState({ from: from, size: size }, cb);
       }
     }, {
       key: 'updateUniformFrame',
@@ -394,7 +419,7 @@
         var from = _constrain2.from;
         var size = _constrain2.size;
 
-        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
+        return this.setNextState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
     }, {
       key: 'getSpaceBefore',
@@ -534,7 +559,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this = this;
+        var _this2 = this;
 
         var _props8 = this.props;
         var itemRenderer = _props8.itemRenderer;
@@ -547,7 +572,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this.items = c;
+          return _this2.items = c;
         });
       }
     }, {

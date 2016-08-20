@@ -15,6 +15,12 @@ const SCROLL_START_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
+const requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
+const cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 export default class extends Component {
   static displayName = 'ReactList';
@@ -55,6 +61,7 @@ export default class extends Component {
       this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.rafId = null;
   }
 
   componentWillReceiveProps(next) {
@@ -80,6 +87,9 @@ export default class extends Component {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame);
     this.scrollParent.removeEventListener('mousewheel', NOOP);
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+    }
   }
 
   getOffset(el) {
@@ -217,6 +227,22 @@ export default class extends Component {
     this.scrollParent.addEventListener('mousewheel', NOOP);
   }
 
+  setNextState(state, cb) {
+    if (!requestAnimationFrame) {
+      this.setState(state, cb);
+      return;
+    }
+
+    if (this.rafId !== null) {
+      return;
+    }
+
+    this.rafId = requestAnimationFrame(() => {
+      this.setState(state, cb);
+      this.rafId = null;
+    });
+  }
+
   updateSimpleFrame(cb) {
     const {end} = this.getStartAndEnd();
     const itemEls = findDOMNode(this.items).children;
@@ -233,7 +259,7 @@ export default class extends Component {
     if (elEnd > end) return cb();
 
     const {pageSize, length} = this.props;
-    this.setState({size: Math.min(this.state.size + pageSize, length)}, cb);
+    this.setNextState({size: Math.min(this.state.size + pageSize, length)}, cb);
   }
 
   updateVariableFrame(cb) {
@@ -265,7 +291,7 @@ export default class extends Component {
       ++size;
     }
 
-    this.setState({from, size}, cb);
+    this.setNextState({from, size}, cb);
   }
 
   updateUniformFrame(cb) {
@@ -282,7 +308,7 @@ export default class extends Component {
       this.props
     );
 
-    return this.setState({itemsPerRow, from, itemSize, size}, cb);
+    return this.setNextState({itemsPerRow, from, itemSize, size}, cb);
   }
 
   getSpaceBefore(index, cache = {}) {
