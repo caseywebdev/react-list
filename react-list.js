@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'react', 'react-dom'], factory);
+    define(['exports', 'module', 'react', 'react-dom', 'react-addons-shallow-compare'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('react'), require('react-dom'));
+    factory(exports, module, require('react'), require('react-dom'), require('react-addons-shallow-compare'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.React, global.ReactDOM);
+    factory(mod.exports, mod, global.React, global.ReactDOM, global.shallowCompare);
     global.ReactList = mod.exports;
   }
-})(this, function (exports, module, _react, _reactDom) {
+})(this, function (exports, module, _react, _reactDom, _reactAddonsShallowCompare) {
   'use strict';
 
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -27,17 +27,9 @@
 
   var _ReactDOM = _interopRequireDefault(_reactDom);
 
+  var _shallowCompare = _interopRequireDefault(_reactAddonsShallowCompare);
+
   var findDOMNode = _ReactDOM['default'].findDOMNode;
-
-  var isEqualSubset = function isEqualSubset(a, b) {
-    for (var key in a) {
-      if (a[key] !== b[key]) return false;
-    }return true;
-  };
-
-  var isEqual = function isEqual(a, b) {
-    return isEqualSubset(a, b) && isEqualSubset(b, a);
-  };
 
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
@@ -50,6 +42,8 @@
   var SIZE_KEYS = { x: 'width', y: 'height' };
 
   var NOOP = function NOOP() {};
+  var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+  var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
   var _default = (function (_Component) {
     _inherits(_default, _Component);
@@ -121,6 +115,7 @@
 
       this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       this.cache = {};
+      this.rafId = null;
     }
 
     _createClass(_default, [{
@@ -137,13 +132,13 @@
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrame = this.updateFrame.bind(this);
-        window.addEventListener('resize', this.updateFrame);
+        window.addEventListener('resize', this.updateFrame, { passive: true });
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
       key: 'shouldComponentUpdate',
       value: function shouldComponentUpdate(props, state) {
-        return !isEqual(props, this.props) || !isEqual(state, this.state);
+        return (0, _shallowCompare['default'])(this, props, state);
       }
     }, {
       key: 'componentDidUpdate',
@@ -156,6 +151,9 @@
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame);
         this.scrollParent.removeEventListener('mousewheel', NOOP);
+        if (this.rafId !== null) {
+          cancelAnimationFrame(this.rafId);
+        }
       }
     }, {
       key: 'getOffset',
@@ -314,8 +312,27 @@
           prev.removeEventListener('scroll', this.updateFrame);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame);
+        this.scrollParent.addEventListener('scroll', this.updateFrame, { passive: true });
         this.scrollParent.addEventListener('mousewheel', NOOP);
+      }
+    }, {
+      key: 'setNextState',
+      value: function setNextState(state, cb) {
+        var _this = this;
+
+        if (!requestAnimationFrame) {
+          this.setState(state, cb);
+          return;
+        }
+
+        if (this.rafId !== null) {
+          return;
+        }
+
+        this.rafId = requestAnimationFrame(function () {
+          _this.setState(state, cb);
+          _this.rafId = null;
+        });
       }
     }, {
       key: 'updateSimpleFrame',
@@ -341,7 +358,7 @@
         var pageSize = _props5.pageSize;
         var length = _props5.length;
 
-        this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
+        this.setNextState({ size: Math.min(this.state.size + pageSize, length) }, cb);
       }
     }, {
       key: 'updateVariableFrame',
@@ -380,7 +397,7 @@
           ++size;
         }
 
-        this.setState({ from: from, size: size }, cb);
+        this.setNextState({ from: from, size: size }, cb);
       }
     }, {
       key: 'updateUniformFrame',
@@ -402,7 +419,7 @@
         var from = _constrain2.from;
         var size = _constrain2.size;
 
-        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
+        return this.setNextState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
     }, {
       key: 'getSpaceBefore',
@@ -542,7 +559,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this = this;
+        var _this2 = this;
 
         var _props8 = this.props;
         var itemRenderer = _props8.itemRenderer;
@@ -555,7 +572,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this.items = c;
+          return _this2.items = c;
         });
       }
     }, {

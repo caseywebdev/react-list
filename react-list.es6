@@ -1,14 +1,8 @@
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import shallowCompare from 'react-addons-shallow-compare';
 
 const {findDOMNode} = ReactDOM;
-
-const isEqualSubset = (a, b) => {
-  for (let key in a) if (a[key] !== b[key]) return false;
-  return true;
-};
-
-const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
@@ -21,6 +15,12 @@ const SCROLL_START_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
+const requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
+const cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 export default class extends Component {
   static displayName = 'ReactList';
@@ -61,6 +61,7 @@ export default class extends Component {
       this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.rafId = null;
   }
 
   componentWillReceiveProps(next) {
@@ -70,12 +71,12 @@ export default class extends Component {
 
   componentDidMount() {
     this.updateFrame = this.updateFrame.bind(this);
-    window.addEventListener('resize', this.updateFrame);
+    window.addEventListener('resize', this.updateFrame, {passive: true});
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
   shouldComponentUpdate(props, state) {
-    return !isEqual(props, this.props) || !isEqual(state, this.state);
+    return shallowCompare(this, props, state);
   }
 
   componentDidUpdate() {
@@ -86,6 +87,9 @@ export default class extends Component {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame);
     this.scrollParent.removeEventListener('mousewheel', NOOP);
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+    }
   }
 
   getOffset(el) {
@@ -219,8 +223,24 @@ export default class extends Component {
       prev.removeEventListener('scroll', this.updateFrame);
       prev.removeEventListener('mousewheel', NOOP);
     }
-    this.scrollParent.addEventListener('scroll', this.updateFrame);
+    this.scrollParent.addEventListener('scroll', this.updateFrame, {passive: true});
     this.scrollParent.addEventListener('mousewheel', NOOP);
+  }
+
+  setNextState(state, cb) {
+    if (!requestAnimationFrame) {
+      this.setState(state, cb);
+      return;
+    }
+
+    if (this.rafId !== null) {
+      return;
+    }
+
+    this.rafId = requestAnimationFrame(() => {
+      this.setState(state, cb);
+      this.rafId = null;
+    });
   }
 
   updateSimpleFrame(cb) {
@@ -239,7 +259,7 @@ export default class extends Component {
     if (elEnd > end) return cb();
 
     const {pageSize, length} = this.props;
-    this.setState({size: Math.min(this.state.size + pageSize, length)}, cb);
+    this.setNextState({size: Math.min(this.state.size + pageSize, length)}, cb);
   }
 
   updateVariableFrame(cb) {
@@ -271,7 +291,7 @@ export default class extends Component {
       ++size;
     }
 
-    this.setState({from, size}, cb);
+    this.setNextState({from, size}, cb);
   }
 
   updateUniformFrame(cb) {
@@ -288,7 +308,7 @@ export default class extends Component {
       this.props
     );
 
-    return this.setState({itemsPerRow, from, itemSize, size}, cb);
+    return this.setNextState({itemsPerRow, from, itemSize, size}, cb);
   }
 
   getSpaceBefore(index, cache = {}) {

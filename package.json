@@ -10,7 +10,8 @@
   },
   "peerDependencies": {
     "react": "0.14 || >= 15.0.0-rc.1 < 16",
-    "react-dom": "0.14 || >= 15.0.0-rc.1 < 16"
+    "react-dom": "0.14 || >= 15.0.0-rc.1 < 16",
+    "react-addons-shallow-compare": "0.14 || >= 15.0.0-rc.1 < 16"
   },
   "devDependencies": {
     "cogs": "1.0.7",
