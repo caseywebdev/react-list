@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.21
+- Enable passive option in scroll and mousewheel event handlers. (#129)
+
 ## 0.7.20
 - Fix body scroll size bug. (#117)
 
