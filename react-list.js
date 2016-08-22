@@ -100,6 +100,8 @@
 
   var NOOP = function NOOP() {};
 
+  var PASSIVE = { passive: true };
+
   _module3.default.exports = (_temp = _class = function (_Component) {
     _inherits(ReactList, _Component);
 
@@ -318,8 +320,8 @@
           prev.removeEventListener('scroll', this.updateFrame);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame);
-        this.scrollParent.addEventListener('mousewheel', NOOP);
+        this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+        this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
       }
     }, {
       key: 'updateSimpleFrame',

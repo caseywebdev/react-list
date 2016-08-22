@@ -23,6 +23,8 @@ const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
 
+const PASSIVE = {passive: true};
+
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
@@ -220,8 +222,8 @@ module.exports = class ReactList extends Component {
       prev.removeEventListener('scroll', this.updateFrame);
       prev.removeEventListener('mousewheel', NOOP);
     }
-    this.scrollParent.addEventListener('scroll', this.updateFrame);
-    this.scrollParent.addEventListener('mousewheel', NOOP);
+    this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+    this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
   }
 
   updateSimpleFrame(cb) {
