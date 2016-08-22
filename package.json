@@ -9,12 +9,16 @@
     "url": "https://github.com/orgsync/react-list"
   },
   "peerDependencies": {
-    "react": "0.14 || >= 15.0.0-rc.1 < 16",
-    "react-dom": "0.14 || >= 15.0.0-rc.1 < 16"
+    "react": "0.14 || 15",
+    "react-dom": "0.14 || 15"
   },
   "devDependencies": {
-    "cogs": "1.0.7",
-    "cogs-transformer-babel": "1.0.12",
+    "babel-preset-es2015": "6.13.2",
+    "babel-preset-react": "6.11.1",
+    "babel-preset-stage-0": "6.5.0",
+    "babel-plugin-transform-es2015-modules-umd": "6.12.0",
+    "cogs": "2.0.9",
+    "cogs-transformer-babel": "2.0.4",
     "cogs-transformer-replace": "1.0.1"
   }
 }

@@ -3,11 +3,10 @@
 <html>
   <head>
     <title>ReactList Examples</title>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react-dom.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.js'></script>
     <script src='react-list.js'></script>
     <script src='examples/index.js'></script>
-    <script src='http://localhost:35729/livereload.js'></script>
     <style>
       body {
         margin: 0;
@@ -89,7 +88,7 @@
     <div id='main'></div>
     <script>
       window.ReactDOM.render(
-        window.React.createFactory(window.index)(),
+        window.React.createFactory(window.index.default)(),
         document.getElementById('main')
       );
     </script>

@@ -1,3 +1,4 @@
+import module from 'module';
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 
@@ -22,7 +23,7 @@ const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
 
-export default class extends Component {
+module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
   static propTypes = {

@@ -1,21 +1,21 @@
 module.exports = {
-  in: {
-    es6: {
-      out: 'js',
-      transformers: [
-        {
-          name: 'babel',
-          options: {modules: 'umd', stage: 0}
+  pipe: {
+    name: 'babel',
+    options: {
+      presets: ['es2015', 'stage-0', 'react'],
+      plugins: [['transform-es2015-modules-umd', {
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          'react-list': 'ReactList'
         },
-        {
-          name: 'replace',
-          only: 'react-list.es6',
-          options: {patterns: {reactList: 'ReactList'}}}
-      ]
+        moduleId: 'react-list',
+        exactGlobals: true
+      }]]
     }
   },
   builds: {
-    'react-list.es6': '.',
-    'examples/index.es6': 'examples'
+    'react-list.es6': 'react-list.js',
+    'examples/index.es6': 'examples/index.js'
   }
 };
