@@ -36,7 +36,7 @@ const PASSIVE = (() => {
         return false;
       }
     });
-  } catch (e) {}
+  } catch (e) {/* ignore */}
   return hasSupport;
 })() ? {passive: true} : false;
 
@@ -450,4 +450,4 @@ module.exports = class ReactList extends Component {
     };
     return <div {...{style}}><div style={listStyle}>{items}</div></div>;
   }
-}
+};
