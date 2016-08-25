@@ -23,7 +23,22 @@ const SIZE_KEYS = {x: 'width', y: 'height'};
 
 const NOOP = () => {};
 
-const PASSIVE = {passive: true};
+// If a browser doesn't support the `options` argument to
+// add/removeEventListener, we need to check, otherwise we will
+// accidentally set `capture` with a truthy value.
+const PASSIVE = (() => {
+  if (typeof window === 'undefined') return false;
+  let hasSupport = false;
+  try {
+    document.createElement('div').addEventListener('test', NOOP, {
+      get passive() {
+        hasSupport = true;
+        return false;
+      }
+    });
+  } catch (e) {}
+  return hasSupport;
+}() ? {passive: true} : false;
 
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
@@ -87,8 +102,8 @@ module.exports = class ReactList extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateFrame);
-    this.scrollParent.removeEventListener('scroll', this.updateFrame);
-    this.scrollParent.removeEventListener('mousewheel', NOOP);
+    this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+    this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
   }
 
   getOffset(el) {
