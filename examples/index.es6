@@ -123,7 +123,7 @@ const examples = [
   }
 ];
 
-export default class extends React.Component {
+export default class ExampleClass extends React.Component {
   renderExamples() {
     return examples.map((props, key) =>
       <div key={key} className={`example axis-${props.axis}`}>
