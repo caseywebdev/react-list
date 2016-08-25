@@ -38,7 +38,7 @@ const PASSIVE = (() => {
     });
   } catch (e) {}
   return hasSupport;
-}() ? {passive: true} : false;
+})() ? {passive: true} : false;
 
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
