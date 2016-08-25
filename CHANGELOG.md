@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.22
+- Properly register and deregister event handlers with options. (#131)
+
 ## 0.7.21
 - Enable passive option in scroll and mousewheel event handlers. (#129)
 
