@@ -123,7 +123,7 @@
     function ReactList(props) {
       _classCallCheck(this, ReactList);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ReactList).call(this, props));
+      var _this = _possibleConstructorReturn(this, (ReactList.__proto__ || Object.getPrototypeOf(ReactList)).call(this, props));
 
       var _this$props = _this.props;
       var initialIndex = _this$props.initialIndex;

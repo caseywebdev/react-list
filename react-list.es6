@@ -450,4 +450,4 @@ module.exports = class ReactList extends Component {
     };
     return <div {...{style}}><div style={listStyle}>{items}</div></div>;
   }
-}
+};

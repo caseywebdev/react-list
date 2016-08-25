@@ -13,12 +13,16 @@
     "react-dom": "0.14 || 15"
   },
   "devDependencies": {
-    "babel-preset-es2015": "6.13.2",
+    "babel-eslint": "6.1.2",
+    "babel-plugin-transform-es2015-modules-umd": "6.12.0",
+    "babel-preset-es2015": "6.14.0",
     "babel-preset-react": "6.11.1",
     "babel-preset-stage-0": "6.5.0",
-    "babel-plugin-transform-es2015-modules-umd": "6.12.0",
     "cogs": "2.0.9",
     "cogs-transformer-babel": "2.0.4",
-    "cogs-transformer-replace": "1.0.1"
+    "cogs-transformer-eslint": "2.0.0",
+    "cogs-transformer-replace": "1.0.1",
+    "eslint-plugin-react": "6.1.2",
+    "eslint": "3.3.1"
   }
 }

@@ -1,19 +1,22 @@
 module.exports = {
-  pipe: {
-    name: 'babel',
-    options: {
-      presets: ['es2015', 'stage-0', 'react'],
-      plugins: [['transform-es2015-modules-umd', {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          'react-list': 'ReactList'
-        },
-        moduleId: 'react-list',
-        exactGlobals: true
-      }]]
+  pipe: [
+    'eslint',
+    {
+      name: 'babel',
+      options: {
+        presets: ['es2015', 'stage-0', 'react'],
+        plugins: [['transform-es2015-modules-umd', {
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM',
+            'react-list': 'ReactList'
+          },
+          moduleId: 'react-list',
+          exactGlobals: true
+        }]]
+      }
     }
-  },
+  ],
   builds: {
     'react-list.es6': 'react-list.js',
     'examples/index.es6': 'examples/index.js'
