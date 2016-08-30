@@ -22,7 +22,7 @@
     "cogs-transformer-babel": "2.0.4",
     "cogs-transformer-eslint": "2.0.0",
     "cogs-transformer-replace": "1.0.1",
-    "eslint-plugin-react": "6.1.2",
-    "eslint": "3.3.1"
+    "eslint-plugin-react": "6.2.0",
+    "eslint": "3.4.0"
   }
 }
