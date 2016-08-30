@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0
+- Dramatically reduced the number of `setState` calls which should yield better
+  performance.
+- Because of the reduced `setState` calls, the shallow equality check in
+  `shouldComponentUpdate` has been removed which should lead to less confusion
+  when attempting to re-render list items.
+- No changes should need to be made by component consumers, but I've bumped the
+  minor version because the `shouldComponentUpdate` change is significant.
+
 ## 0.7.22
 - Properly register and deregister event handlers with options. (#131)
 
