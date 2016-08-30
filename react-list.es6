@@ -4,13 +4,6 @@ import ReactDOM from 'react-dom';
 
 const {findDOMNode} = ReactDOM;
 
-const isEqualSubset = (a, b) => {
-  for (let key in a) if (a[key] !== b[key]) return false;
-  return true;
-};
-
-const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
-
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
 const INNER_SIZE_KEYS = {x: 'innerWidth', y: 'innerHeight'};
@@ -83,7 +76,7 @@ module.exports = class ReactList extends Component {
 
   componentWillReceiveProps(next) {
     let {from, size, itemsPerRow} = this.state;
-    this.setState(this.constrain(from, size, itemsPerRow, next));
+    this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
   }
 
   componentDidMount() {
@@ -92,12 +85,15 @@ module.exports = class ReactList extends Component {
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
-  shouldComponentUpdate(props, state) {
-    return !isEqual(props, this.props) || !isEqual(state, this.state);
-  }
-
   componentDidUpdate() {
     this.updateFrame();
+  }
+
+  maybeSetState(b, cb) {
+    const a = this.state;
+    for (let key in b) if (a[key] !== b[key]) return this.setState(b, cb);
+
+    cb();
   }
 
   componentWillUnmount() {
@@ -257,7 +253,8 @@ module.exports = class ReactList extends Component {
     if (elEnd > end) return cb();
 
     const {pageSize, length} = this.props;
-    this.setState({size: Math.min(this.state.size + pageSize, length)}, cb);
+    const size = Math.min(this.state.size + pageSize, length);
+    this.maybeSetState({size}, cb);
   }
 
   updateVariableFrame(cb) {
@@ -289,7 +286,7 @@ module.exports = class ReactList extends Component {
       ++size;
     }
 
-    this.setState({from, size}, cb);
+    this.maybeSetState({from, size}, cb);
   }
 
   updateUniformFrame(cb) {
@@ -306,7 +303,7 @@ module.exports = class ReactList extends Component {
       this.props
     );
 
-    return this.setState({itemsPerRow, from, itemSize, size}, cb);
+    return this.maybeSetState({itemsPerRow, from, itemSize, size}, cb);
   }
 
   getSpaceBefore(index, cache = {}) {

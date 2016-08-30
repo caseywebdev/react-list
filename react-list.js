@@ -78,16 +78,6 @@
   var findDOMNode = _reactDom2.default.findDOMNode;
 
 
-  var isEqualSubset = function isEqualSubset(a, b) {
-    for (var key in a) {
-      if (a[key] !== b[key]) return false;
-    }return true;
-  };
-
-  var isEqual = function isEqual(a, b) {
-    return isEqualSubset(a, b) && isEqualSubset(b, a);
-  };
-
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var INNER_SIZE_KEYS = { x: 'innerWidth', y: 'innerHeight' };
@@ -149,7 +139,7 @@
         var size = _state.size;
         var itemsPerRow = _state.itemsPerRow;
 
-        this.setState(this.constrain(from, size, itemsPerRow, next));
+        this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
       }
     }, {
       key: 'componentDidMount',
@@ -159,14 +149,17 @@
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
-      key: 'shouldComponentUpdate',
-      value: function shouldComponentUpdate(props, state) {
-        return !isEqual(props, this.props) || !isEqual(state, this.state);
-      }
-    }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate() {
         this.updateFrame();
+      }
+    }, {
+      key: 'maybeSetState',
+      value: function maybeSetState(b, cb) {
+        var a = this.state;
+        for (var key in b) {
+          if (a[key] !== b[key]) return this.setState(b, cb);
+        }cb();
       }
     }, {
       key: 'componentWillUnmount',
@@ -362,7 +355,8 @@
         var pageSize = _props4.pageSize;
         var length = _props4.length;
 
-        this.setState({ size: Math.min(this.state.size + pageSize, length) }, cb);
+        var size = Math.min(this.state.size + pageSize, length);
+        this.maybeSetState({ size: size }, cb);
       }
     }, {
       key: 'updateVariableFrame',
@@ -401,7 +395,7 @@
           ++size;
         }
 
-        this.setState({ from: from, size: size }, cb);
+        this.maybeSetState({ from: from, size: size }, cb);
       }
     }, {
       key: 'updateUniformFrame',
@@ -425,7 +419,7 @@
         var size = _constrain.size;
 
 
-        return this.setState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
+        return this.maybeSetState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
     }, {
       key: 'getSpaceBefore',
