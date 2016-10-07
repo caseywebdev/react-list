@@ -81,12 +81,13 @@ module.exports = class ReactList extends Component {
 
   componentDidMount() {
     this.updateFrame = this.updateFrame.bind(this);
-    window.addEventListener('resize', this.updateFrame);
+    this.updateFrameAsync = this.updateFrameAsync.bind(this);
+    window.addEventListener('resize', this.updateFrameAsync);
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
   componentDidUpdate() {
-    this.updateFrame();
+    this.updateFrameAsync();
   }
 
   maybeSetState(b, cb) {
@@ -97,9 +98,10 @@ module.exports = class ReactList extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateFrame);
-    this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+    window.removeEventListener('resize', this.updateFrameAsync);
+    this.scrollParent.removeEventListener('scroll', this.updateFrameAsync, PASSIVE);
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+    window.cancelAnimationFrame(this.frameRequested);
   }
 
   getOffset(el) {
@@ -215,7 +217,15 @@ module.exports = class ReactList extends Component {
     return {itemSize, itemsPerRow};
   }
 
+  updateFrameAsync() {
+    if (this.frameRequested) {
+      return;
+    }
+    this.frameRequested = window.requestAnimationFrame(this.updateFrame);
+  }
+
   updateFrame(cb) {
+    this.frameRequested = null;
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
@@ -230,10 +240,10 @@ module.exports = class ReactList extends Component {
     this.scrollParent = this.getScrollParent();
     if (prev === this.scrollParent) return;
     if (prev) {
-      prev.removeEventListener('scroll', this.updateFrame);
+      prev.removeEventListener('scroll', this.updateFrameAsync);
       prev.removeEventListener('mousewheel', NOOP);
     }
-    this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+    this.scrollParent.addEventListener('scroll', this.updateFrameAsync, PASSIVE);
     this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
   }
 

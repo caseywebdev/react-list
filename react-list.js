@@ -145,13 +145,14 @@
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrame = this.updateFrame.bind(this);
-        window.addEventListener('resize', this.updateFrame);
+        this.updateFrameAsync = this.updateFrameAsync.bind(this);
+        window.addEventListener('resize', this.updateFrameAsync);
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate() {
-        this.updateFrame();
+        this.updateFrameAsync();
       }
     }, {
       key: 'maybeSetState',
@@ -164,9 +165,10 @@
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
-        window.removeEventListener('resize', this.updateFrame);
-        this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+        window.removeEventListener('resize', this.updateFrameAsync);
+        this.scrollParent.removeEventListener('scroll', this.updateFrameAsync, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+        window.cancelAnimationFrame(this.frameRequested);
       }
     }, {
       key: 'getOffset',
@@ -258,7 +260,7 @@
     }, {
       key: 'getStartAndEnd',
       value: function getStartAndEnd() {
-        var threshold = arguments.length <= 0 || arguments[0] === undefined ? this.props.threshold : arguments[0];
+        var threshold = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props.threshold;
 
         var scroll = this.getScroll();
         var start = Math.max(0, scroll - threshold);
@@ -305,8 +307,17 @@
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
     }, {
+      key: 'updateFrameAsync',
+      value: function updateFrameAsync() {
+        if (this.frameRequested) {
+          return;
+        }
+        this.frameRequested = window.requestAnimationFrame(this.updateFrame);
+      }
+    }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
+        this.frameRequested = null;
         this.updateScrollParent();
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
@@ -325,10 +336,10 @@
         this.scrollParent = this.getScrollParent();
         if (prev === this.scrollParent) return;
         if (prev) {
-          prev.removeEventListener('scroll', this.updateFrame);
+          prev.removeEventListener('scroll', this.updateFrameAsync);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+        this.scrollParent.addEventListener('scroll', this.updateFrameAsync, PASSIVE);
         this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
       }
     }, {
@@ -424,7 +435,7 @@
     }, {
       key: 'getSpaceBefore',
       value: function getSpaceBefore(index) {
-        var cache = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+        var cache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
         if (cache[index] != null) return cache[index];
 
