@@ -582,7 +582,7 @@
 
         var items = [];
         for (var i = 0; i < size; ++i) {
-          items.push(itemRenderer(from + i, i));
+          items.push(itemRenderer(from + i, i, size));
         }return itemsRenderer(items, function (c) {
           return _this2.items = c;
         });
