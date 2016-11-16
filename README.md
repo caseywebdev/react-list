@@ -187,6 +187,16 @@ more complicated with margins, so they are not supported. Use a transparent
 border or padding or an element with nested elements to achieve the desired
 spacing.
 
+##### Why is there no onScroll event handler?
+
+If you need an onScroll handler, just add the handler to the div wrapping your ReactList component: 
+
+```
+<div style={{height: 300, overflow: 'auto'}} onScroll={this.handleScroll}>
+  <ReactList ... />
+</div>
+```
+
 ## Development
 
 ```bash
