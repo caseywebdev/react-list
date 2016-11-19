@@ -184,9 +184,6 @@ module.exports = class ReactList extends Component {
   getItemSizeAndItemsPerRow() {
     const {axis, useStaticSize} = this.props;
     let {itemSize, itemsPerRow} = this.state;
-    if (useStaticSize && itemSize && itemsPerRow) {
-      return {itemSize, itemsPerRow};
-    }
 
     const itemEls = findDOMNode(this.items).children;
     if (!itemEls.length) return {};
@@ -197,9 +194,12 @@ module.exports = class ReactList extends Component {
     // thousandths of a pixel) different size for the same element between
     // renders. This can cause an infinite render loop, so only change the
     // itemSize when it is significantly different.
-    const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
-    const delta = Math.abs(firstElSize - itemSize);
-    if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
+    if(useStaticSize && itemSize){
+      const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
+
+      const delta = Math.abs(firstElSize - itemSize);
+      if (isNaN(delta) || delta >= 1) itemSize = firstElSize;
+    }
 
     if (!itemSize) return {};
 
