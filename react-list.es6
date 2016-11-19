@@ -194,7 +194,7 @@ module.exports = class ReactList extends Component {
     // thousandths of a pixel) different size for the same element between
     // renders. This can cause an infinite render loop, so only change the
     // itemSize when it is significantly different.
-    if (useStaticSize && itemSize) {
+    if (!useStaticSize || !itemSize) {
       const firstElSize = firstEl[OFFSET_SIZE_KEYS[axis]];
 
       const delta = Math.abs(firstElSize - itemSize);
