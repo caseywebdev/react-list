@@ -49,7 +49,8 @@ module.exports = class ReactList extends Component {
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: PropTypes.bool,
-    useTranslate3d: PropTypes.bool
+    useTranslate3d: PropTypes.bool,
+    usePosition: PropTypes.bool
   };
 
   static defaultProps = {
@@ -61,7 +62,8 @@ module.exports = class ReactList extends Component {
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    usePosition: false
   };
 
   constructor(props) {
@@ -419,7 +421,7 @@ module.exports = class ReactList extends Component {
   }
 
   render() {
-    const {axis, length, type, useTranslate3d} = this.props;
+    const {axis, length, type, useTranslate3d, usePosition} = this.props;
     const {from, itemsPerRow} = this.state;
 
     const items = this.renderItems();
@@ -436,15 +438,24 @@ module.exports = class ReactList extends Component {
     const offset = this.getSpaceBefore(from, cache);
     const x = axis === 'x' ? offset : 0;
     const y = axis === 'y' ? offset : 0;
-    const transform =
-      useTranslate3d ?
-      `translate3d(${x}px, ${y}px, 0)` :
-      `translate(${x}px, ${y}px)`;
-    const listStyle = {
-      msTransform: transform,
-      WebkitTransform: transform,
-      transform
-    };
+    let listStyle;
+    if (usePosition) {
+      listStyle = {
+        position: 'relative',
+        top: y,
+        left: x
+      };
+    } else {
+      const transform =
+        useTranslate3d ?
+        `translate3d(${x}px, ${y}px, 0)` :
+        `translate(${x}px, ${y}px)`;
+      listStyle = {
+        msTransform: transform,
+        WebkitTransform: transform,
+        transform
+      };
+    }
     return <div {...{style}}><div style={listStyle}>{items}</div></div>;
   }
 };

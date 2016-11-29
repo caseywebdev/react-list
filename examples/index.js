@@ -178,6 +178,12 @@
     itemSizeGetter: getHeight,
     type: 'variable'
   }, {
+    length: 10000,
+    itemRenderer: renderVariableHeightItem,
+    itemSizeGetter: getHeight,
+    usePosition: true,
+    type: 'variable'
+  }, {
     axis: 'x',
     length: 10000,
     itemRenderer: renderVariableWidthItem,
