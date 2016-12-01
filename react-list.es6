@@ -33,6 +33,15 @@ const PASSIVE = (() => {
   return hasSupport;
 })() ? {passive: true} : false;
 
+const isEqualSubset = (a, b) => {
+  if (!a || !b) return false;
+  for (let key in b) if (a[key] !== b[key]) return false;
+
+  return true;
+};
+
+const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
+
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
@@ -72,6 +81,7 @@ module.exports = class ReactList extends Component {
       this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.updateCounter = 0;
   }
 
   componentWillReceiveProps(next) {
@@ -85,15 +95,25 @@ module.exports = class ReactList extends Component {
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
-  componentDidUpdate() {
-    this.updateFrame();
+  componentDidUpdate(prevProps, prevState) {
+    // If the parent has changed any props, we want to update.
+    if (!isEqual(this.props, prevProps)) return this.updateFrame();
+    // If size has changed, we also want to update. This is important
+    // to ensure that lists fully fill, no matter the `pageSize`.
+    if (this.state.size !== prevState.size) {
+      // Size is unstable; we've done too many renders in a row.
+      if (++this.updateCounter > 100) return;
+      // This can cascade, so we want to keep it from possibly
+      // blowing the stack.
+      return setTimeout(() => this.updateFrame(), 0);
+    }
+    this.updateCounter = 0;
   }
 
-  maybeSetState(b, cb) {
-    const a = this.state;
-    for (let key in b) if (a[key] !== b[key]) return this.setState(b, cb);
+  maybeSetState(newState, cb) {
+    if (isEqualSubset(this.state, newState)) return cb();
 
-    cb();
+    this.setState(newState, cb);
   }
 
   componentWillUnmount() {
@@ -303,7 +323,7 @@ module.exports = class ReactList extends Component {
       this.props
     );
 
-    return this.maybeSetState({itemsPerRow, from, itemSize, size}, cb);
+    this.maybeSetState({itemsPerRow, from, itemSize, size}, cb);
   }
 
   getSpaceBefore(index, cache = {}) {
