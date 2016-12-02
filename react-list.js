@@ -107,6 +107,18 @@
     return hasSupport;
   }() ? { passive: true } : false;
 
+  var UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
+
+  var isEqualSubset = function isEqualSubset(a, b) {
+    for (var key in b) {
+      if (a[key] !== b[key]) return false;
+    }return true;
+  };
+
+  var isEqual = function isEqual(a, b) {
+    return isEqualSubset(a, b) && isEqualSubset(b, a);
+  };
+
   _module3.default.exports = (_temp = _class = function (_Component) {
     _inherits(ReactList, _Component);
 
@@ -127,6 +139,8 @@
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
+      _this.prevPrevState = {};
+      _this.unstable = false;
       return _this;
     }
 
@@ -149,16 +163,38 @@
       }
     }, {
       key: 'componentDidUpdate',
-      value: function componentDidUpdate() {
-        this.updateFrame();
+      value: function componentDidUpdate(prevProps, prevState) {
+
+        // If the list has reached an unstable state, prevent an infinite loop.
+        if (this.unstable) return;
+
+        // Update calculations if props have changed between renders.
+        var propsEqual = isEqual(this.props, prevProps);
+        if (!propsEqual) {
+          this.prevPrevState = {};
+          return this.updateFrame();
+        }
+
+        // Check for ping-ponging between the same two states.
+        var stateEqual = isEqual(this.state, prevState);
+        var pingPong = !stateEqual && isEqual(this.state, this.prevPrevState);
+
+        // Ping-ponging between states means this list is unstable, log an error.
+        if (pingPong) {
+          this.unstable = true;
+          return console.error(UNSTABLE_MESSAGE);
+        }
+
+        // Update calculations if state has changed between renders.
+        this.prevPrevState = prevState;
+        if (!stateEqual) this.updateFrame();
       }
     }, {
       key: 'maybeSetState',
       value: function maybeSetState(b, cb) {
-        var a = this.state;
-        for (var key in b) {
-          if (a[key] !== b[key]) return this.setState(b, cb);
-        }cb();
+        if (isEqualSubset(this.state, b)) return cb();
+
+        this.setState(b, cb);
       }
     }, {
       key: 'componentWillUnmount',
