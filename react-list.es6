@@ -332,6 +332,10 @@ module.exports = class ReactList extends Component {
   }
 
   cacheSizes() {
+    // is hidden
+    if (findDOMNode(this).offsetParent === null) {
+      return;
+    }
     const {cache} = this;
     const {from} = this.state;
     const itemEls = findDOMNode(this.items).children;
