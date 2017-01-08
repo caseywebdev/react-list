@@ -90,6 +90,7 @@ module.exports = class ReactList extends Component {
   }
 
   componentDidMount() {
+    this.mounted = true;
     this.updateFrame = this.updateFrame.bind(this);
     window.addEventListener('resize', this.updateFrame);
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
@@ -117,6 +118,7 @@ module.exports = class ReactList extends Component {
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
@@ -236,6 +238,7 @@ module.exports = class ReactList extends Component {
   }
 
   updateFrame(cb) {
+    if (!this.mounted) return;
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
