@@ -171,15 +171,6 @@ viewport.
 
 ## FAQ
 
-##### Why is the list freezing/overflowing the stack?
-
-This happens when specifying the `uniform` type without actually providing
-uniform size elements. The component attempts to draw only the minimum necessary
-elements at one time and that minimum element calculation is based off the first
-element in the list. When the first element does not match the other elements,
-the calculation will be wrong and the component will never be able to fully
-resolve the ideal necessary elements.
-
 ##### Why doesn't it work with margins?
 
 The calculations to figure out element positioning and size get significantly
@@ -189,7 +180,7 @@ spacing.
 
 ##### Why is there no onScroll event handler?
 
-If you need an onScroll handler, just add the handler to the div wrapping your ReactList component: 
+If you need an onScroll handler, just add the handler to the div wrapping your ReactList component:
 
 ```
 <div style={{height: 300, overflow: 'auto'}} onScroll={this.handleScroll}>

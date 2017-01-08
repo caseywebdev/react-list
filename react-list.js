@@ -107,6 +107,17 @@
     return hasSupport;
   }() ? { passive: true } : false;
 
+  var isEqualSubset = function isEqualSubset(a, b) {
+    if (!a || !b) return false;
+    for (var key in b) {
+      if (a[key] !== b[key]) return false;
+    }return true;
+  };
+
+  var isEqual = function isEqual(a, b) {
+    return isEqualSubset(a, b) && isEqualSubset(b, a);
+  };
+
   _module3.default.exports = (_temp = _class = function (_Component) {
     _inherits(ReactList, _Component);
 
@@ -127,6 +138,7 @@
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
+      _this.updateCounter = 0;
       return _this;
     }
 
@@ -143,26 +155,42 @@
     }, {
       key: 'componentDidMount',
       value: function componentDidMount() {
+        this.mounted = true;
         this.updateFrame = this.updateFrame.bind(this);
         window.addEventListener('resize', this.updateFrame);
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
       key: 'componentDidUpdate',
-      value: function componentDidUpdate() {
-        this.updateFrame();
+      value: function componentDidUpdate(prevProps, prevState) {
+        var _this2 = this;
+
+        // If the parent has changed any props, we want to update.
+        if (!isEqual(this.props, prevProps)) return this.updateFrame();
+        // If size has changed, we also want to update. This is important
+        // to ensure that lists fully fill, no matter the `pageSize`.
+        if (this.state.size !== prevState.size) {
+          // Size is unstable; we've done too many renders in a row.
+          if (++this.updateCounter > 100) return;
+          // This can cascade, so we want to keep it from possibly
+          // blowing the stack.
+          return setTimeout(function () {
+            return _this2.updateFrame();
+          }, 0);
+        }
+        this.updateCounter = 0;
       }
     }, {
       key: 'maybeSetState',
-      value: function maybeSetState(b, cb) {
-        var a = this.state;
-        for (var key in b) {
-          if (a[key] !== b[key]) return this.setState(b, cb);
-        }cb();
+      value: function maybeSetState(newState, cb) {
+        if (isEqualSubset(this.state, newState)) return cb();
+
+        this.setState(newState, cb);
       }
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
+        this.mounted = false;
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
@@ -306,6 +334,7 @@
     }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
+        if (!this.mounted) return;
         this.updateScrollParent();
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
@@ -412,7 +441,7 @@
             from = _constrain.from,
             size = _constrain.size;
 
-        return this.maybeSetState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
+        this.maybeSetState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
     }, {
       key: 'getSpaceBefore',
@@ -552,7 +581,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this2 = this;
+        var _this3 = this;
 
         var _props7 = this.props,
             itemRenderer = _props7.itemRenderer,
@@ -565,7 +594,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this2.items = c;
+          return _this3.items = c;
         });
       }
     }, {
