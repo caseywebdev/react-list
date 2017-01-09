@@ -33,6 +33,16 @@ const PASSIVE = (() => {
   return hasSupport;
 })() ? {passive: true} : false;
 
+const UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
+
+const isEqualSubset = (a, b) => {
+  for (let key in b) if (a[key] !== b[key]) return false;
+
+  return true;
+};
+
+const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
+
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
@@ -72,6 +82,8 @@ module.exports = class ReactList extends Component {
       this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.prevPrevState = {};
+    this.unstable = false;
   }
 
   componentWillReceiveProps(next) {
@@ -85,15 +97,37 @@ module.exports = class ReactList extends Component {
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
-  componentDidUpdate() {
-    this.updateFrame();
+  componentDidUpdate(prevProps, prevState) {
+
+    // If the list has reached an unstable state, prevent an infinite loop.
+    if (this.unstable) return;
+
+    // Update calculations if props have changed between renders.
+    const propsEqual = isEqual(this.props, prevProps);
+    if (!propsEqual) {
+      this.prevPrevState = {};
+      return this.updateFrame();
+    }
+
+    // Check for ping-ponging between the same two states.
+    const stateEqual = isEqual(this.state, prevState);
+    const pingPong = !stateEqual && isEqual(this.state, this.prevPrevState);
+
+    // Ping-ponging between states means this list is unstable, log an error.
+    if (pingPong) {
+      this.unstable = true;
+      return console.error(UNSTABLE_MESSAGE);
+    }
+
+    // Update calculations if state has changed between renders.
+    this.prevPrevState = prevState;
+    if (!stateEqual) this.updateFrame();
   }
 
   maybeSetState(b, cb) {
-    const a = this.state;
-    for (let key in b) if (a[key] !== b[key]) return this.setState(b, cb);
+    if (isEqualSubset(this.state, b)) return cb();
 
-    cb();
+    this.setState(b, cb);
   }
 
   componentWillUnmount() {
