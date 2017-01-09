@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+- Provide an error message if the list reaches an unstable state due to
+  misconfiguration. (#156, #157)
+
 ## 0.8.0
 - Dramatically reduced the number of `setState` calls which should yield better
   performance.
