@@ -34,8 +34,7 @@ const PASSIVE = (() => {
 })() ? {passive: true} : false;
 
 const UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
-const MARKER_DURATION = 100;
-const MAX_UPDATES_PER_MARKER_DURATION = 20;
+const MAX_SYNC_UPDATES = 100;
 
 const isEqualSubset = (a, b) => {
   for (let key in b) if (a[key] !== b[key]) return false;
@@ -84,6 +83,7 @@ module.exports = class ReactList extends Component {
     this.cache = {};
     this.prevPrevState = {};
     this.unstable = false;
+    this.updateCounter = 0;
   }
 
   componentWillReceiveProps(next) {
@@ -102,20 +102,16 @@ module.exports = class ReactList extends Component {
     // If the list has reached an unstable state, prevent an infinite loop.
     if (this.unstable) return;
 
-    if (this.updateMarker && Date.now() - this.updateMarker > MARKER_DURATION) {
-      delete this.updateMarker;
-    }
-
-    if (!this.updateMarker) {
-      this.updateMarker = Date.now();
-      this.updatesSinceMarker = 0;
-    }
-
-    ++this.updatesSinceMarker;
-
-    if (this.updatesSinceMarker > MAX_UPDATES_PER_MARKER_DURATION) {
+    if (++this.updateCounter > MAX_SYNC_UPDATES) {
       this.unstable = true;
       return console.error(UNSTABLE_MESSAGE);
+    }
+
+    if (!this.updateCounterTimeoutId) {
+      this.updateCounterTimeoutId = setTimeout(() => {
+        this.updateCounter = 0;
+        delete this.updateCounterTimeoutId;
+      }, 0);
     }
 
     this.updateFrame();

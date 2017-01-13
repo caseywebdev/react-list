@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.3
+- Use `setTimeout` to detect stack overflow.
+
 ## 0.8.2
 - Fix issue with misconfiguration detection. (#160)
 

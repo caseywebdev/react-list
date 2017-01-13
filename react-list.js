@@ -108,8 +108,7 @@
   }() ? { passive: true } : false;
 
   var UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
-  var MARKER_DURATION = 100;
-  var MAX_UPDATES_PER_MARKER_DURATION = 20;
+  var MAX_SYNC_UPDATES = 100;
 
   var isEqualSubset = function isEqualSubset(a, b) {
     for (var key in b) {
@@ -139,6 +138,7 @@
       _this.cache = {};
       _this.prevPrevState = {};
       _this.unstable = false;
+      _this.updateCounter = 0;
       return _this;
     }
 
@@ -162,24 +162,21 @@
     }, {
       key: 'componentDidUpdate',
       value: function componentDidUpdate() {
+        var _this2 = this;
 
         // If the list has reached an unstable state, prevent an infinite loop.
         if (this.unstable) return;
 
-        if (this.updateMarker && Date.now() - this.updateMarker > MARKER_DURATION) {
-          delete this.updateMarker;
-        }
-
-        if (!this.updateMarker) {
-          this.updateMarker = Date.now();
-          this.updatesSinceMarker = 0;
-        }
-
-        ++this.updatesSinceMarker;
-
-        if (this.updatesSinceMarker > MAX_UPDATES_PER_MARKER_DURATION) {
+        if (++this.updateCounter > MAX_SYNC_UPDATES) {
           this.unstable = true;
           return console.error(UNSTABLE_MESSAGE);
+        }
+
+        if (!this.updateCounterTimeoutId) {
+          this.updateCounterTimeoutId = setTimeout(function () {
+            _this2.updateCounter = 0;
+            delete _this2.updateCounterTimeoutId;
+          }, 0);
         }
 
         this.updateFrame();
@@ -583,7 +580,7 @@
     }, {
       key: 'renderItems',
       value: function renderItems() {
-        var _this2 = this;
+        var _this3 = this;
 
         var _props7 = this.props,
             itemRenderer = _props7.itemRenderer,
@@ -596,7 +593,7 @@
         for (var i = 0; i < size; ++i) {
           items.push(itemRenderer(from + i, i));
         }return itemsRenderer(items, function (c) {
-          return _this2.items = c;
+          return _this3.items = c;
         });
       }
     }, {
