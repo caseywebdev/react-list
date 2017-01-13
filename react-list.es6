@@ -34,14 +34,14 @@ const PASSIVE = (() => {
 })() ? {passive: true} : false;
 
 const UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
+const MARKER_DURATION = 100;
+const MAX_UPDATES_PER_MARKER_DURATION = 20;
 
 const isEqualSubset = (a, b) => {
   for (let key in b) if (a[key] !== b[key]) return false;
 
   return true;
 };
-
-const isEqual = (a, b) => isEqualSubset(a, b) && isEqualSubset(b, a);
 
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
@@ -97,31 +97,28 @@ module.exports = class ReactList extends Component {
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
 
     // If the list has reached an unstable state, prevent an infinite loop.
     if (this.unstable) return;
 
-    // Update calculations if props have changed between renders.
-    const propsEqual = isEqual(this.props, prevProps);
-    if (!propsEqual) {
-      this.prevPrevState = {};
-      return this.updateFrame();
+    if (this.updateMarker && Date.now() - this.updateMarker > MARKER_DURATION) {
+      delete this.updateMarker;
     }
 
-    // Check for ping-ponging between the same two states.
-    const stateEqual = isEqual(this.state, prevState);
-    const pingPong = !stateEqual && isEqual(this.state, this.prevPrevState);
+    if (!this.updateMarker) {
+      this.updateMarker = Date.now();
+      this.updatesSinceMarker = 0;
+    }
 
-    // Ping-ponging between states means this list is unstable, log an error.
-    if (pingPong) {
+    ++this.updatesSinceMarker;
+
+    if (this.updatesSinceMarker > MAX_UPDATES_PER_MARKER_DURATION) {
       this.unstable = true;
       return console.error(UNSTABLE_MESSAGE);
     }
 
-    // Update calculations if state has changed between renders.
-    this.prevPrevState = prevState;
-    if (!stateEqual) this.updateFrame();
+    this.updateFrame();
   }
 
   maybeSetState(b, cb) {

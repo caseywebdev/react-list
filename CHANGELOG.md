@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.2
+- Fix issue with misconfiguration detection. (#160)
+
 ## 0.8.1
 - Provide an error message if the list reaches an unstable state due to
   misconfiguration. (#156, #157)

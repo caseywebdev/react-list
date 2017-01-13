@@ -108,15 +108,13 @@
   }() ? { passive: true } : false;
 
   var UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
+  var MARKER_DURATION = 100;
+  var MAX_UPDATES_PER_MARKER_DURATION = 20;
 
   var isEqualSubset = function isEqualSubset(a, b) {
     for (var key in b) {
       if (a[key] !== b[key]) return false;
     }return true;
-  };
-
-  var isEqual = function isEqual(a, b) {
-    return isEqualSubset(a, b) && isEqualSubset(b, a);
   };
 
   _module3.default.exports = (_temp = _class = function (_Component) {
@@ -163,31 +161,28 @@
       }
     }, {
       key: 'componentDidUpdate',
-      value: function componentDidUpdate(prevProps, prevState) {
+      value: function componentDidUpdate() {
 
         // If the list has reached an unstable state, prevent an infinite loop.
         if (this.unstable) return;
 
-        // Update calculations if props have changed between renders.
-        var propsEqual = isEqual(this.props, prevProps);
-        if (!propsEqual) {
-          this.prevPrevState = {};
-          return this.updateFrame();
+        if (this.updateMarker && Date.now() - this.updateMarker > MARKER_DURATION) {
+          delete this.updateMarker;
         }
 
-        // Check for ping-ponging between the same two states.
-        var stateEqual = isEqual(this.state, prevState);
-        var pingPong = !stateEqual && isEqual(this.state, this.prevPrevState);
+        if (!this.updateMarker) {
+          this.updateMarker = Date.now();
+          this.updatesSinceMarker = 0;
+        }
 
-        // Ping-ponging between states means this list is unstable, log an error.
-        if (pingPong) {
+        ++this.updatesSinceMarker;
+
+        if (this.updatesSinceMarker > MAX_UPDATES_PER_MARKER_DURATION) {
           this.unstable = true;
           return console.error(UNSTABLE_MESSAGE);
         }
 
-        // Update calculations if state has changed between renders.
-        this.prevPrevState = prevState;
-        if (!stateEqual) this.updateFrame();
+        this.updateFrame();
       }
     }, {
       key: 'maybeSetState',
