@@ -590,9 +590,10 @@
             size = _state6.size;
 
         var items = [];
-        for (var i = 0; i < size; ++i) {
-          items.push(itemRenderer(from + i, i));
-        }return itemsRenderer(items, function (c) {
+        for (var i = from, n = from + size; i < n; ++i) {
+          items.push(itemRenderer(i, i));
+        }
+        return itemsRenderer(items, function (c) {
           return _this3.items = c;
         });
       }
