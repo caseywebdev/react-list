@@ -253,7 +253,7 @@ module.exports = class ReactList extends Component {
 
   waitForFrameUpdate() {
     if (!this._waitForFrameUpdate) {
-      this._waitForFrameUpdate = new Promise((function (resolve, reject) {
+      this._waitForFrameUpdate = new Promise((function (resolve) {
         this.onFrameUpdate = (function () {
           resolve();
           this.onFrameUpdate = null;
@@ -270,9 +270,9 @@ module.exports = class ReactList extends Component {
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
-      case 'simple': this.updateSimpleFrame(cb);
-      case 'variable': this.updateVariableFrame(cb);
-      case 'uniform': this.updateUniformFrame(cb);
+    case 'simple': this.updateSimpleFrame(cb);
+    case 'variable': this.updateVariableFrame(cb);
+    case 'uniform': this.updateUniformFrame(cb);
     }
     if (this.onFrameUpdate) {
       this.onFrameUpdate();
