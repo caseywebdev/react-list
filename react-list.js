@@ -342,6 +342,21 @@
         this.frameRequested = window.requestAnimationFrame(this.updateFrame);
       }
     }, {
+      key: 'waitForFrameUpdate',
+      value: function waitForFrameUpdate() {
+        if (!this._waitForFrameUpdate) {
+          this._waitForFrameUpdate = new Promise((function (resolve, reject) {
+            this.onFrameUpdate = (function () {
+              resolve();
+              this.onFrameUpdate = null;
+              this._waitForFrameUpdate = null;
+            }).bind(this);
+          }).bind(this));
+        }
+
+        return this._waitForFrameUpdate;
+      }
+    }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
         this.frameRequested = null;
@@ -349,11 +364,14 @@
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
           case 'simple':
-            return this.updateSimpleFrame(cb);
+            this.updateSimpleFrame(cb);
           case 'variable':
-            return this.updateVariableFrame(cb);
+            this.updateVariableFrame(cb);
           case 'uniform':
-            return this.updateUniformFrame(cb);
+            this.updateUniformFrame(cb);
+        }
+        if (this.onFrameUpdate) {
+          this.onFrameUpdate();
         }
       }
     }, {
