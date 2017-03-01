@@ -251,14 +251,31 @@ module.exports = class ReactList extends Component {
     this.frameRequested = window.requestAnimationFrame(this.updateFrame);
   }
 
+  waitForFrameUpdate() {
+    if (!this._waitForFrameUpdate) {
+      this._waitForFrameUpdate = new Promise((function (resolve) {
+        this.onFrameUpdate = (function () {
+          resolve();
+          this.onFrameUpdate = null;
+          this._waitForFrameUpdate = null;
+        }).bind(this);
+      }).bind(this));
+    }
+
+    return this._waitForFrameUpdate;
+  }
+
   updateFrame(cb) {
     this.frameRequested = null;
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
     switch (this.props.type) {
-    case 'simple': return this.updateSimpleFrame(cb);
-    case 'variable': return this.updateVariableFrame(cb);
-    case 'uniform': return this.updateUniformFrame(cb);
+    case 'simple': this.updateSimpleFrame(cb);
+    case 'variable': this.updateVariableFrame(cb);
+    case 'uniform': this.updateUniformFrame(cb);
+    }
+    if (this.onFrameUpdate) {
+      this.onFrameUpdate();
     }
   }
 
