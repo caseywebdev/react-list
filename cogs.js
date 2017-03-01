@@ -1,10 +1,10 @@
 module.exports = {
-  pipe: [
+  transformers: [
     'eslint',
     {
       name: 'babel',
       options: {
-        presets: ['es2015', 'stage-0', 'react'],
+        presets: ['es2015', 'stage-1', 'react'],
         plugins: [['transform-es2015-modules-umd', {
           globals: {
             react: 'React',

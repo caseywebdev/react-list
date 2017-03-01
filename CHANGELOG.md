@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.3
+- Use `setTimeout` to detect stack overflow.
+
+## 0.8.2
+- Fix issue with misconfiguration detection. (#160)
+
+## 0.8.1
+- Provide an error message if the list reaches an unstable state due to
+  misconfiguration. (#156, #157)
+
 ## 0.8.0
 - Dramatically reduced the number of `setState` calls which should yield better
   performance.

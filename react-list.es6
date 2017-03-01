@@ -33,6 +33,15 @@ const PASSIVE = (() => {
   return hasSupport;
 })() ? {passive: true} : false;
 
+const UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
+const MAX_SYNC_UPDATES = 100;
+
+const isEqualSubset = (a, b) => {
+  for (let key in b) if (a[key] !== b[key]) return false;
+
+  return true;
+};
+
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
@@ -72,6 +81,9 @@ module.exports = class ReactList extends Component {
       this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.prevPrevState = {};
+    this.unstable = false;
+    this.updateCounter = 0;
   }
 
   componentWillReceiveProps(next) {
@@ -87,14 +99,29 @@ module.exports = class ReactList extends Component {
   }
 
   componentDidUpdate() {
+
+    // If the list has reached an unstable state, prevent an infinite loop.
+    if (this.unstable) return;
+
+    if (++this.updateCounter > MAX_SYNC_UPDATES) {
+      this.unstable = true;
+      return console.error(UNSTABLE_MESSAGE);
+    }
+
+    if (!this.updateCounterTimeoutId) {
+      this.updateCounterTimeoutId = setTimeout(() => {
+        this.updateCounter = 0;
+        delete this.updateCounterTimeoutId;
+      }, 0);
+    }
+
     this.updateFrameAsync();
   }
 
   maybeSetState(b, cb) {
-    const a = this.state;
-    for (let key in b) if (a[key] !== b[key]) return this.setState(b, cb);
+    if (isEqualSubset(this.state, b)) return cb();
 
-    cb();
+    this.setState(b, cb);
   }
 
   componentWillUnmount() {

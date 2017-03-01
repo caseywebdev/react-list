@@ -171,7 +171,7 @@ viewport.
 
 ## FAQ
 
-##### Why is the list freezing/overflowing the stack?
+##### What is "ReactList failed to reach a stable state."?
 
 This happens when specifying the `uniform` type without actually providing
 uniform size elements. The component attempts to draw only the minimum necessary
@@ -186,6 +186,16 @@ The calculations to figure out element positioning and size get significantly
 more complicated with margins, so they are not supported. Use a transparent
 border or padding or an element with nested elements to achieve the desired
 spacing.
+
+##### Why is there no onScroll event handler?
+
+If you need an onScroll handler, just add the handler to the div wrapping your ReactList component:
+
+```
+<div style={{height: 300, overflow: 'auto'}} onScroll={this.handleScroll}>
+  <ReactList ... />
+</div>
+```
 
 ## Development
 
