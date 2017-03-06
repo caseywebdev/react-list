@@ -75,10 +75,9 @@ module.exports = class ReactList extends Component {
 
   constructor(props) {
     super(props);
-    const {initialIndex, pageSize} = this.props;
+    const {initialIndex} = props;
     const itemsPerRow = 1;
-    const {from, size} =
-      this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
+    const {from, size} = this.constrain(initialIndex, 0, itemsPerRow, props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
     this.prevPrevState = {};
@@ -392,8 +391,8 @@ module.exports = class ReactList extends Component {
     if (itemSizeEstimator) return itemSizeEstimator(index, cache);
   }
 
-  constrain(from, size, itemsPerRow, {length, pageSize, type}) {
-    size = Math.max(size, pageSize);
+  constrain(from, size, itemsPerRow, {length, type}) {
+    if (type === 'uniform') size = Math.max(size, 1);
     let mod = size % itemsPerRow;
     if (mod) size += itemsPerRow - mod;
     if (size > length) size = length;

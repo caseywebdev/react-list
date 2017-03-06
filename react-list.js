@@ -124,13 +124,11 @@
 
       var _this = _possibleConstructorReturn(this, (ReactList.__proto__ || Object.getPrototypeOf(ReactList)).call(this, props));
 
-      var _this$props = _this.props,
-          initialIndex = _this$props.initialIndex,
-          pageSize = _this$props.pageSize;
+      var initialIndex = props.initialIndex;
 
       var itemsPerRow = 1;
 
-      var _this$constrain = _this.constrain(initialIndex, pageSize, itemsPerRow, _this.props),
+      var _this$constrain = _this.constrain(initialIndex, 0, itemsPerRow, props),
           from = _this$constrain.from,
           size = _this$constrain.size;
 
@@ -523,10 +521,9 @@
       key: 'constrain',
       value: function constrain(from, size, itemsPerRow, _ref) {
         var length = _ref.length,
-            pageSize = _ref.pageSize,
             type = _ref.type;
 
-        size = Math.max(size, pageSize);
+        if (type === 'uniform') size = Math.max(size, 1);
         var mod = size % itemsPerRow;
         if (mod) size += itemsPerRow - mod;
         if (size > length) size = length;
