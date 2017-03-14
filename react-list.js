@@ -150,6 +150,7 @@
             size = _state.size,
             itemsPerRow = _state.itemsPerRow;
 
+        clearTimeout(this.updateFrameTimeoutId);
         this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
       }
     }, {
@@ -163,6 +164,11 @@
       key: 'componentDidUpdate',
       value: function componentDidUpdate() {
         var _this2 = this;
+
+        var _props = this.props,
+            stableFrameDelay = _props.stableFrameDelay,
+            type = _props.type;
+
 
         // If the list has reached an unstable state, prevent an infinite loop.
         if (this.unstable) return;
@@ -179,7 +185,11 @@
           }, 0);
         }
 
-        this.updateFrame();
+        if (type === 'simple' && stableFrameDelay) {
+          this.updateFrameTimeoutId = setTimeout(this.updateFrame, stableFrameDelay);
+        } else {
+          this.updateFrame();
+        }
       }
     }, {
       key: 'maybeSetState',
@@ -194,6 +204,7 @@
         window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+        clearTimeout(this.updateFrameTimeoutId);
       }
     }, {
       key: 'getOffset',
@@ -210,9 +221,9 @@
     }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
-        var _props = this.props,
-            axis = _props.axis,
-            scrollParentGetter = _props.scrollParentGetter;
+        var _props2 = this.props,
+            axis = _props2.axis,
+            scrollParentGetter = _props2.scrollParentGetter;
 
         if (scrollParentGetter) return scrollParentGetter();
         var el = findDOMNode(this);
@@ -276,9 +287,9 @@
     }, {
       key: 'hasDeterminateSize',
       value: function hasDeterminateSize() {
-        var _props2 = this.props,
-            itemSizeGetter = _props2.itemSizeGetter,
-            type = _props2.type;
+        var _props3 = this.props,
+            itemSizeGetter = _props3.itemSizeGetter,
+            type = _props3.type;
 
         return type === 'uniform' || itemSizeGetter;
       }
@@ -298,9 +309,9 @@
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
-        var _props3 = this.props,
-            axis = _props3.axis,
-            useStaticSize = _props3.useStaticSize;
+        var _props4 = this.props,
+            axis = _props4.axis,
+            useStaticSize = _props4.useStaticSize;
         var _state2 = this.state,
             itemSize = _state2.itemSize,
             itemsPerRow = _state2.itemsPerRow;
@@ -377,9 +388,9 @@
 
         if (elEnd > end) return cb();
 
-        var _props4 = this.props,
-            pageSize = _props4.pageSize,
-            length = _props4.length;
+        var _props5 = this.props,
+            pageSize = _props5.pageSize,
+            length = _props5.length;
 
         var size = Math.min(this.state.size + pageSize, length);
         this.maybeSetState({ size: size }, cb);
@@ -393,9 +404,9 @@
             start = _getStartAndEnd2.start,
             end = _getStartAndEnd2.end;
 
-        var _props5 = this.props,
-            length = _props5.length,
-            pageSize = _props5.pageSize;
+        var _props6 = this.props,
+            length = _props6.length,
+            pageSize = _props6.pageSize;
 
         var space = 0;
         var from = 0;
@@ -490,11 +501,11 @@
       value: function getSizeOf(index) {
         var cache = this.cache,
             items = this.items;
-        var _props6 = this.props,
-            axis = _props6.axis,
-            itemSizeGetter = _props6.itemSizeGetter,
-            itemSizeEstimator = _props6.itemSizeEstimator,
-            type = _props6.type;
+        var _props7 = this.props,
+            axis = _props7.axis,
+            itemSizeGetter = _props7.itemSizeGetter,
+            itemSizeEstimator = _props7.itemSizeEstimator,
+            type = _props7.type;
         var _state4 = this.state,
             from = _state4.from,
             itemSize = _state4.itemSize,
@@ -582,9 +593,9 @@
       value: function renderItems() {
         var _this3 = this;
 
-        var _props7 = this.props,
-            itemRenderer = _props7.itemRenderer,
-            itemsRenderer = _props7.itemsRenderer;
+        var _props8 = this.props,
+            itemRenderer = _props8.itemRenderer,
+            itemsRenderer = _props8.itemsRenderer;
         var _state6 = this.state,
             from = _state6.from,
             size = _state6.size;
@@ -599,11 +610,11 @@
     }, {
       key: 'render',
       value: function render() {
-        var _props8 = this.props,
-            axis = _props8.axis,
-            length = _props8.length,
-            type = _props8.type,
-            useTranslate3d = _props8.useTranslate3d;
+        var _props9 = this.props,
+            axis = _props9.axis,
+            length = _props9.length,
+            type = _props9.type,
+            useTranslate3d = _props9.useTranslate3d;
         var _state7 = this.state,
             from = _state7.from,
             itemsPerRow = _state7.itemsPerRow;
@@ -653,6 +664,7 @@
     minSize: _propTypes2.default.number,
     pageSize: _propTypes2.default.number,
     scrollParentGetter: _propTypes2.default.func,
+    stableFrameDelay: _propTypes2.default.number,
     threshold: _propTypes2.default.number,
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,

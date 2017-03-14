@@ -57,6 +57,7 @@ module.exports = class ReactList extends Component {
     minSize: PropTypes.number,
     pageSize: PropTypes.number,
     scrollParentGetter: PropTypes.func,
+    stableFrameDelay: PropTypes.number,
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: PropTypes.bool,
@@ -90,6 +91,7 @@ module.exports = class ReactList extends Component {
 
   componentWillReceiveProps(next) {
     let {from, size, itemsPerRow} = this.state;
+    clearTimeout(this.updateFrameTimeoutId);
     this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
   }
 
@@ -100,6 +102,7 @@ module.exports = class ReactList extends Component {
   }
 
   componentDidUpdate() {
+    let {stableFrameDelay, type} = this.props;
 
     // If the list has reached an unstable state, prevent an infinite loop.
     if (this.unstable) return;
@@ -116,7 +119,14 @@ module.exports = class ReactList extends Component {
       }, 0);
     }
 
-    this.updateFrame();
+    if (type === 'simple' && stableFrameDelay) {
+      this.updateFrameTimeoutId = setTimeout(
+        this.updateFrame, stableFrameDelay
+      );
+    } else {
+      this.updateFrame();
+    }
+
   }
 
   maybeSetState(b, cb) {
@@ -129,6 +139,7 @@ module.exports = class ReactList extends Component {
     window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+    clearTimeout(this.updateFrameTimeoutId);
   }
 
   getOffset(el) {
