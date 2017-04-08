@@ -8,6 +8,7 @@ module.exports = {
         plugins: [['transform-es2015-modules-umd', {
           globals: {
             react: 'React',
+            'prop-types': 'PropTypes',
             'react-dom': 'ReactDOM',
             'react-list': 'ReactList'
           },

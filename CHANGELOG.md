@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.5
+- Use `prop-types` package instead of `React.PropTypes`.
+
 ## 0.8.4
 - Non-`uniform` type lists with a `window` scroll parent will no longer render
   an initial page unless they are visible in the viewport. (#143)

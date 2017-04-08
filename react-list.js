@@ -1,19 +1,21 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module', 'react', 'react-dom'], factory);
+    define(['module', 'prop-types', 'react', 'react-dom'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module, require('react'), require('react-dom'));
+    factory(module, require('prop-types'), require('react'), require('react-dom'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod, global.React, global.ReactDOM);
+    factory(mod, global.PropTypes, global.React, global.ReactDOM);
     global.ReactList = mod.exports;
   }
-})(this, function (_module2, _react, _reactDom) {
+})(this, function (_module2, _propTypes, _react, _reactDom) {
   'use strict';
 
   var _module3 = _interopRequireDefault(_module2);
+
+  var _propTypes2 = _interopRequireDefault(_propTypes);
 
   var _react2 = _interopRequireDefault(_react);
 
@@ -640,19 +642,19 @@
 
     return ReactList;
   }(_react.Component), _class.displayName = 'ReactList', _class.propTypes = {
-    axis: _react.PropTypes.oneOf(['x', 'y']),
-    initialIndex: _react.PropTypes.number,
-    itemRenderer: _react.PropTypes.func,
-    itemSizeEstimator: _react.PropTypes.func,
-    itemSizeGetter: _react.PropTypes.func,
-    itemsRenderer: _react.PropTypes.func,
-    length: _react.PropTypes.number,
-    pageSize: _react.PropTypes.number,
-    scrollParentGetter: _react.PropTypes.func,
-    threshold: _react.PropTypes.number,
-    type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
-    useStaticSize: _react.PropTypes.bool,
-    useTranslate3d: _react.PropTypes.bool
+    axis: _propTypes2.default.oneOf(['x', 'y']),
+    initialIndex: _propTypes2.default.number,
+    itemRenderer: _propTypes2.default.func,
+    itemSizeEstimator: _propTypes2.default.func,
+    itemSizeGetter: _propTypes2.default.func,
+    itemsRenderer: _propTypes2.default.func,
+    length: _propTypes2.default.number,
+    pageSize: _propTypes2.default.number,
+    scrollParentGetter: _propTypes2.default.func,
+    threshold: _propTypes2.default.number,
+    type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
+    useStaticSize: _propTypes2.default.bool,
+    useTranslate3d: _propTypes2.default.bool
   }, _class.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {

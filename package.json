@@ -1,12 +1,15 @@
 {
   "name": "react-list",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/orgsync/react-list"
+  },
+  "dependencies": {
+    "prop-types": "15"
   },
   "peerDependencies": {
     "react": "0.14 || 15",
