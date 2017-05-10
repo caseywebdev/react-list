@@ -54,6 +54,7 @@ module.exports = class ReactList extends Component {
     itemSizeGetter: PropTypes.func,
     itemsRenderer: PropTypes.func,
     length: PropTypes.number,
+    minSize: PropTypes.number,
     pageSize: PropTypes.number,
     scrollParentGetter: PropTypes.func,
     threshold: PropTypes.number,
@@ -67,6 +68,7 @@ module.exports = class ReactList extends Component {
     itemRenderer: (index, key) => <div key={key}>{index}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
+    minSize: 1,
     pageSize: 10,
     threshold: 100,
     type: 'simple',
@@ -392,8 +394,8 @@ module.exports = class ReactList extends Component {
     if (itemSizeEstimator) return itemSizeEstimator(index, cache);
   }
 
-  constrain(from, size, itemsPerRow, {length, type}) {
-    if (type === 'uniform') size = Math.max(size, 1);
+  constrain(from, size, itemsPerRow, {length, minSize, type}) {
+    size = Math.max(size, minSize);
     let mod = size % itemsPerRow;
     if (mod) size += itemsPerRow - mod;
     if (size > length) size = length;
