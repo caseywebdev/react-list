@@ -443,7 +443,9 @@ module.exports = class ReactList extends Component {
     const {itemRenderer, itemsRenderer} = this.props;
     const {from, size} = this.state;
     const items = [];
-    for (let i = 0; i < size; ++i) items.push(itemRenderer(from + i, i));
+    for (let i = from, n = from + size; i < n; ++i) {
+      items.push(itemRenderer(i, i));
+    }
     return itemsRenderer(items, c => this.items = c);
   }
 
