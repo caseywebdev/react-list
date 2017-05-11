@@ -523,9 +523,10 @@
       key: 'constrain',
       value: function constrain(from, size, itemsPerRow, _ref) {
         var length = _ref.length,
+            minSize = _ref.minSize,
             type = _ref.type;
 
-        if (type === 'uniform') size = Math.max(size, 1);
+        size = Math.max(size, minSize);
         var mod = size % itemsPerRow;
         if (mod) size += itemsPerRow - mod;
         if (size > length) size = length;
@@ -649,6 +650,7 @@
     itemSizeGetter: _propTypes2.default.func,
     itemsRenderer: _propTypes2.default.func,
     length: _propTypes2.default.number,
+    minSize: _propTypes2.default.number,
     pageSize: _propTypes2.default.number,
     scrollParentGetter: _propTypes2.default.func,
     threshold: _propTypes2.default.number,
@@ -672,6 +674,7 @@
       );
     },
     length: 0,
+    minSize: 1,
     pageSize: 10,
     threshold: 100,
     type: 'simple',
