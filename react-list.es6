@@ -1,5 +1,6 @@
 import module from 'module';
-import React, {Component, PropTypes} from 'react';
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
 const {findDOMNode} = ReactDOM;
@@ -53,6 +54,7 @@ module.exports = class ReactList extends Component {
     itemSizeGetter: PropTypes.func,
     itemsRenderer: PropTypes.func,
     length: PropTypes.number,
+    minSize: PropTypes.number,
     pageSize: PropTypes.number,
     scrollParentGetter: PropTypes.func,
     threshold: PropTypes.number,
@@ -66,6 +68,7 @@ module.exports = class ReactList extends Component {
     itemRenderer: (index, key) => <div key={key}>{index}</div>,
     itemsRenderer: (items, ref) => <div ref={ref}>{items}</div>,
     length: 0,
+    minSize: 1,
     pageSize: 10,
     threshold: 100,
     type: 'simple',
@@ -75,10 +78,9 @@ module.exports = class ReactList extends Component {
 
   constructor(props) {
     super(props);
-    const {initialIndex, pageSize} = this.props;
+    const {initialIndex} = props;
     const itemsPerRow = 1;
-    const {from, size} =
-      this.constrain(initialIndex, pageSize, itemsPerRow, this.props);
+    const {from, size} = this.constrain(initialIndex, 0, itemsPerRow, props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
     this.prevPrevState = {};
@@ -419,8 +421,8 @@ module.exports = class ReactList extends Component {
     if (itemSizeEstimator) return itemSizeEstimator(index, cache);
   }
 
-  constrain(from, size, itemsPerRow, {length, pageSize, type}) {
-    size = Math.max(size, pageSize);
+  constrain(from, size, itemsPerRow, {length, minSize, type}) {
+    size = Math.max(size, minSize);
     let mod = size % itemsPerRow;
     if (mod) size += itemsPerRow - mod;
     if (size > length) size = length;

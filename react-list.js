@@ -1,19 +1,21 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module', 'react', 'react-dom'], factory);
+    define(['module', 'prop-types', 'react', 'react-dom'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module, require('react'), require('react-dom'));
+    factory(module, require('prop-types'), require('react'), require('react-dom'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod, global.React, global.ReactDOM);
+    factory(mod, global.PropTypes, global.React, global.ReactDOM);
     global.ReactList = mod.exports;
   }
-})(this, function (_module2, _react, _reactDom) {
+})(this, function (_module2, _propTypes, _react, _reactDom) {
   'use strict';
 
   var _module3 = _interopRequireDefault(_module2);
+
+  var _propTypes2 = _interopRequireDefault(_propTypes);
 
   var _react2 = _interopRequireDefault(_react);
 
@@ -124,16 +126,13 @@
 
       var _this = _possibleConstructorReturn(this, (ReactList.__proto__ || Object.getPrototypeOf(ReactList)).call(this, props));
 
-      var _this$props = _this.props;
-      var initialIndex = _this$props.initialIndex;
-      var pageSize = _this$props.pageSize;
+      var initialIndex = props.initialIndex;
 
       var itemsPerRow = 1;
 
-      var _this$constrain = _this.constrain(initialIndex, pageSize, itemsPerRow, _this.props);
-
-      var from = _this$constrain.from;
-      var size = _this$constrain.size;
+      var _this$constrain = _this.constrain(initialIndex, 0, itemsPerRow, props),
+          from = _this$constrain.from,
+          size = _this$constrain.size;
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
@@ -558,11 +557,11 @@
     }, {
       key: 'constrain',
       value: function constrain(from, size, itemsPerRow, _ref) {
-        var length = _ref.length;
-        var pageSize = _ref.pageSize;
-        var type = _ref.type;
+        var length = _ref.length,
+            minSize = _ref.minSize,
+            type = _ref.type;
 
-        size = Math.max(size, pageSize);
+        size = Math.max(size, minSize);
         var mod = size % itemsPerRow;
         if (mod) size += itemsPerRow - mod;
         if (size > length) size = length;
@@ -680,19 +679,20 @@
 
     return ReactList;
   }(_react.Component), _class.displayName = 'ReactList', _class.propTypes = {
-    axis: _react.PropTypes.oneOf(['x', 'y']),
-    initialIndex: _react.PropTypes.number,
-    itemRenderer: _react.PropTypes.func,
-    itemSizeEstimator: _react.PropTypes.func,
-    itemSizeGetter: _react.PropTypes.func,
-    itemsRenderer: _react.PropTypes.func,
-    length: _react.PropTypes.number,
-    pageSize: _react.PropTypes.number,
-    scrollParentGetter: _react.PropTypes.func,
-    threshold: _react.PropTypes.number,
-    type: _react.PropTypes.oneOf(['simple', 'variable', 'uniform']),
-    useStaticSize: _react.PropTypes.bool,
-    useTranslate3d: _react.PropTypes.bool
+    axis: _propTypes2.default.oneOf(['x', 'y']),
+    initialIndex: _propTypes2.default.number,
+    itemRenderer: _propTypes2.default.func,
+    itemSizeEstimator: _propTypes2.default.func,
+    itemSizeGetter: _propTypes2.default.func,
+    itemsRenderer: _propTypes2.default.func,
+    length: _propTypes2.default.number,
+    minSize: _propTypes2.default.number,
+    pageSize: _propTypes2.default.number,
+    scrollParentGetter: _propTypes2.default.func,
+    threshold: _propTypes2.default.number,
+    type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
+    useStaticSize: _propTypes2.default.bool,
+    useTranslate3d: _propTypes2.default.bool
   }, _class.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
@@ -710,6 +710,7 @@
       );
     },
     length: 0,
+    minSize: 1,
     pageSize: 10,
     threshold: 100,
     type: 'simple',

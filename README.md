@@ -101,9 +101,15 @@ used when the prop `type` is set to `variable`.
 
 The number of items in the list.
 
+#### minSize (defaults to `1`)
+
+The minimum number of items to render at any given time. This can be used to
+render some amount of items initially when rendering HTML on the server.
+
 ##### pageSize (defaults to `10`)
 
-The number of items to batch up for new renders.
+The number of items to batch up for new renders. Does not apply to `'uniform'`
+lists as the optimal number of items is calculated automatically.
 
 ##### scrollParentGetter (defaults to finding the nearest scrollable parent)
 
