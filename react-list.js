@@ -156,7 +156,8 @@
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrame = this.updateFrame.bind(this);
-        window.addEventListener('resize', this.updateFrame);
+        this.updateFrameAsync = this.updateFrameAsync.bind(this);
+        window.addEventListener('resize', this.updateFrameAsync);
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
@@ -179,7 +180,7 @@
           }, 0);
         }
 
-        this.updateFrame();
+        this.updateFrameAsync();
       }
     }, {
       key: 'maybeSetState',
@@ -191,9 +192,10 @@
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
-        window.removeEventListener('resize', this.updateFrame);
-        this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+        window.removeEventListener('resize', this.updateFrameAsync);
+        this.scrollParent.removeEventListener('scroll', this.updateFrameAsync, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+        window.cancelAnimationFrame(this.frameRequested);
       }
     }, {
       key: 'getOffset',
@@ -332,17 +334,44 @@
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
     }, {
+      key: 'updateFrameAsync',
+      value: function updateFrameAsync() {
+        if (this.frameRequested) {
+          return;
+        }
+        this.frameRequested = window.requestAnimationFrame(this.updateFrame);
+      }
+    }, {
+      key: 'waitForFrameUpdate',
+      value: function waitForFrameUpdate() {
+        if (!this._waitForFrameUpdate) {
+          this._waitForFrameUpdate = new Promise(function (resolve) {
+            this.onFrameUpdate = function () {
+              resolve();
+              this.onFrameUpdate = null;
+              this._waitForFrameUpdate = null;
+            }.bind(this);
+          }.bind(this));
+        }
+
+        return this._waitForFrameUpdate;
+      }
+    }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
+        this.frameRequested = null;
         this.updateScrollParent();
         if (typeof cb != 'function') cb = NOOP;
         switch (this.props.type) {
           case 'simple':
-            return this.updateSimpleFrame(cb);
+            this.updateSimpleFrame(cb);
           case 'variable':
-            return this.updateVariableFrame(cb);
+            this.updateVariableFrame(cb);
           case 'uniform':
-            return this.updateUniformFrame(cb);
+            this.updateUniformFrame(cb);
+        }
+        if (this.onFrameUpdate) {
+          this.onFrameUpdate();
         }
       }
     }, {
@@ -352,10 +381,10 @@
         this.scrollParent = this.getScrollParent();
         if (prev === this.scrollParent) return;
         if (prev) {
-          prev.removeEventListener('scroll', this.updateFrame);
+          prev.removeEventListener('scroll', this.updateFrameAsync);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+        this.scrollParent.addEventListener('scroll', this.updateFrameAsync, PASSIVE);
         this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
       }
     }, {
@@ -591,7 +620,7 @@
 
         var items = [];
         for (var i = 0; i < size; ++i) {
-          items.push(itemRenderer(from + i, i));
+          items.push(itemRenderer(from + i, i, size));
         }return itemsRenderer(items, function (c) {
           return _this3.items = c;
         });
