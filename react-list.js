@@ -309,7 +309,11 @@
           return { itemSize: itemSize, itemsPerRow: itemsPerRow };
         }
 
-        var itemEls = findDOMNode(this.items).children;
+        var DOMNode = findDOMNode(this.items);
+        if (!DOMNode) {
+          return {};
+        }
+        var itemEls = DOMNode.children;
         if (!itemEls.length) return {};
 
         var firstEl = itemEls[0];
@@ -364,15 +368,19 @@
         var _getStartAndEnd = this.getStartAndEnd(),
             end = _getStartAndEnd.end;
 
-        var itemEls = findDOMNode(this.items).children;
+        var DOMNode = findDOMNode(this.items);
         var elEnd = 0;
 
-        if (itemEls.length) {
-          var axis = this.props.axis;
+        if (DOMNode) {
+          var itemEls = DOMNode.children;
 
-          var firstItemEl = itemEls[0];
-          var lastItemEl = itemEls[itemEls.length - 1];
-          elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] - this.getOffset(firstItemEl);
+          if (itemEls.length) {
+            var axis = this.props.axis;
+
+            var firstItemEl = itemEls[0];
+            var lastItemEl = itemEls[itemEls.length - 1];
+            elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] - this.getOffset(firstItemEl);
+          }
         }
 
         if (elEnd > end) return cb();
@@ -479,10 +487,14 @@
         var cache = this.cache;
         var from = this.state.from;
 
-        var itemEls = findDOMNode(this.items).children;
-        var sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
-        for (var i = 0, l = itemEls.length; i < l; ++i) {
-          cache[from + i] = itemEls[i][sizeKey];
+        var DOMNode = findDOMNode(this.items);
+
+        if (DOMNode) {
+          var itemEls = DOMNode.children;
+          var sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
+          for (var i = 0, l = itemEls.length; i < l; ++i) {
+            cache[from + i] = itemEls[i][sizeKey];
+          }
         }
       }
     }, {

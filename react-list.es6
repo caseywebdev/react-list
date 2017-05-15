@@ -217,7 +217,11 @@ module.exports = class ReactList extends Component {
       return {itemSize, itemsPerRow};
     }
 
-    const itemEls = findDOMNode(this.items).children;
+    const DOMNode = findDOMNode(this.items);
+    if (!DOMNode) {
+      return {};
+    }
+    const itemEls = DOMNode.children;
     if (!itemEls.length) return {};
 
     const firstEl = itemEls[0];
@@ -268,15 +272,19 @@ module.exports = class ReactList extends Component {
 
   updateSimpleFrame(cb) {
     const {end} = this.getStartAndEnd();
-    const itemEls = findDOMNode(this.items).children;
+    const DOMNode = findDOMNode(this.items);
     let elEnd = 0;
 
-    if (itemEls.length) {
-      const {axis} = this.props;
-      const firstItemEl = itemEls[0];
-      const lastItemEl = itemEls[itemEls.length - 1];
-      elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] -
-        this.getOffset(firstItemEl);
+    if (DOMNode) {
+      const itemEls = DOMNode.children;
+
+      if (itemEls.length) {
+        const {axis} = this.props;
+        const firstItemEl = itemEls[0];
+        const lastItemEl = itemEls[itemEls.length - 1];
+        elEnd = this.getOffset(lastItemEl) + lastItemEl[OFFSET_SIZE_KEYS[axis]] -
+          this.getOffset(firstItemEl);
+      }
     }
 
     if (elEnd > end) return cb();
@@ -363,10 +371,14 @@ module.exports = class ReactList extends Component {
   cacheSizes() {
     const {cache} = this;
     const {from} = this.state;
-    const itemEls = findDOMNode(this.items).children;
-    const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
-    for (let i = 0, l = itemEls.length; i < l; ++i) {
-      cache[from + i] = itemEls[i][sizeKey];
+    const DOMNode = findDOMNode(this.items);
+
+    if (DOMNode) {
+      const itemEls = DOMNode.children;
+      const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
+      for (let i = 0, l = itemEls.length; i < l; ++i) {
+        cache[from + i] = itemEls[i][sizeKey];
+      }
     }
   }
 
