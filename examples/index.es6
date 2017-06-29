@@ -57,6 +57,12 @@ const examples = [
     itemRenderer: renderVariableHeightItem
   },
   {
+    length: 10000,
+    itemRenderer: renderVariableHeightItem,
+    className: 'is-animated',
+    stableFrameDelay: 500
+  },
+  {
     axis: 'x',
     length: 10000,
     itemRenderer: renderVariableWidthItem
@@ -126,9 +132,13 @@ const examples = [
 export default class extends React.Component {
   renderExamples() {
     return examples.map((props, key) =>
-      <div key={key} className={`example axis-${props.axis}`}>
+      <div key={key}
+        className={`example axis-${props.axis} ${props.className}`}
+      >
         <strong>Props</strong>
-        <pre className='props'>{JSON.stringify(props, null, 2)}</pre>
+        <pre className='props'>{
+          JSON.stringify(props, null, 2).replace(/\\n\s+/g, ' ')
+        }</pre>
         <strong>Component</strong>
         <div className='component'><ReactList {...props} /></div>
       </div>

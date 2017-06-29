@@ -160,6 +160,11 @@
     length: 10000,
     itemRenderer: renderVariableHeightItem
   }, {
+    length: 10000,
+    itemRenderer: renderVariableHeightItem,
+    className: 'is-animated',
+    stableFrameDelay: 500
+  }, {
     axis: 'x',
     length: 10000,
     itemRenderer: renderVariableWidthItem
@@ -230,7 +235,9 @@
         return examples.map(function (props, key) {
           return _react2.default.createElement(
             'div',
-            { key: key, className: 'example axis-' + props.axis },
+            { key: key,
+              className: 'example axis-' + props.axis + ' ' + props.className
+            },
             _react2.default.createElement(
               'strong',
               null,
@@ -239,7 +246,7 @@
             _react2.default.createElement(
               'pre',
               { className: 'props' },
-              JSON.stringify(props, null, 2)
+              JSON.stringify(props, null, 2).replace(/\\n\s+/g, ' ')
             ),
             _react2.default.createElement(
               'strong',
