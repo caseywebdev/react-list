@@ -9,6 +9,7 @@
     "url": "https://github.com/orgsync/react-list"
   },
   "scripts": {
+    "prebuild": "npm run test",
     "build": "cogs",
     "test": "NODE_ENV=test jest"
   },
