@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`react-list uniform react-list renders into DOM 1`] = `
+<div
+  data-reactroot=""
+  style="position: relative;"
+>
+  <div>
+    <ul>
+      <li>
+        <!-- react-text: 5 -->
+        list item: 
+        <!-- /react-text -->
+        <!-- react-text: 6 -->
+        1
+        <!-- /react-text -->
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`react-list uniform react-list renders with react-test-renderer 1`] = `
+<div
+  style={
+    Object {
+      "position": "relative",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "WebkitTransform": "translate(0px, 0px)",
+        "msTransform": "translate(0px, 0px)",
+        "transform": "translate(0px, 0px)",
+      }
+    }
+  >
+    <ul>
+      <li>
+        list item: 
+        1
+      </li>
+    </ul>
+  </div>
+</div>
+`;

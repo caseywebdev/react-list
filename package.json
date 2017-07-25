@@ -8,6 +8,11 @@
     "type": "git",
     "url": "https://github.com/orgsync/react-list"
   },
+  "scripts": {
+    "prebuild": "npm run test",
+    "build": "cogs",
+    "test": "NODE_ENV=test jest"
+  },
   "dependencies": {
     "prop-types": "15"
   },
@@ -26,6 +31,20 @@
     "cogs-transformer-eslint": "^3.0.0",
     "cogs-transformer-replace": "^3.0.0",
     "eslint": "^3.4.0",
-    "eslint-plugin-react": "^6.2.0"
+    "eslint-plugin-react": "^6.2.0",
+    "jest": "^20.0.4",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "presets": [
+          "es2015",
+          "react"
+        ]
+      }
+    }
   }
 }

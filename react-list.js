@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module', 'prop-types', 'react', 'react-dom'], factory);
+    define(['module', 'prop-types', 'react'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module, require('prop-types'), require('react'), require('react-dom'));
+    factory(module, require('prop-types'), require('react'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod, global.PropTypes, global.React, global.ReactDOM);
+    factory(mod, global.PropTypes, global.React);
     global.ReactList = mod.exports;
   }
-})(this, function (_module2, _propTypes, _react, _reactDom) {
+})(this, function (_module2, _propTypes, _react) {
   'use strict';
 
   var _module3 = _interopRequireDefault(_module2);
@@ -19,13 +19,25 @@
 
   var _react2 = _interopRequireDefault(_react);
 
-  var _reactDom2 = _interopRequireDefault(_reactDom);
-
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
       default: obj
     };
   }
+
+  var _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -76,9 +88,6 @@
   }
 
   var _class, _temp;
-
-  var findDOMNode = _reactDom2.default.findDOMNode;
-
 
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
@@ -215,7 +224,7 @@
             scrollParentGetter = _props.scrollParentGetter;
 
         if (scrollParentGetter) return scrollParentGetter();
-        var el = findDOMNode(this);
+        var el = this.rootDOMNode;
         var overflowKey = OVERFLOW_KEYS[axis];
         while (el = el.parentElement) {
           switch (window.getComputedStyle(el)[overflowKey]) {
@@ -239,7 +248,7 @@
         document.body[scrollKey] || document.documentElement[scrollKey] : scrollParent[scrollKey];
         var max = this.getScrollSize() - this.getViewportSize();
         var scroll = Math.max(0, Math.min(actual, max));
-        var el = findDOMNode(this);
+        var el = this.rootDOMNode;
         return this.getOffset(scrollParent) + scroll - this.getOffset(el);
       }
     }, {
@@ -248,7 +257,7 @@
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
-        offset += this.getOffset(findDOMNode(this));
+        offset += this.getOffset(this.rootDOMNode);
         if (scrollParent === window) return window.scrollTo(0, offset);
 
         offset -= this.getOffset(this.scrollParent);
@@ -309,7 +318,7 @@
           return { itemSize: itemSize, itemsPerRow: itemsPerRow };
         }
 
-        var itemEls = findDOMNode(this.items).children;
+        var itemEls = this.items.children;
         if (!itemEls.length) return {};
 
         var firstEl = itemEls[0];
@@ -364,7 +373,7 @@
         var _getStartAndEnd = this.getStartAndEnd(),
             end = _getStartAndEnd.end;
 
-        var itemEls = findDOMNode(this.items).children;
+        var itemEls = this.items.children;
         var elEnd = 0;
 
         if (itemEls.length) {
@@ -479,7 +488,7 @@
         var cache = this.cache;
         var from = this.state.from;
 
-        var itemEls = findDOMNode(this.items).children;
+        var itemEls = this.items.children;
         var sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
         for (var i = 0, l = itemEls.length; i < l; ++i) {
           cache[from + i] = itemEls[i][sizeKey];
@@ -512,7 +521,7 @@
 
         // Try the DOM.
         if (type === 'simple' && index >= from && index < from + size && items) {
-          var itemEl = findDOMNode(items).children[index - from];
+          var itemEl = items.children[index - from];
           if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
         }
 
@@ -599,6 +608,8 @@
     }, {
       key: 'render',
       value: function render() {
+        var _this4 = this;
+
         var _props8 = this.props,
             axis = _props8.axis,
             length = _props8.length,
@@ -631,7 +642,9 @@
         };
         return _react2.default.createElement(
           'div',
-          { style: style },
+          _extends({ style: style }, { ref: function ref(node) {
+              return _this4.rootDOMNode = node;
+            } }),
           _react2.default.createElement(
             'div',
             { style: listStyle },
