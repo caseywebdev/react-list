@@ -8,6 +8,9 @@
     "type": "git",
     "url": "https://github.com/orgsync/react-list"
   },
+  "scripts": {
+    "build": "cogs"
+  },
   "dependencies": {
     "prop-types": "15"
   },
