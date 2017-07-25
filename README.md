@@ -203,6 +203,41 @@ If you need an onScroll handler, just add the handler to the div wrapping your R
 </div>
 ```
 
+##### Why are my unit tests failing with `TypeError: Cannot read property 'parentElement' of null`?
+
+Your're probably using [react-test-render](https://github.com/facebook/react/tree/master/packages/react-test-renderer) to create snapshot tests. `react-test-render` is an
+abstraction layer and knows nothing about the react specific `ref` feature to get DOM nodes.
+Therefore the `null` element access.
+
+However, you can pass options to the `react-test-renderer`:
+
+```js
+import ReactTestRenderer from 'react-test-renderer';
+
+function render (component) {
+    const reactTestRendererOptions = {
+        createNodeMock
+    };
+    return ReactTestRenderer.create(component, reactTestRendererOptions);
+}
+
+function isDOMElementType(type) {
+    return [
+        'div',
+        'ul',
+        'table',
+        // ...
+    ].includes(type);
+}
+
+function createNodeMock(element) {
+    if (isDOMElementType(element.type)) {
+        return document.createElement(element.type);
+    }
+    return null;
+}
+``` 
+
 ## Development
 
 ```bash
