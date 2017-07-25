@@ -65,12 +65,10 @@ describe('react-list', function () {
   describe('uniform react-list', () => {
 
     it('renders with react-test-renderer', function () {
-      expect(() => {
-        const tree = render(
-          <MyList type={'uniform'} items={[1, 2, 3, 4, 5]} />
-        );
-        expect(tree).toMatchSnapshot();
-      }).toThrow();
+      const tree = render(
+        <MyList type={'uniform'} items={[1, 2, 3, 4, 5]} />
+      );
+      expect(tree).toMatchSnapshot();
     });
 
     it('renders into DOM', function () {

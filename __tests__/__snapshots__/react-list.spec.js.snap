@@ -19,3 +19,30 @@ exports[`react-list uniform react-list renders into DOM 1`] = `
   </div>
 </div>
 `;
+
+exports[`react-list uniform react-list renders with react-test-renderer 1`] = `
+<div
+  style={
+    Object {
+      "position": "relative",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "WebkitTransform": "translate(0px, 0px)",
+        "msTransform": "translate(0px, 0px)",
+        "transform": "translate(0px, 0px)",
+      }
+    }
+  >
+    <ul>
+      <li>
+        list item: 
+        1
+      </li>
+    </ul>
+  </div>
+</div>
+`;
