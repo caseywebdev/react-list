@@ -1,5 +1,8 @@
 # Changelog
 
+## master
+- Remove `react-dom` peer dependency.
+
 ## 0.8.6
 - Add `minSize` prop to ensure a list is always at least `minSize` elements
   large.
