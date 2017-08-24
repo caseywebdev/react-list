@@ -1,7 +1,8 @@
 # Changelog
 
-## master
-- Remove `react-dom` peer dependency.
+## 0.8.7
+- Remove `findDOMNode` (and consequently the `react-dom` peer dependency) in
+  favor of the preferred `ref={c => this.el = c}` pattern.
 
 ## 0.8.6
 - Add `minSize` prop to ensure a list is always at least `minSize` elements
