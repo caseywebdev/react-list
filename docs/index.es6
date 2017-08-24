@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom';
-import React from 'react';
+import React, {Component} from 'react';
+import {render} from 'react-dom';
 import ReactList from '..';
 
 const renderItem = (index, key) =>
@@ -124,7 +124,7 @@ const examples = [
   }
 ];
 
-class Examples extends React.Component {
+class Examples extends Component {
   renderExamples() {
     return examples.map((props, key) =>
       <div key={key} className={`example axis-${props.axis}`}>
@@ -152,4 +152,4 @@ class Examples extends React.Component {
   }
 }
 
-ReactDOM.render(<Examples />, document.getElementById('main'));
+render(<Examples />, document.getElementById('main'));
