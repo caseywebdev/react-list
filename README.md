@@ -212,4 +212,4 @@ make
 
 [React]: https://github.com/facebook/react
 [the example page]: https://orgsync.github.io/react-list/
-[the example page source]: examples/index.es6
+[the example page source]: docs/index.es6

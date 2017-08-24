@@ -5,7 +5,7 @@
     "ecmaVersion": 6,
     "ecmaFeatures": {
       "jsx": true
-    },
+    }
   },
   "plugins": [
     "react"
@@ -120,9 +120,10 @@
     "no-process-exit": 0,
     "no-restricted-modules": 0,
     "no-sync": 0,
-    "indent": [2, 2],
+    "indent": 0,
+    "indent-legacy": [2, 2],
     "brace-style": [2, "1tbs", {"allowSingleLine": true}],
-    "camelcase": [2, {"properties": "never"}],
+    "camelcase": [1, {"properties": "never"}],
     "comma-spacing": [2, {"before": false, "after": true}],
     "comma-style": [2, "last"],
     "consistent-this": 0,
@@ -157,10 +158,7 @@
     "space-after-function-name": 0,
     "keyword-spacing": 2,
     "space-before-blocks": [2, "always"],
-    "space-before-function-paren": [2, {
-      "anonymous": "always",
-      "named": "never"
-    }],
+    "space-before-function-paren": [2, {"anonymous": "always", "named": "never"}],
     "space-before-function-parentheses": 0,
     "space-in-parens": [2, "never"],
     "object-curly-spacing": [2, "never"],
@@ -173,7 +171,7 @@
     "wrap-regex": 0,
     "no-var": 0,
     "generator-star": 0,
-    "generator-star-spacing": [2, "after"],
+    "generator-star-spacing": [2, "before"],
     "max-depth": [1, 3],
     "max-len": [1, 80, 4],
     "max-params": [1, 4],
@@ -187,12 +185,12 @@
     "react/jsx-sort-props": 0,
     "react/jsx-uses-react": 2,
     "react/jsx-uses-vars": 2,
-    "react/jsx-wrap-multilines": 2,
-    "react/no-did-mount-set-state": 2,
-    "react/no-did-update-set-state": 2,
+    "react/jsx-wrap-multilines": [2, {"arrow": false, "assignment": false, "declaration": false, "return": true}],
+    "react/no-did-mount-set-state": 0,
+    "react/no-did-update-set-state": 0,
     "react/no-multi-comp": 0,
     "react/no-unknown-property": 2,
-    "react/prop-types": 1,
+    "react/prop-types": 0,
     "react/react-in-jsx-scope": 2,
     "react/self-closing-comp": 2
   }

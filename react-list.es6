@@ -1,9 +1,6 @@
 import module from 'module';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
-
-const {findDOMNode} = ReactDOM;
 
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
@@ -142,7 +139,7 @@ module.exports = class ReactList extends Component {
   getScrollParent() {
     const {axis, scrollParentGetter} = this.props;
     if (scrollParentGetter) return scrollParentGetter();
-    let el = findDOMNode(this);
+    let el = this.el || this.items;
     const overflowKey = OVERFLOW_KEYS[axis];
     while (el = el.parentElement) {
       switch (window.getComputedStyle(el)[overflowKey]) {
@@ -164,14 +161,14 @@ module.exports = class ReactList extends Component {
       scrollParent[scrollKey];
     const max = this.getScrollSize() - this.getViewportSize();
     const scroll = Math.max(0, Math.min(actual, max));
-    const el = findDOMNode(this);
+    const el = this.el || this.items;
     return this.getOffset(scrollParent) + scroll - this.getOffset(el);
   }
 
   setScroll(offset) {
     const {scrollParent} = this;
     const {axis} = this.props;
-    offset += this.getOffset(findDOMNode(this));
+    offset += this.getOffset(this.el || this.items);
     if (scrollParent === window) return window.scrollTo(0, offset);
 
     offset -= this.getOffset(this.scrollParent);
@@ -217,7 +214,7 @@ module.exports = class ReactList extends Component {
       return {itemSize, itemsPerRow};
     }
 
-    const itemEls = findDOMNode(this.items).children;
+    const itemEls = this.items.children;
     if (!itemEls.length) return {};
 
     const firstEl = itemEls[0];
@@ -268,7 +265,7 @@ module.exports = class ReactList extends Component {
 
   updateSimpleFrame(cb) {
     const {end} = this.getStartAndEnd();
-    const itemEls = findDOMNode(this.items).children;
+    const itemEls = this.items.children;
     let elEnd = 0;
 
     if (itemEls.length) {
@@ -363,7 +360,7 @@ module.exports = class ReactList extends Component {
   cacheSizes() {
     const {cache} = this;
     const {from} = this.state;
-    const itemEls = findDOMNode(this.items).children;
+    const itemEls = this.items.children;
     const sizeKey = OFFSET_SIZE_KEYS[this.props.axis];
     for (let i = 0, l = itemEls.length; i < l; ++i) {
       cache[from + i] = itemEls[i][sizeKey];
@@ -386,7 +383,7 @@ module.exports = class ReactList extends Component {
 
     // Try the DOM.
     if (type === 'simple' && index >= from && index < from + size && items) {
-      const itemEl = findDOMNode(items).children[index - from];
+      const itemEl = items.children[index - from];
       if (itemEl) return itemEl[OFFSET_SIZE_KEYS[axis]];
     }
 
@@ -474,6 +471,10 @@ module.exports = class ReactList extends Component {
       WebkitTransform: transform,
       transform
     };
-    return <div {...{style}}><div style={listStyle}>{items}</div></div>;
+    return (
+      <div {...{style}} ref={c => this.el = c}>
+        <div style={listStyle}>{items}</div>
+      </div>
+    );
   }
 };

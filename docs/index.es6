@@ -1,5 +1,6 @@
+import 'react-dom';
 import React from 'react';
-import ReactList from 'react-list';
+import ReactList from '..';
 
 const renderItem = (index, key) =>
   <div key={key} className={'item' + (index % 2 ? '' : ' even')}>
