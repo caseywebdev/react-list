@@ -136,10 +136,14 @@ module.exports = class ReactList extends Component {
     return offset;
   }
 
+  getEl() {
+    return this.el || this.items;
+  }
+
   getScrollParent() {
     const {axis, scrollParentGetter} = this.props;
     if (scrollParentGetter) return scrollParentGetter();
-    let el = this.el || this.items;
+    let el = this.getEl();
     const overflowKey = OVERFLOW_KEYS[axis];
     while (el = el.parentElement) {
       switch (window.getComputedStyle(el)[overflowKey]) {
@@ -161,14 +165,14 @@ module.exports = class ReactList extends Component {
       scrollParent[scrollKey];
     const max = this.getScrollSize() - this.getViewportSize();
     const scroll = Math.max(0, Math.min(actual, max));
-    const el = this.el || this.items;
+    const el = this.getEl();
     return this.getOffset(scrollParent) + scroll - this.getOffset(el);
   }
 
   setScroll(offset) {
     const {scrollParent} = this;
     const {axis} = this.props;
-    offset += this.getOffset(this.el || this.items);
+    offset += this.getOffset(this.getEl());
     if (scrollParent === window) return window.scrollTo(0, offset);
 
     offset -= this.getOffset(this.scrollParent);

@@ -217,6 +217,11 @@
         return offset;
       }
     }, {
+      key: 'getEl',
+      value: function getEl() {
+        return this.el || this.items;
+      }
+    }, {
       key: 'getScrollParent',
       value: function getScrollParent() {
         var _props = this.props,
@@ -224,7 +229,7 @@
             scrollParentGetter = _props.scrollParentGetter;
 
         if (scrollParentGetter) return scrollParentGetter();
-        var el = this.el || this.items;
+        var el = this.getEl();
         var overflowKey = OVERFLOW_KEYS[axis];
         while (el = el.parentElement) {
           switch (window.getComputedStyle(el)[overflowKey]) {
@@ -248,7 +253,7 @@
         document.body[scrollKey] || document.documentElement[scrollKey] : scrollParent[scrollKey];
         var max = this.getScrollSize() - this.getViewportSize();
         var scroll = Math.max(0, Math.min(actual, max));
-        var el = this.el || this.items;
+        var el = this.getEl();
         return this.getOffset(scrollParent) + scroll - this.getOffset(el);
       }
     }, {
@@ -257,7 +262,7 @@
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
-        offset += this.getOffset(this.el || this.items);
+        offset += this.getOffset(this.getEl());
         if (scrollParent === window) return window.scrollTo(0, offset);
 
         offset -= this.getOffset(this.scrollParent);
