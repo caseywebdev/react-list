@@ -195,7 +195,8 @@ spacing.
 
 ##### Why is there no onScroll event handler?
 
-If you need an onScroll handler, just add the handler to the div wrapping your ReactList component:
+If you need an onScroll handler, just add the handler to the div wrapping your
+ReactList component:
 
 ```
 <div style={{height: 300, overflow: 'auto'}} onScroll={this.handleScroll}>
