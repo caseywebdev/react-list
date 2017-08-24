@@ -207,7 +207,7 @@ ReactList component:
 ## Development
 
 ```bash
-open index.html
+open docs/index.html
 make
 ```
 
