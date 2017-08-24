@@ -22221,13 +22221,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 Cogs.define("docs/index.es6", ["node_modules"], ["docs/index","docs"], {"react-dom":"node_modules/react-dom/index.js","react":"node_modules/react/react.js","..":"react-list.js"}, function (require, exports, module) {
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-require('react-dom');
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _react = require('react');
 
@@ -22385,16 +22383,16 @@ var examples = [{
   useTranslate3d: true
 }];
 
-var _class = function (_React$Component) {
-  _inherits(_class, _React$Component);
+var Examples = function (_React$Component) {
+  _inherits(Examples, _React$Component);
 
-  function _class() {
-    _classCallCheck(this, _class);
+  function Examples() {
+    _classCallCheck(this, Examples);
 
-    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (Examples.__proto__ || Object.getPrototypeOf(Examples)).apply(this, arguments));
   }
 
-  _createClass(_class, [{
+  _createClass(Examples, [{
     key: 'renderExamples',
     value: function renderExamples() {
       return examples.map(function (props, key) {
@@ -22452,10 +22450,10 @@ var _class = function (_React$Component) {
     }
   }]);
 
-  return _class;
+  return Examples;
 }(_react2.default.Component);
 
-exports.default = _class;
+_reactDom2.default.render(_react2.default.createElement(Examples, null), document.getElementById('main'));
 
 });
 Cogs.require("./docs/index.es6");

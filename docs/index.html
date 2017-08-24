@@ -3,7 +3,6 @@
 <html>
   <head>
     <title>ReactList Examples</title>
-    <script src='index.js'></script>
     <style>
       body {
         margin: 0;
@@ -83,13 +82,6 @@
 
   <body>
     <div id='main'></div>
-    <script>
-      Cogs.require('./node_modules/react-dom').render(
-        Cogs.require('./node_modules/react').createFactory(
-          Cogs.require('./docs/index').default
-        )(),
-        document.getElementById('main')
-      );
-    </script>
+    <script src='index.js'></script>
   </body>
 </html>
