@@ -9,7 +9,7 @@ bower install react-list
 
 # or
 
-npm install react-list
+npm install --save react-list
 ```
 
 ReactList depends on React.
