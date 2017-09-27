@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
@@ -12,7 +12,7 @@
     "prop-types": "15"
   },
   "peerDependencies": {
-    "react": "0.14 || 15"
+    "react": "0.14 || 15 || 16"
   },
   "devDependencies": {
     "babel-eslint": "7.2.3",
