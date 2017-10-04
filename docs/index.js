@@ -22433,7 +22433,7 @@ var Examples = function (_Component) {
         { className: 'index' },
         _react2.default.createElement(
           'a',
-          { className: 'banner', href: 'https://github.com/orgsync/react-list' },
+          { className: 'banner', href: 'https://github.com/coderiety/react-list' },
           _react2.default.createElement('img', {
             src: 'https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67',
             alt: 'Fork me on GitHub'

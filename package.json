@@ -6,7 +6,7 @@
   "main": "react-list.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/orgsync/react-list"
+    "url": "https://github.com/coderiety/react-list"
   },
   "dependencies": {
     "prop-types": "15"
