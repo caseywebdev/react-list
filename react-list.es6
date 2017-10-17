@@ -204,7 +204,16 @@ module.exports = class ReactList extends Component {
   getStartAndEnd(threshold = this.props.threshold) {
     const scroll = this.getScroll();
     const start = Math.max(0, scroll - threshold);
-    let end = scroll + this.getViewportSize() + threshold;
+
+    const viewportSize = this.getViewportSize()
+
+    // render element only if the viewportSize is greater than 0
+    if(viewportSize > 0){
+      let end = scroll + viewportSize + threshold;
+    } else {
+      let end = 0
+    }
+
     if (this.hasDeterminateSize()) {
       end = Math.min(end, this.getSpaceBefore(this.props.length));
     }
@@ -269,6 +278,10 @@ module.exports = class ReactList extends Component {
 
   updateSimpleFrame(cb) {
     const {end} = this.getStartAndEnd();
+
+    // do not update the frame if there are 0 elements to be rendered
+    if (end === 0) {return cb()}
+
     const itemEls = this.items.children;
     let elEnd = 0;
 
