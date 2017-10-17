@@ -289,7 +289,16 @@
 
         var scroll = this.getScroll();
         var start = Math.max(0, scroll - threshold);
-        var end = scroll + this.getViewportSize() + threshold;
+
+        var viewportSize = this.getViewportSize()
+
+        // render element only if the viewportSize is greater than 0
+        if(viewportSize > 0){
+          var end = scroll + viewportSize + threshold;
+        } else {
+          var end = 0
+        }
+
         if (this.hasDeterminateSize()) {
           end = Math.min(end, this.getSpaceBefore(this.props.length));
         }
@@ -364,6 +373,9 @@
         var _getStartAndEnd = this.getStartAndEnd(),
             end = _getStartAndEnd.end;
 
+        // do not update the frame if there are 0 elements to be rendered
+        if(end === 0) {return cb()}
+        
         var itemEls = this.items.children;
         var elEnd = 0;
 
