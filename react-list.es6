@@ -57,7 +57,8 @@ module.exports = class ReactList extends Component {
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: PropTypes.bool,
-    useTranslate3d: PropTypes.bool
+    useTranslate3d: PropTypes.bool,
+    useStaticScrollParent: PropTypes.bool
   };
 
   static defaultProps = {
@@ -70,7 +71,8 @@ module.exports = class ReactList extends Component {
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    useStaticScrollParent: false
   };
 
   constructor(props) {
@@ -257,6 +259,9 @@ module.exports = class ReactList extends Component {
 
   updateScrollParent() {
     const prev = this.scrollParent;
+    if (prev && this.props.useStaticScrollParent) {
+      return;
+    }
     this.scrollParent = this.getScrollParent();
     if (prev === this.scrollParent) return;
     if (prev) {
