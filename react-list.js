@@ -349,6 +349,9 @@
       key: 'updateScrollParent',
       value: function updateScrollParent() {
         var prev = this.scrollParent;
+        if (prev && this.props.useStaticScrollParent) {
+          return;
+        }
         this.scrollParent = this.getScrollParent();
         if (prev === this.scrollParent) return;
         if (prev) {
@@ -660,7 +663,8 @@
     threshold: _propTypes2.default.number,
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,
-    useTranslate3d: _propTypes2.default.bool
+    useTranslate3d: _propTypes2.default.bool,
+    useStaticScrollParent: _propTypes2.default.bool
   }, _class.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
@@ -683,6 +687,7 @@
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    useStaticScrollParent: false
   }, _temp);
 });

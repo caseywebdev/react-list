@@ -157,6 +157,10 @@ A boolean to determine whether the `translate3d` CSS property should be used for
 positioning instead of the default `translate`. This can help performance on
 mobile devices, but is supported by fewer browsers.
 
+#### useStaticScrollParent (defaults to `false`)
+
+Set to `true` if the scroll parent will never change. This is an opt-in optimization that will only search for the scroll parent (or call scrollParentGetter) once for the duration of the component's life.
+
 ## Methods
 
 ##### scrollTo(index)
