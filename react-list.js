@@ -83,7 +83,7 @@
   var OVERFLOW_KEYS = { x: 'overflowX', y: 'overflowY' };
   var SCROLL_SIZE_KEYS = { x: 'scrollWidth', y: 'scrollHeight' };
   var SCROLL_START_KEYS = { x: 'scrollLeft', y: 'scrollTop' };
-  var SIZE_KEYS = { x: 'width', y: 'height' };
+  var SIZE_KEYS = { x: 'minWidth', y: 'minHeight' };
 
   var NOOP = function NOOP() {};
 

@@ -10,7 +10,7 @@ const OFFSET_START_KEYS = {x: 'offsetLeft', y: 'offsetTop'};
 const OVERFLOW_KEYS = {x: 'overflowX', y: 'overflowY'};
 const SCROLL_SIZE_KEYS = {x: 'scrollWidth', y: 'scrollHeight'};
 const SCROLL_START_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
-const SIZE_KEYS = {x: 'width', y: 'height'};
+const SIZE_KEYS = {x: 'minWidth', y: 'minHeight'};
 
 const NOOP = () => {};
 
