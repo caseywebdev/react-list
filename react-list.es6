@@ -78,6 +78,8 @@ module.exports = class ReactList extends Component {
     const {initialIndex} = props;
     const itemsPerRow = 1;
     const {from, size} = this.constrain(initialIndex, 0, itemsPerRow, props);
+    this.window = props.window || window;
+    this.document = this.window.document;
     this.state = {from, size, itemsPerRow};
     this.cache = {};
     this.prevPrevState = {};
@@ -123,7 +125,7 @@ module.exports = class ReactList extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateFrame);
+    this.window.removeEventListener('resize', this.updateFrame);
     this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
   }
@@ -146,23 +148,23 @@ module.exports = class ReactList extends Component {
     let el = this.getEl();
     const overflowKey = OVERFLOW_KEYS[axis];
     while (el = el.parentElement) {
-      switch (window.getComputedStyle(el)[overflowKey]) {
+      switch (this.window.getComputedStyle(el)[overflowKey]) {
       case 'auto': case 'scroll': case 'overlay': return el;
       }
     }
-    return window;
+    return this.window;
   }
 
   getScroll() {
     const {scrollParent} = this;
+    const {body, documentElement} = this.document;
     const {axis} = this.props;
     const scrollKey = SCROLL_START_KEYS[axis];
-    const actual = scrollParent === window ?
+    const actual = scrollParent === this.window ?
       // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
       // always return document.documentElement[scrollKey] as 0, so take
       // whichever has a value.
-      document.body[scrollKey] || document.documentElement[scrollKey] :
-      scrollParent[scrollKey];
+      body[scrollKey] || documentElement[scrollKey] : scrollParent[scrollKey];
     const max = this.getScrollSize() - this.getViewportSize();
     const scroll = Math.max(0, Math.min(actual, max));
     const el = this.getEl();
@@ -173,7 +175,7 @@ module.exports = class ReactList extends Component {
     const {scrollParent} = this;
     const {axis} = this.props;
     offset += this.getOffset(this.getEl());
-    if (scrollParent === window) return window.scrollTo(0, offset);
+    if (scrollParent === this.window) return this.window.scrollTo(0, offset);
 
     offset -= this.getOffset(this.scrollParent);
     scrollParent[SCROLL_START_KEYS[axis]] = offset;
@@ -182,16 +184,16 @@ module.exports = class ReactList extends Component {
   getViewportSize() {
     const {scrollParent} = this;
     const {axis} = this.props;
-    return scrollParent === window ?
-      window[INNER_SIZE_KEYS[axis]] :
+    return scrollParent === this.window ?
+      this.window[INNER_SIZE_KEYS[axis]] :
       scrollParent[CLIENT_SIZE_KEYS[axis]];
   }
 
   getScrollSize() {
     const {scrollParent} = this;
-    const {body, documentElement} = document;
+    const {body, documentElement} = this.document;
     const key = SCROLL_SIZE_KEYS[this.props.axis];
-    return scrollParent === window ?
+    return scrollParent === this.window ?
       Math.max(body[key], documentElement[key]) :
       scrollParent[key];
   }

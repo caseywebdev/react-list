@@ -157,6 +157,12 @@ A boolean to determine whether the `translate3d` CSS property should be used for
 positioning instead of the default `translate`. This can help performance on
 mobile devices, but is supported by fewer browsers.
 
+##### window (defaults to the `window` object)
+
+Makes it possible to overwrite the window object used inside the component.
+It can be useful if writing an app which runs in an iframe and you want to
+have the infinite scroll depending on the parent window.
+
 ## Methods
 
 ##### scrollTo(index)

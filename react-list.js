@@ -129,6 +129,8 @@
           from = _this$constrain.from,
           size = _this$constrain.size;
 
+      _this.window = props.window || window;
+      _this.document = _this.window.document;
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
       _this.prevPrevState = {};
@@ -186,7 +188,7 @@
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
-        window.removeEventListener('resize', this.updateFrame);
+        this.window.removeEventListener('resize', this.updateFrame);
         this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
       }
@@ -218,25 +220,28 @@
         var el = this.getEl();
         var overflowKey = OVERFLOW_KEYS[axis];
         while (el = el.parentElement) {
-          switch (window.getComputedStyle(el)[overflowKey]) {
+          switch (this.window.getComputedStyle(el)[overflowKey]) {
             case 'auto':case 'scroll':case 'overlay':
               return el;
           }
         }
-        return window;
+        return this.window;
       }
     }, {
       key: 'getScroll',
       value: function getScroll() {
         var scrollParent = this.scrollParent;
+        var _document = this.document,
+            body = _document.body,
+            documentElement = _document.documentElement;
         var axis = this.props.axis;
 
         var scrollKey = SCROLL_START_KEYS[axis];
-        var actual = scrollParent === window ?
+        var actual = scrollParent === this.window ?
         // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
         // always return document.documentElement[scrollKey] as 0, so take
         // whichever has a value.
-        document.body[scrollKey] || document.documentElement[scrollKey] : scrollParent[scrollKey];
+        body[scrollKey] || documentElement[scrollKey] : scrollParent[scrollKey];
         var max = this.getScrollSize() - this.getViewportSize();
         var scroll = Math.max(0, Math.min(actual, max));
         var el = this.getEl();
@@ -249,7 +254,7 @@
         var axis = this.props.axis;
 
         offset += this.getOffset(this.getEl());
-        if (scrollParent === window) return window.scrollTo(0, offset);
+        if (scrollParent === this.window) return this.window.scrollTo(0, offset);
 
         offset -= this.getOffset(this.scrollParent);
         scrollParent[SCROLL_START_KEYS[axis]] = offset;
@@ -260,18 +265,18 @@
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
-        return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
+        return scrollParent === this.window ? this.window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
       }
     }, {
       key: 'getScrollSize',
       value: function getScrollSize() {
         var scrollParent = this.scrollParent;
-        var _document = document,
-            body = _document.body,
-            documentElement = _document.documentElement;
+        var _document2 = this.document,
+            body = _document2.body,
+            documentElement = _document2.documentElement;
 
         var key = SCROLL_SIZE_KEYS[this.props.axis];
-        return scrollParent === window ? Math.max(body[key], documentElement[key]) : scrollParent[key];
+        return scrollParent === this.window ? Math.max(body[key], documentElement[key]) : scrollParent[key];
       }
     }, {
       key: 'hasDeterminateSize',
