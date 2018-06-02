@@ -2,11 +2,14 @@ BIN=node_modules/.bin/
 COGS=$(BIN)cogs
 .DEFAULT_GOAL := build
 
-install: package.json
+package-lock.json: package.json
+	npm install --package-lock-only
+
+node_modules: package-lock.json
 	npm install
 
-build: install
+build: node_modules
 	$(COGS)
 
-dev: install
+dev: node_modules
 	$(COGS) -w docs/index.es6 -w react-list.es6
