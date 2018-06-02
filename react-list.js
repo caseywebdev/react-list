@@ -131,6 +131,7 @@
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
+      _this.cachedScroll = null;
       _this.prevPrevState = {};
       _this.unstable = false;
       _this.updateCounter = 0;
@@ -150,8 +151,8 @@
     }, {
       key: 'componentDidMount',
       value: function componentDidMount() {
-        this.updateFrame = this.updateFrame.bind(this);
-        window.addEventListener('resize', this.updateFrame);
+        this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
+        window.addEventListener('resize', this.updateFrameAndClearCache);
         this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
       }
     }, {
@@ -186,8 +187,8 @@
     }, {
       key: 'componentWillUnmount',
       value: function componentWillUnmount() {
-        window.removeEventListener('resize', this.updateFrame);
-        this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+        window.removeEventListener('resize', this.updateFrameAndClearCache);
+        this.scrollParent.removeEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
       }
     }, {
@@ -228,6 +229,8 @@
     }, {
       key: 'getScroll',
       value: function getScroll() {
+        // Cache scroll position as this causes a forced synchronous layout.
+        if (typeof this.cachedScroll === 'number') return this.cachedScroll;
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
@@ -240,7 +243,8 @@
         var max = this.getScrollSize() - this.getViewportSize();
         var scroll = Math.max(0, Math.min(actual, max));
         var el = this.getEl();
-        return this.getOffset(scrollParent) + scroll - this.getOffset(el);
+        this.cachedScroll = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+        return this.cachedScroll;
       }
     }, {
       key: 'setScroll',
@@ -332,6 +336,12 @@
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
     }, {
+      key: 'updateFrameAndClearCache',
+      value: function updateFrameAndClearCache(cb) {
+        this.cachedScroll = null;
+        return this.updateFrame(cb);
+      }
+    }, {
       key: 'updateFrame',
       value: function updateFrame(cb) {
         this.updateScrollParent();
@@ -352,10 +362,12 @@
         this.scrollParent = this.getScrollParent();
         if (prev === this.scrollParent) return;
         if (prev) {
-          prev.removeEventListener('scroll', this.updateFrame);
+          prev.removeEventListener('scroll', this.updateFrameAndClearCache);
           prev.removeEventListener('mousewheel', NOOP);
         }
-        this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+        this.scrollParent.addEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
+        // You have to attach mousewheel listener to the scrollable element.
+        // Just an empty listener. After that onscroll events will be fired synchronously.
         this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
       }
     }, {
