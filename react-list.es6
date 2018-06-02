@@ -80,6 +80,7 @@ module.exports = class ReactList extends Component {
     const {from, size} = this.constrain(initialIndex, 0, itemsPerRow, props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
+    this.cachedScroll = null;
     this.prevPrevState = {};
     this.unstable = false;
     this.updateCounter = 0;
@@ -91,8 +92,8 @@ module.exports = class ReactList extends Component {
   }
 
   componentDidMount() {
-    this.updateFrame = this.updateFrame.bind(this);
-    window.addEventListener('resize', this.updateFrame);
+    this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
+    window.addEventListener('resize', this.updateFrameAndClearCache);
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 
@@ -123,8 +124,8 @@ module.exports = class ReactList extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateFrame);
-    this.scrollParent.removeEventListener('scroll', this.updateFrame, PASSIVE);
+    window.removeEventListener('resize', this.updateFrameAndClearCache);
+    this.scrollParent.removeEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
   }
 
@@ -154,6 +155,8 @@ module.exports = class ReactList extends Component {
   }
 
   getScroll() {
+    // Cache scroll position as this causes a forced synchronous layout.
+    if (typeof this.cachedScroll === 'number') return this.cachedScroll;
     const {scrollParent} = this;
     const {axis} = this.props;
     const scrollKey = SCROLL_START_KEYS[axis];
@@ -166,7 +169,8 @@ module.exports = class ReactList extends Component {
     const max = this.getScrollSize() - this.getViewportSize();
     const scroll = Math.max(0, Math.min(actual, max));
     const el = this.getEl();
-    return this.getOffset(scrollParent) + scroll - this.getOffset(el);
+    this.cachedScroll = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+    return this.cachedScroll;
   }
 
   setScroll(offset) {
@@ -245,6 +249,12 @@ module.exports = class ReactList extends Component {
     return {itemSize, itemsPerRow};
   }
 
+  // Called by 'scroll' and 'resize' events, clears scroll position cache.
+  updateFrameAndClearCache(cb) {
+    this.cachedScroll = null;
+    return this.updateFrame(cb);
+  }
+
   updateFrame(cb) {
     this.updateScrollParent();
     if (typeof cb != 'function') cb = NOOP;
@@ -260,10 +270,12 @@ module.exports = class ReactList extends Component {
     this.scrollParent = this.getScrollParent();
     if (prev === this.scrollParent) return;
     if (prev) {
-      prev.removeEventListener('scroll', this.updateFrame);
+      prev.removeEventListener('scroll', this.updateFrameAndClearCache);
       prev.removeEventListener('mousewheel', NOOP);
     }
-    this.scrollParent.addEventListener('scroll', this.updateFrame, PASSIVE);
+    this.scrollParent.addEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
+    // You have to attach mousewheel listener to the scrollable element.
+    // Just an empty listener. After that onscroll events will be fired synchronously.
     this.scrollParent.addEventListener('mousewheel', NOOP, PASSIVE);
   }
 
