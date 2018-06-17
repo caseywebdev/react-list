@@ -419,7 +419,7 @@
         var maxFrom = length - 1;
 
         while (from < maxFrom) {
-          var itemSize = this.getSizeOfRow(from);
+          var itemSize = this.getSizeOfItem(from);
           if (itemSize == null || space + itemSize > start) break;
           space += itemSize;
           ++from;
@@ -428,7 +428,7 @@
         var maxSize = length - from;
 
         while (size < maxSize && space < end) {
-          var _itemSize = this.getSizeOfRow(from + size);
+          var _itemSize = this.getSizeOfItem(from + size);
           if (_itemSize == null) {
             size = Math.min(size + pageSize, maxSize);
             break;
@@ -482,7 +482,7 @@
         var space = cache[from] || 0;
         for (var i = from; i < index; ++i) {
           cache[i] = space;
-          var _itemSize2 = this.getSizeOfRow(i);
+          var _itemSize2 = this.getSizeOfItem(i);
           if (_itemSize2 == null) break;
           space += _itemSize2;
         }
@@ -502,8 +502,8 @@
         }
       }
     }, {
-      key: 'getSizeOfRow',
-      value: function getSizeOfRow(index) {
+      key: 'getSizeOfItem',
+      value: function getSizeOfItem(index) {
         var cache = this.cache,
             items = this.items;
         var _props5 = this.props,
@@ -565,7 +565,7 @@
       value: function scrollAround(index) {
         var current = this.getScrollPosition();
         var bottom = this.getSpaceBefore(index);
-        var top = bottom - this.props.scrollParentViewportSizeGetter(this) + this.getSizeOfRow(index);
+        var top = bottom - this.props.scrollParentViewportSizeGetter(this) + this.getSizeOfItem(index);
         var min = Math.min(top, bottom);
         var max = Math.max(top, bottom);
         if (current <= min) return this.setScroll(min);
@@ -587,7 +587,7 @@
             last = void 0;
         for (var i = from; i < from + size; ++i) {
           var itemStart = this.getSpaceBefore(i, cache);
-          var itemEnd = itemStart + this.getSizeOfRow(i);
+          var itemEnd = itemStart + this.getSizeOfItem(i);
           if (first == null && itemEnd > start) first = i;
           if (first != null && itemStart < end) last = i;
         }
