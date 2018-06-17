@@ -20598,6 +20598,27 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }return true;
   };
 
+  var defaultScrollParentGetter = function defaultScrollParentGetter(component) {
+    var axis = component.props.axis;
+
+    var el = component.getEl();
+    var overflowKey = OVERFLOW_KEYS[axis];
+    while (el = el.parentElement) {
+      switch (window.getComputedStyle(el)[overflowKey]) {
+        case 'auto':case 'scroll':case 'overlay':
+          return el;
+      }
+    }
+    return window;
+  };
+
+  var defaultScrollParentViewportSizeGetter = function defaultScrollParentViewportSizeGetter(component) {
+    var axis = component.props.axis;
+    var scrollParent = component.scrollParent;
+
+    return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
+  };
+
   _module3.default.exports = (_temp = _class = function (_Component) {
     _inherits(ReactList, _Component);
 
@@ -20616,7 +20637,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
-      _this.cachedScroll = null;
+      _this.cachedScrollPosition = null;
       _this.prevPrevState = {};
       _this.unstable = false;
       _this.updateCounter = 0;
@@ -20626,6 +20647,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     _createClass(ReactList, [{
       key: 'componentWillReceiveProps',
       value: function componentWillReceiveProps(next) {
+        // Viewport scroll is no longer useful if axis changes
+        if (this.props.axis !== next.axis) this.clearSizeCache();
         var _state = this.state,
             from = _state.from,
             size = _state.size,
@@ -20694,28 +20717,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         return this.el || this.items;
       }
     }, {
-      key: 'getScrollParent',
-      value: function getScrollParent() {
-        var _props = this.props,
-            axis = _props.axis,
-            scrollParentGetter = _props.scrollParentGetter;
-
-        if (scrollParentGetter) return scrollParentGetter();
-        var el = this.getEl();
-        var overflowKey = OVERFLOW_KEYS[axis];
-        while (el = el.parentElement) {
-          switch (window.getComputedStyle(el)[overflowKey]) {
-            case 'auto':case 'scroll':case 'overlay':
-              return el;
-          }
-        }
-        return window;
-      }
-    }, {
-      key: 'getScroll',
-      value: function getScroll() {
+      key: 'getScrollPosition',
+      value: function getScrollPosition() {
         // Cache scroll position as this causes a forced synchronous layout.
-        if (typeof this.cachedScroll === 'number') return this.cachedScroll;
+        if (typeof this.cachedScrollPosition === 'number') return this.cachedScrollPosition;
         var scrollParent = this.scrollParent;
         var axis = this.props.axis;
 
@@ -20725,11 +20730,11 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         // always return document.documentElement[scrollKey] as 0, so take
         // whichever has a value.
         document.body[scrollKey] || document.documentElement[scrollKey] : scrollParent[scrollKey];
-        var max = this.getScrollSize() - this.getViewportSize();
+        var max = this.getScrollSize() - this.props.scrollParentViewportSizeGetter(this);
         var scroll = Math.max(0, Math.min(actual, max));
         var el = this.getEl();
-        this.cachedScroll = this.getOffset(scrollParent) + scroll - this.getOffset(el);
-        return this.cachedScroll;
+        this.cachedScrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+        return this.cachedScrollPosition;
       }
     }, {
       key: 'setScroll',
@@ -20742,14 +20747,6 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
         offset -= this.getOffset(this.scrollParent);
         scrollParent[SCROLL_START_KEYS[axis]] = offset;
-      }
-    }, {
-      key: 'getViewportSize',
-      value: function getViewportSize() {
-        var scrollParent = this.scrollParent;
-        var axis = this.props.axis;
-
-        return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
       }
     }, {
       key: 'getScrollSize',
@@ -20765,9 +20762,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'hasDeterminateSize',
       value: function hasDeterminateSize() {
-        var _props2 = this.props,
-            itemSizeGetter = _props2.itemSizeGetter,
-            type = _props2.type;
+        var _props = this.props,
+            itemSizeGetter = _props.itemSizeGetter,
+            type = _props.type;
 
         return type === 'uniform' || itemSizeGetter;
       }
@@ -20776,9 +20773,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
       value: function getStartAndEnd() {
         var threshold = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props.threshold;
 
-        var scroll = this.getScroll();
+        var scroll = this.getScrollPosition();
         var start = Math.max(0, scroll - threshold);
-        var end = scroll + this.getViewportSize() + threshold;
+        var end = scroll + this.props.scrollParentViewportSizeGetter(this) + threshold;
         if (this.hasDeterminateSize()) {
           end = Math.min(end, this.getSpaceBefore(this.props.length));
         }
@@ -20787,9 +20784,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'getItemSizeAndItemsPerRow',
       value: function getItemSizeAndItemsPerRow() {
-        var _props3 = this.props,
-            axis = _props3.axis,
-            useStaticSize = _props3.useStaticSize;
+        var _props2 = this.props,
+            axis = _props2.axis,
+            useStaticSize = _props2.useStaticSize;
         var _state2 = this.state,
             itemSize = _state2.itemSize,
             itemsPerRow = _state2.itemsPerRow;
@@ -20821,9 +20818,14 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         }return { itemSize: itemSize, itemsPerRow: itemsPerRow };
       }
     }, {
+      key: 'clearSizeCache',
+      value: function clearSizeCache() {
+        this.cachedScrollPosition = null;
+      }
+    }, {
       key: 'updateFrameAndClearCache',
       value: function updateFrameAndClearCache(cb) {
-        this.cachedScroll = null;
+        this.clearSizeCache();
         return this.updateFrame(cb);
       }
     }, {
@@ -20844,12 +20846,14 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
       key: 'updateScrollParent',
       value: function updateScrollParent() {
         var prev = this.scrollParent;
-        this.scrollParent = this.getScrollParent();
+        this.scrollParent = this.props.scrollParentGetter(this);
         if (prev === this.scrollParent) return;
         if (prev) {
           prev.removeEventListener('scroll', this.updateFrameAndClearCache);
           prev.removeEventListener('mousewheel', NOOP);
         }
+        // If we have a new parent, cached parent dimensions are no longer useful.
+        this.clearSizeCache();
         this.scrollParent.addEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
         // You have to attach mousewheel listener to the scrollable element.
         // Just an empty listener. After that onscroll events will be fired synchronously.
@@ -20874,9 +20878,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
         if (elEnd > end) return cb();
 
-        var _props4 = this.props,
-            pageSize = _props4.pageSize,
-            length = _props4.length;
+        var _props3 = this.props,
+            pageSize = _props3.pageSize,
+            length = _props3.length;
 
         var size = Math.min(this.state.size + pageSize, length);
         this.maybeSetState({ size: size }, cb);
@@ -20890,9 +20894,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             start = _getStartAndEnd2.start,
             end = _getStartAndEnd2.end;
 
-        var _props5 = this.props,
-            length = _props5.length,
-            pageSize = _props5.pageSize;
+        var _props4 = this.props,
+            length = _props4.length,
+            pageSize = _props4.pageSize;
 
         var space = 0;
         var from = 0;
@@ -20900,7 +20904,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var maxFrom = length - 1;
 
         while (from < maxFrom) {
-          var itemSize = this.getSizeOf(from);
+          var itemSize = this.getSizeOfRow(from);
           if (itemSize == null || space + itemSize > start) break;
           space += itemSize;
           ++from;
@@ -20909,7 +20913,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var maxSize = length - from;
 
         while (size < maxSize && space < end) {
-          var _itemSize = this.getSizeOf(from + size);
+          var _itemSize = this.getSizeOfRow(from + size);
           if (_itemSize == null) {
             size = Math.min(size + pageSize, maxSize);
             break;
@@ -20963,7 +20967,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var space = cache[from] || 0;
         for (var i = from; i < index; ++i) {
           cache[i] = space;
-          var _itemSize2 = this.getSizeOf(i);
+          var _itemSize2 = this.getSizeOfRow(i);
           if (_itemSize2 == null) break;
           space += _itemSize2;
         }
@@ -20983,15 +20987,15 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         }
       }
     }, {
-      key: 'getSizeOf',
-      value: function getSizeOf(index) {
+      key: 'getSizeOfRow',
+      value: function getSizeOfRow(index) {
         var cache = this.cache,
             items = this.items;
-        var _props6 = this.props,
-            axis = _props6.axis,
-            itemSizeGetter = _props6.itemSizeGetter,
-            itemSizeEstimator = _props6.itemSizeEstimator,
-            type = _props6.type;
+        var _props5 = this.props,
+            axis = _props5.axis,
+            itemSizeGetter = _props5.itemSizeGetter,
+            itemSizeEstimator = _props5.itemSizeEstimator,
+            type = _props5.type;
         var _state4 = this.state,
             from = _state4.from,
             itemSize = _state4.itemSize,
@@ -21044,9 +21048,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'scrollAround',
       value: function scrollAround(index) {
-        var current = this.getScroll();
+        var current = this.getScrollPosition();
         var bottom = this.getSpaceBefore(index);
-        var top = bottom - this.getViewportSize() + this.getSizeOf(index);
+        var top = bottom - this.props.scrollParentViewportSizeGetter(this) + this.getSizeOfRow(index);
         var min = Math.min(top, bottom);
         var max = Math.max(top, bottom);
         if (current <= min) return this.setScroll(min);
@@ -21068,7 +21072,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             last = void 0;
         for (var i = from; i < from + size; ++i) {
           var itemStart = this.getSpaceBefore(i, cache);
-          var itemEnd = itemStart + this.getSizeOf(i);
+          var itemEnd = itemStart + this.getSizeOfRow(i);
           if (first == null && itemEnd > start) first = i;
           if (first != null && itemStart < end) last = i;
         }
@@ -21079,9 +21083,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
       value: function renderItems() {
         var _this3 = this;
 
-        var _props7 = this.props,
-            itemRenderer = _props7.itemRenderer,
-            itemsRenderer = _props7.itemsRenderer;
+        var _props6 = this.props,
+            itemRenderer = _props6.itemRenderer,
+            itemsRenderer = _props6.itemsRenderer;
         var _state6 = this.state,
             from = _state6.from,
             size = _state6.size;
@@ -21098,11 +21102,11 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
       value: function render() {
         var _this4 = this;
 
-        var _props8 = this.props,
-            axis = _props8.axis,
-            length = _props8.length,
-            type = _props8.type,
-            useTranslate3d = _props8.useTranslate3d;
+        var _props7 = this.props,
+            axis = _props7.axis,
+            length = _props7.length,
+            type = _props7.type,
+            useTranslate3d = _props7.useTranslate3d;
         var _state7 = this.state,
             from = _state7.from,
             itemsPerRow = _state7.itemsPerRow;
@@ -21154,6 +21158,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     minSize: _propTypes2.default.number,
     pageSize: _propTypes2.default.number,
     scrollParentGetter: _propTypes2.default.func,
+    scrollParentViewportSizeGetter: _propTypes2.default.func,
     threshold: _propTypes2.default.number,
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,
@@ -21177,6 +21182,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     length: 0,
     minSize: 1,
     pageSize: 10,
+    scrollParentGetter: defaultScrollParentGetter,
+    scrollParentViewportSizeGetter: defaultScrollParentViewportSizeGetter,
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
