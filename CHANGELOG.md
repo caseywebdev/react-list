@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.10
+- Add `scrollParentViewportSizeGetter` prop.
+
 ## 0.8.7
 - Remove `findDOMNode` (and consequently the `react-dom` peer dependency) in
   favor of the preferred `ref={c => this.el = c}` pattern.
