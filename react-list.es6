@@ -1,4 +1,3 @@
-import module from 'module';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 
@@ -60,7 +59,7 @@ const defaultScrollParentViewportSizeGetter = (component) => {
     scrollParent[CLIENT_SIZE_KEYS[axis]];
 };
 
-module.exports = class ReactList extends Component {
+export default class ReactList extends Component {
   static displayName = 'ReactList';
 
   static propTypes = {
