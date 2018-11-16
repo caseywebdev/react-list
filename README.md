@@ -119,6 +119,12 @@ the list to work as intended. It is exposed as a prop for more complicated uses
 where the scrolling container may not initially have an overflow property that
 enables scrolling.
 
+#### scrollParentViewportSizeGetter (defaults to scrollParent's viewport size)
+
+A function that returns the size of the scrollParent's viewport. Provide this
+prop if you can efficiently determine your scrollParent's viewport size as it
+can improve performance.
+
 ##### threshold (defaults to `100`)
 
 The number of pixels to buffer at the beginning and end of the rendered list

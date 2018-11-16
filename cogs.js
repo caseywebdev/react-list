@@ -4,6 +4,7 @@ module.exports = [
       'eslint',
       {
         name: 'babel',
+        only: 'react-list.es6',
         options: {
           presets: ['es2015', 'stage-0', 'react'],
           plugins: [['transform-es2015-modules-umd', {
@@ -19,7 +20,7 @@ module.exports = [
         }
       }
     ],
-    builds: {'react-list.es6': 'react-list.js'}
+    builds: {'react-list.es6': {ext: {'.es6': '.js'}}}
   },
   {
     transformers: [
@@ -30,12 +31,16 @@ module.exports = [
           patterns: {'process.env.NODE_ENV': "'development'"}
         }
       },
-      {name: 'babel', options: {presets: ['es2015', 'stage-0', 'react']}},
+      {
+        name: 'babel',
+        only: 'docs/index.es6',
+        options: {presets: ['es2015', 'stage-0', 'react']}
+      },
       {
         name: 'concat-commonjs',
         options: {entry: 'docs/index.es6', extensions: ['.es6', '.js']}
       }
     ],
-    builds: {'docs/index.es6': 'docs/index.js'}
+    builds: {'docs/index.es6': {ext: {'.es6': '.js'}}}
   }
 ];
