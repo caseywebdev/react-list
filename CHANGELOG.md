@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.11
+- Reduce MAX_SYNC_UPDATES to 50 to match [upstream
+  changes](https://github.com/facebook/react/pull/13163).
+
 ## 0.8.10
 - Add `scrollParentViewportSizeGetter` prop.
 
