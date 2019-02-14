@@ -12,7 +12,7 @@ const SCROLL_SIZE_KEYS = {x: 'scrollWidth', y: 'scrollHeight'};
 const SCROLL_START_KEYS = {x: 'scrollLeft', y: 'scrollTop'};
 const SIZE_KEYS = {x: 'width', y: 'height'};
 
-const NOOP = () => {};
+const NOOP = () => { };
 
 // If a browser doesn't support the `options` argument to
 // add/removeEventListener, we need to check, otherwise we will
@@ -27,7 +27,7 @@ const PASSIVE = (() => {
         return false;
       }
     });
-  } catch (e) {}
+  } catch (e) { }
   return hasSupport;
 })() ? {passive: true} : false;
 
@@ -214,7 +214,9 @@ module.exports = class ReactList extends Component {
     const start = Math.max(0, scroll - threshold);
     let end = scroll + this.props.scrollParentViewportSizeGetter(this) + threshold;
     if (this.hasDeterminateSize()) {
-      end = Math.min(end, this.getSpaceBefore(this.props.length));
+      const {itemSize} = this.getItemSizeAndItemsPerRow();
+      const maxLength = this.getSpaceBefore(this.props.length - 1) + itemSize;
+      end = Math.min(end, maxLength);
     }
     return {start, end};
   }
@@ -248,7 +250,7 @@ module.exports = class ReactList extends Component {
       let item = itemEls[itemsPerRow];
       item && item[startKey] === firstStart;
       item = itemEls[itemsPerRow]
-    ) ++itemsPerRow;
+    )++itemsPerRow;
 
     return {itemSize, itemsPerRow};
   }
@@ -424,7 +426,7 @@ module.exports = class ReactList extends Component {
     if (size > length) size = length;
     from =
       type === 'simple' || !from ? 0 :
-      Math.max(Math.min(from, length - size), 0);
+        Math.max(Math.min(from, length - size), 0);
 
     if (mod = from % itemsPerRow) {
       from -= mod;
@@ -490,8 +492,8 @@ module.exports = class ReactList extends Component {
     const y = axis === 'y' ? offset : 0;
     const transform =
       useTranslate3d ?
-      `translate3d(${x}px, ${y}px, 0)` :
-      `translate(${x}px, ${y}px)`;
+        `translate3d(${x}px, ${y}px, 0)` :
+        `translate(${x}px, ${y}px)`;
     const listStyle = {
       msTransform: transform,
       WebkitTransform: transform,
