@@ -9,10 +9,11 @@
     "url": "https://github.com/coderiety/react-list"
   },
   "dependencies": {
-    "prop-types": "15"
+    "prop-types": "15",
+    "react-lifecycles-compat": "^3.0.4"
   },
   "peerDependencies": {
-    "react": "0.14 || 15 || 16"
+    "react": "^0.14.9 || 15 || 16"
   },
   "devDependencies": {
     "babel-eslint": "8",

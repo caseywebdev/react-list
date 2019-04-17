@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module', 'prop-types', 'react'], factory);
+    define(['module', 'prop-types', 'react', 'react-lifecycles-compat'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module, require('prop-types'), require('react'));
+    factory(module, require('prop-types'), require('react'), require('react-lifecycles-compat'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod, global.PropTypes, global.React);
+    factory(mod, global.PropTypes, global.React, global.reactLifecyclesCompat);
     global.ReactList = mod.exports;
   }
-})(this, function (_module2, _propTypes, _react) {
+})(this, function (_module2, _propTypes, _react, _reactLifecyclesCompat) {
   'use strict';
 
   var _module3 = _interopRequireDefault(_module2);
@@ -73,8 +73,6 @@
     if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
   }
 
-  var _class, _temp;
-
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var INNER_SIZE_KEYS = { x: 'innerWidth', y: 'innerHeight' };
@@ -134,7 +132,26 @@
     return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
   };
 
-  _module3.default.exports = (_temp = _class = function (_Component) {
+  var constrain = function constrain(from, size, itemsPerRow, _ref) {
+    var length = _ref.length,
+        minSize = _ref.minSize,
+        type = _ref.type;
+
+    size = Math.max(size, minSize);
+    var mod = size % itemsPerRow;
+    if (mod) size += itemsPerRow - mod;
+    if (size > length) size = length;
+    from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
+
+    if (mod = from % itemsPerRow) {
+      from -= mod;
+      size += mod;
+    }
+
+    return { from: from, size: size };
+  };
+
+  var ReactList = function (_Component) {
     _inherits(ReactList, _Component);
 
     function ReactList(props) {
@@ -146,13 +163,13 @@
 
       var itemsPerRow = 1;
 
-      var _this$constrain = _this.constrain(initialIndex, 0, itemsPerRow, props),
-          from = _this$constrain.from,
-          size = _this$constrain.size;
+      var _constrain = constrain(initialIndex, 0, itemsPerRow, props),
+          from = _constrain.from,
+          size = _constrain.size;
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
-      _this.cachedScrollPosition = null;
+      _this.cachedScrollData = null;
       _this.prevPrevState = {};
       _this.unstable = false;
       _this.updateCounter = 0;
@@ -160,18 +177,6 @@
     }
 
     _createClass(ReactList, [{
-      key: 'componentWillReceiveProps',
-      value: function componentWillReceiveProps(next) {
-        // Viewport scroll is no longer useful if axis changes
-        if (this.props.axis !== next.axis) this.clearSizeCache();
-        var _state = this.state,
-            from = _state.from,
-            size = _state.size,
-            itemsPerRow = _state.itemsPerRow;
-
-        this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
-      }
-    }, {
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
@@ -234,10 +239,10 @@
     }, {
       key: 'getScrollPosition',
       value: function getScrollPosition() {
-        // Cache scroll position as this causes a forced synchronous layout.
-        if (typeof this.cachedScrollPosition === 'number') return this.cachedScrollPosition;
-        var scrollParent = this.scrollParent;
         var axis = this.props.axis;
+
+        if (this.cachedScrollData !== null && axis === this.cachedScrollData.axis) return this.cachedScrollData.scrollPosition;
+        var scrollParent = this.scrollParent;
 
         var scrollKey = SCROLL_START_KEYS[axis];
         var actual = scrollParent === window ?
@@ -248,8 +253,9 @@
         var max = this.getScrollSize() - this.props.scrollParentViewportSizeGetter(this);
         var scroll = Math.max(0, Math.min(actual, max));
         var el = this.getEl();
-        this.cachedScrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
-        return this.cachedScrollPosition;
+        var scrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+        this.cachedScrollData = { axis: axis, scrollPosition: scrollPosition };
+        return scrollPosition;
       }
     }, {
       key: 'setScroll',
@@ -302,9 +308,9 @@
         var _props2 = this.props,
             axis = _props2.axis,
             useStaticSize = _props2.useStaticSize;
-        var _state2 = this.state,
-            itemSize = _state2.itemSize,
-            itemsPerRow = _state2.itemsPerRow;
+        var _state = this.state,
+            itemSize = _state.itemSize,
+            itemsPerRow = _state.itemsPerRow;
 
         if (useStaticSize && itemSize && itemsPerRow) {
           return { itemSize: itemSize, itemsPerRow: itemsPerRow };
@@ -335,7 +341,7 @@
     }, {
       key: 'clearSizeCache',
       value: function clearSizeCache() {
-        this.cachedScrollPosition = null;
+        this.cachedScrollData = null;
       }
     }, {
       key: 'updateFrameAndClearCache',
@@ -452,9 +458,9 @@
             start = _getStartAndEnd3.start,
             end = _getStartAndEnd3.end;
 
-        var _constrain = this.constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props),
-            from = _constrain.from,
-            size = _constrain.size;
+        var _constrain2 = constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props),
+            from = _constrain2.from,
+            size = _constrain2.size;
 
         return this.maybeSetState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
@@ -466,9 +472,9 @@
         if (cache[index] != null) return cache[index];
 
         // Try the static itemSize.
-        var _state3 = this.state,
-            itemSize = _state3.itemSize,
-            itemsPerRow = _state3.itemsPerRow;
+        var _state2 = this.state,
+            itemSize = _state2.itemSize,
+            itemsPerRow = _state2.itemsPerRow;
 
         if (itemSize) {
           return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
@@ -511,10 +517,10 @@
             itemSizeGetter = _props5.itemSizeGetter,
             itemSizeEstimator = _props5.itemSizeEstimator,
             type = _props5.type;
-        var _state4 = this.state,
-            from = _state4.from,
-            itemSize = _state4.itemSize,
-            size = _state4.size;
+        var _state3 = this.state,
+            from = _state3.from,
+            itemSize = _state3.itemSize,
+            size = _state3.size;
 
 
         // Try the static itemSize.
@@ -536,26 +542,6 @@
         if (itemSizeEstimator) return itemSizeEstimator(index, cache);
       }
     }, {
-      key: 'constrain',
-      value: function constrain(from, size, itemsPerRow, _ref) {
-        var length = _ref.length,
-            minSize = _ref.minSize,
-            type = _ref.type;
-
-        size = Math.max(size, minSize);
-        var mod = size % itemsPerRow;
-        if (mod) size += itemsPerRow - mod;
-        if (size > length) size = length;
-        from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
-
-        if (mod = from % itemsPerRow) {
-          from -= mod;
-          size += mod;
-        }
-
-        return { from: from, size: size };
-      }
-    }, {
       key: 'scrollTo',
       value: function scrollTo(index) {
         if (index != null) this.setScroll(this.getSpaceBefore(index));
@@ -574,9 +560,9 @@
     }, {
       key: 'getVisibleRange',
       value: function getVisibleRange() {
-        var _state5 = this.state,
-            from = _state5.from,
-            size = _state5.size;
+        var _state4 = this.state,
+            from = _state4.from,
+            size = _state4.size;
 
         var _getStartAndEnd4 = this.getStartAndEnd(0),
             start = _getStartAndEnd4.start,
@@ -601,9 +587,9 @@
         var _props6 = this.props,
             itemRenderer = _props6.itemRenderer,
             itemsRenderer = _props6.itemsRenderer;
-        var _state6 = this.state,
-            from = _state6.from,
-            size = _state6.size;
+        var _state5 = this.state,
+            from = _state5.from,
+            size = _state5.size;
 
         var items = [];
         for (var i = 0; i < size; ++i) {
@@ -622,9 +608,9 @@
             length = _props7.length,
             type = _props7.type,
             useTranslate3d = _props7.useTranslate3d;
-        var _state7 = this.state,
-            from = _state7.from,
-            itemsPerRow = _state7.itemsPerRow;
+        var _state6 = this.state,
+            from = _state6.from,
+            itemsPerRow = _state6.itemsPerRow;
 
 
         var items = this.renderItems();
@@ -659,10 +645,27 @@
           )
         );
       }
+    }], [{
+      key: 'getDerivedStateFromProps',
+      value: function getDerivedStateFromProps(props, prevState) {
+        var from = prevState.from,
+            size = prevState.size,
+            itemsPerRow = prevState.itemsPerRow;
+
+
+        var newState = constrain(from, size, itemsPerRow, props);
+        if (!isEqualSubset(prevState, newState)) {
+          return newState;
+        }
+        return null;
+      }
     }]);
 
     return ReactList;
-  }(_react.Component), _class.displayName = 'ReactList', _class.propTypes = {
+  }(_react.Component);
+
+  ReactList.displayName = 'ReactList';
+  ReactList.propTypes = {
     axis: _propTypes2.default.oneOf(['x', 'y']),
     initialIndex: _propTypes2.default.number,
     itemRenderer: _propTypes2.default.func,
@@ -678,7 +681,8 @@
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,
     useTranslate3d: _propTypes2.default.bool
-  }, _class.defaultProps = {
+  };
+  ReactList.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
       return _react2.default.createElement(
@@ -703,5 +707,10 @@
     type: 'simple',
     useStaticSize: false,
     useTranslate3d: false
-  }, _temp);
+  };
+
+
+  (0, _reactLifecyclesCompat.polyfill)(ReactList);
+
+  _module3.default.exports = ReactList;
 });
