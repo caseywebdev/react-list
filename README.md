@@ -101,7 +101,7 @@ used when the prop `type` is set to `variable`.
 
 The number of items in the list.
 
-#### minSize (defaults to `1`)
+##### minSize (defaults to `1`)
 
 The minimum number of items to render at any given time. This can be used to
 render some amount of items initially when rendering HTML on the server.
@@ -119,7 +119,7 @@ the list to work as intended. It is exposed as a prop for more complicated uses
 where the scrolling container may not initially have an overflow property that
 enables scrolling.
 
-#### scrollParentViewportSizeGetter (defaults to scrollParent's viewport size)
+##### scrollParentViewportSizeGetter (defaults to scrollParent's viewport size)
 
 A function that returns the size of the scrollParent's viewport. Provide this
 prop if you can efficiently determine your scrollParent's viewport size as it
