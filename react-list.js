@@ -492,6 +492,10 @@
     }, {
       key: 'cacheSizes',
       value: function cacheSizes() {
+        // is hidden
+        if (findDOMNode(this).offsetParent === null) {
+          return;
+        }
         var cache = this.cache;
         var from = this.state.from;
 
