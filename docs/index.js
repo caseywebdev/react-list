@@ -20482,20 +20482,184 @@ if ('development' !== 'production') {
   module.exports = COGS_REQUIRE("node_modules/prop-types/factoryWithThrowingShims.js")();
 }
 });
+Cogs.define("node_modules/react-lifecycles-compat/react-lifecycles-compat.cjs.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module, exports) {
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+function componentWillMount() {
+  // Call this.constructor.gDSFP to support sub-classes.
+  var state = this.constructor.getDerivedStateFromProps(this.props, this.state);
+  if (state !== null && state !== undefined) {
+    this.setState(state);
+  }
+}
+
+function componentWillReceiveProps(nextProps) {
+  // Call this.constructor.gDSFP to support sub-classes.
+  // Use the setState() updater to ensure state isn't stale in certain edge cases.
+  function updater(prevState) {
+    var state = this.constructor.getDerivedStateFromProps(nextProps, prevState);
+    return state !== null && state !== undefined ? state : null;
+  }
+  // Binding "this" is important for shallow renderer support.
+  this.setState(updater.bind(this));
+}
+
+function componentWillUpdate(nextProps, nextState) {
+  try {
+    var prevProps = this.props;
+    var prevState = this.state;
+    this.props = nextProps;
+    this.state = nextState;
+    this.__reactInternalSnapshotFlag = true;
+    this.__reactInternalSnapshot = this.getSnapshotBeforeUpdate(
+      prevProps,
+      prevState
+    );
+  } finally {
+    this.props = prevProps;
+    this.state = prevState;
+  }
+}
+
+// React may warn about cWM/cWRP/cWU methods being deprecated.
+// Add a flag to suppress these warnings for this special case.
+componentWillMount.__suppressDeprecationWarning = true;
+componentWillReceiveProps.__suppressDeprecationWarning = true;
+componentWillUpdate.__suppressDeprecationWarning = true;
+
+function polyfill(Component) {
+  var prototype = Component.prototype;
+
+  if (!prototype || !prototype.isReactComponent) {
+    throw new Error('Can only polyfill class components');
+  }
+
+  if (
+    typeof Component.getDerivedStateFromProps !== 'function' &&
+    typeof prototype.getSnapshotBeforeUpdate !== 'function'
+  ) {
+    return Component;
+  }
+
+  // If new component APIs are defined, "unsafe" lifecycles won't be called.
+  // Error if any of these lifecycles are present,
+  // Because they would work differently between older and newer (16.3+) versions of React.
+  var foundWillMountName = null;
+  var foundWillReceivePropsName = null;
+  var foundWillUpdateName = null;
+  if (typeof prototype.componentWillMount === 'function') {
+    foundWillMountName = 'componentWillMount';
+  } else if (typeof prototype.UNSAFE_componentWillMount === 'function') {
+    foundWillMountName = 'UNSAFE_componentWillMount';
+  }
+  if (typeof prototype.componentWillReceiveProps === 'function') {
+    foundWillReceivePropsName = 'componentWillReceiveProps';
+  } else if (typeof prototype.UNSAFE_componentWillReceiveProps === 'function') {
+    foundWillReceivePropsName = 'UNSAFE_componentWillReceiveProps';
+  }
+  if (typeof prototype.componentWillUpdate === 'function') {
+    foundWillUpdateName = 'componentWillUpdate';
+  } else if (typeof prototype.UNSAFE_componentWillUpdate === 'function') {
+    foundWillUpdateName = 'UNSAFE_componentWillUpdate';
+  }
+  if (
+    foundWillMountName !== null ||
+    foundWillReceivePropsName !== null ||
+    foundWillUpdateName !== null
+  ) {
+    var componentName = Component.displayName || Component.name;
+    var newApiName =
+      typeof Component.getDerivedStateFromProps === 'function'
+        ? 'getDerivedStateFromProps()'
+        : 'getSnapshotBeforeUpdate()';
+
+    throw Error(
+      'Unsafe legacy lifecycles will not be called for components using new component APIs.\n\n' +
+        componentName +
+        ' uses ' +
+        newApiName +
+        ' but also contains the following legacy lifecycles:' +
+        (foundWillMountName !== null ? '\n  ' + foundWillMountName : '') +
+        (foundWillReceivePropsName !== null
+          ? '\n  ' + foundWillReceivePropsName
+          : '') +
+        (foundWillUpdateName !== null ? '\n  ' + foundWillUpdateName : '') +
+        '\n\nThe above lifecycles should be removed. Learn more about this warning here:\n' +
+        'https://fb.me/react-async-component-lifecycle-hooks'
+    );
+  }
+
+  // React <= 16.2 does not support static getDerivedStateFromProps.
+  // As a workaround, use cWM and cWRP to invoke the new static lifecycle.
+  // Newer versions of React will ignore these lifecycles if gDSFP exists.
+  if (typeof Component.getDerivedStateFromProps === 'function') {
+    prototype.componentWillMount = componentWillMount;
+    prototype.componentWillReceiveProps = componentWillReceiveProps;
+  }
+
+  // React <= 16.2 does not support getSnapshotBeforeUpdate.
+  // As a workaround, use cWU to invoke the new lifecycle.
+  // Newer versions of React will ignore that lifecycle if gSBU exists.
+  if (typeof prototype.getSnapshotBeforeUpdate === 'function') {
+    if (typeof prototype.componentDidUpdate !== 'function') {
+      throw new Error(
+        'Cannot polyfill getSnapshotBeforeUpdate() for components that do not define componentDidUpdate() on the prototype'
+      );
+    }
+
+    prototype.componentWillUpdate = componentWillUpdate;
+
+    var componentDidUpdate = prototype.componentDidUpdate;
+
+    prototype.componentDidUpdate = function componentDidUpdatePolyfill(
+      prevProps,
+      prevState,
+      maybeSnapshot
+    ) {
+      // 16.3+ will not execute our will-update method;
+      // It will pass a snapshot value to did-update though.
+      // Older versions will require our polyfilled will-update value.
+      // We need to handle both cases, but can't just check for the presence of "maybeSnapshot",
+      // Because for <= 15.x versions this might be a "prevContext" object.
+      // We also can't just check "__reactInternalSnapshot",
+      // Because get-snapshot might return a falsy value.
+      // So check for the explicit __reactInternalSnapshotFlag flag to determine behavior.
+      var snapshot = this.__reactInternalSnapshotFlag
+        ? this.__reactInternalSnapshot
+        : maybeSnapshot;
+
+      componentDidUpdate.call(this, prevProps, prevState, snapshot);
+    };
+  }
+
+  return Component;
+}
+
+exports.polyfill = polyfill;
+});
 Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module, exports) {
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module', 'prop-types', 'react'], factory);
+    define(['module', 'prop-types', 'react', 'react-lifecycles-compat'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module, COGS_REQUIRE("node_modules/prop-types/index.js"), COGS_REQUIRE("node_modules/react/index.js"));
+    factory(module, COGS_REQUIRE("node_modules/prop-types/index.js"), COGS_REQUIRE("node_modules/react/index.js"), COGS_REQUIRE("node_modules/react-lifecycles-compat/react-lifecycles-compat.cjs.js"));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod, global.PropTypes, global.React);
+    factory(mod, global.PropTypes, global.React, global.reactLifecyclesCompat);
     global.ReactList = mod.exports;
   }
-})(this, function (_module2, _propTypes, _react) {
+})(this, function (_module2, _propTypes, _react, _reactLifecyclesCompat) {
   'use strict';
 
   var _module3 = _interopRequireDefault(_module2);
@@ -20558,8 +20722,6 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
   }
 
-  var _class, _temp;
-
   var CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
   var CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
   var INNER_SIZE_KEYS = { x: 'innerWidth', y: 'innerHeight' };
@@ -20619,7 +20781,26 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
   };
 
-  _module3.default.exports = (_temp = _class = function (_Component) {
+  var constrain = function constrain(from, size, itemsPerRow, _ref) {
+    var length = _ref.length,
+        minSize = _ref.minSize,
+        type = _ref.type;
+
+    size = Math.max(size, minSize);
+    var mod = size % itemsPerRow;
+    if (mod) size += itemsPerRow - mod;
+    if (size > length) size = length;
+    from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
+
+    if (mod = from % itemsPerRow) {
+      from -= mod;
+      size += mod;
+    }
+
+    return { from: from, size: size };
+  };
+
+  var ReactList = function (_Component) {
     _inherits(ReactList, _Component);
 
     function ReactList(props) {
@@ -20631,13 +20812,13 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
       var itemsPerRow = 1;
 
-      var _this$constrain = _this.constrain(initialIndex, 0, itemsPerRow, props),
-          from = _this$constrain.from,
-          size = _this$constrain.size;
+      var _constrain = constrain(initialIndex, 0, itemsPerRow, props),
+          from = _constrain.from,
+          size = _constrain.size;
 
       _this.state = { from: from, size: size, itemsPerRow: itemsPerRow };
       _this.cache = {};
-      _this.cachedScrollPosition = null;
+      _this.cachedScrollData = null;
       _this.prevPrevState = {};
       _this.unstable = false;
       _this.updateCounter = 0;
@@ -20645,18 +20826,6 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }
 
     _createClass(ReactList, [{
-      key: 'componentWillReceiveProps',
-      value: function componentWillReceiveProps(next) {
-        // Viewport scroll is no longer useful if axis changes
-        if (this.props.axis !== next.axis) this.clearSizeCache();
-        var _state = this.state,
-            from = _state.from,
-            size = _state.size,
-            itemsPerRow = _state.itemsPerRow;
-
-        this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
-      }
-    }, {
       key: 'componentDidMount',
       value: function componentDidMount() {
         this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
@@ -20719,10 +20888,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'getScrollPosition',
       value: function getScrollPosition() {
-        // Cache scroll position as this causes a forced synchronous layout.
-        if (typeof this.cachedScrollPosition === 'number') return this.cachedScrollPosition;
-        var scrollParent = this.scrollParent;
         var axis = this.props.axis;
+
+        if (this.cachedScrollData !== null && axis === this.cachedScrollData.axis) return this.cachedScrollData.scrollPosition;
+        var scrollParent = this.scrollParent;
 
         var scrollKey = SCROLL_START_KEYS[axis];
         var actual = scrollParent === window ?
@@ -20733,8 +20902,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var max = this.getScrollSize() - this.props.scrollParentViewportSizeGetter(this);
         var scroll = Math.max(0, Math.min(actual, max));
         var el = this.getEl();
-        this.cachedScrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
-        return this.cachedScrollPosition;
+        var scrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+        this.cachedScrollData = { axis: axis, scrollPosition: scrollPosition };
+        return scrollPosition;
       }
     }, {
       key: 'setScroll',
@@ -20787,9 +20957,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var _props2 = this.props,
             axis = _props2.axis,
             useStaticSize = _props2.useStaticSize;
-        var _state2 = this.state,
-            itemSize = _state2.itemSize,
-            itemsPerRow = _state2.itemsPerRow;
+        var _state = this.state,
+            itemSize = _state.itemSize,
+            itemsPerRow = _state.itemsPerRow;
 
         if (useStaticSize && itemSize && itemsPerRow) {
           return { itemSize: itemSize, itemsPerRow: itemsPerRow };
@@ -20820,7 +20990,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'clearSizeCache',
       value: function clearSizeCache() {
-        this.cachedScrollPosition = null;
+        this.cachedScrollData = null;
       }
     }, {
       key: 'updateFrameAndClearCache',
@@ -20937,9 +21107,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             start = _getStartAndEnd3.start,
             end = _getStartAndEnd3.end;
 
-        var _constrain = this.constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props),
-            from = _constrain.from,
-            size = _constrain.size;
+        var _constrain2 = constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props),
+            from = _constrain2.from,
+            size = _constrain2.size;
 
         return this.maybeSetState({ itemsPerRow: itemsPerRow, from: from, itemSize: itemSize, size: size }, cb);
       }
@@ -20951,9 +21121,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         if (cache[index] != null) return cache[index];
 
         // Try the static itemSize.
-        var _state3 = this.state,
-            itemSize = _state3.itemSize,
-            itemsPerRow = _state3.itemsPerRow;
+        var _state2 = this.state,
+            itemSize = _state2.itemSize,
+            itemsPerRow = _state2.itemsPerRow;
 
         if (itemSize) {
           return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
@@ -20996,10 +21166,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             itemSizeGetter = _props5.itemSizeGetter,
             itemSizeEstimator = _props5.itemSizeEstimator,
             type = _props5.type;
-        var _state4 = this.state,
-            from = _state4.from,
-            itemSize = _state4.itemSize,
-            size = _state4.size;
+        var _state3 = this.state,
+            from = _state3.from,
+            itemSize = _state3.itemSize,
+            size = _state3.size;
 
 
         // Try the static itemSize.
@@ -21021,26 +21191,6 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         if (itemSizeEstimator) return itemSizeEstimator(index, cache);
       }
     }, {
-      key: 'constrain',
-      value: function constrain(from, size, itemsPerRow, _ref) {
-        var length = _ref.length,
-            minSize = _ref.minSize,
-            type = _ref.type;
-
-        size = Math.max(size, minSize);
-        var mod = size % itemsPerRow;
-        if (mod) size += itemsPerRow - mod;
-        if (size > length) size = length;
-        from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
-
-        if (mod = from % itemsPerRow) {
-          from -= mod;
-          size += mod;
-        }
-
-        return { from: from, size: size };
-      }
-    }, {
       key: 'scrollTo',
       value: function scrollTo(index) {
         if (index != null) this.setScroll(this.getSpaceBefore(index));
@@ -21059,9 +21209,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'getVisibleRange',
       value: function getVisibleRange() {
-        var _state5 = this.state,
-            from = _state5.from,
-            size = _state5.size;
+        var _state4 = this.state,
+            from = _state4.from,
+            size = _state4.size;
 
         var _getStartAndEnd4 = this.getStartAndEnd(0),
             start = _getStartAndEnd4.start,
@@ -21086,9 +21236,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var _props6 = this.props,
             itemRenderer = _props6.itemRenderer,
             itemsRenderer = _props6.itemsRenderer;
-        var _state6 = this.state,
-            from = _state6.from,
-            size = _state6.size;
+        var _state5 = this.state,
+            from = _state5.from,
+            size = _state5.size;
 
         var items = [];
         for (var i = 0; i < size; ++i) {
@@ -21107,9 +21257,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             length = _props7.length,
             type = _props7.type,
             useTranslate3d = _props7.useTranslate3d;
-        var _state7 = this.state,
-            from = _state7.from,
-            itemsPerRow = _state7.itemsPerRow;
+        var _state6 = this.state,
+            from = _state6.from,
+            itemsPerRow = _state6.itemsPerRow;
 
 
         var items = this.renderItems();
@@ -21144,10 +21294,27 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
           )
         );
       }
+    }], [{
+      key: 'getDerivedStateFromProps',
+      value: function getDerivedStateFromProps(props, prevState) {
+        var from = prevState.from,
+            size = prevState.size,
+            itemsPerRow = prevState.itemsPerRow;
+
+
+        var newState = constrain(from, size, itemsPerRow, props);
+        if (!isEqualSubset(prevState, newState)) {
+          return newState;
+        }
+        return null;
+      }
     }]);
 
     return ReactList;
-  }(_react.Component), _class.displayName = 'ReactList', _class.propTypes = {
+  }(_react.Component);
+
+  ReactList.displayName = 'ReactList';
+  ReactList.propTypes = {
     axis: _propTypes2.default.oneOf(['x', 'y']),
     initialIndex: _propTypes2.default.number,
     itemRenderer: _propTypes2.default.func,
@@ -21163,7 +21330,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,
     useTranslate3d: _propTypes2.default.bool
-  }, _class.defaultProps = {
+  };
+  ReactList.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
       return _react2.default.createElement(
@@ -21188,7 +21356,12 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     type: 'simple',
     useStaticSize: false,
     useTranslate3d: false
-  }, _temp);
+  };
+
+
+  (0, _reactLifecyclesCompat.polyfill)(ReactList);
+
+  _module3.default.exports = ReactList;
 });
 });
 Cogs.define("docs/index.es6", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module, exports) {

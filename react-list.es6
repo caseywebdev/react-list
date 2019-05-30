@@ -1,6 +1,7 @@
 import module from 'module';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
+import {polyfill} from 'react-lifecycles-compat';
 
 const CLIENT_SIZE_KEYS = {x: 'clientWidth', y: 'clientHeight'};
 const CLIENT_START_KEYS = {x: 'clientTop', y: 'clientLeft'};
@@ -60,7 +61,24 @@ const defaultScrollParentViewportSizeGetter = (component) => {
     scrollParent[CLIENT_SIZE_KEYS[axis]];
 };
 
-module.exports = class ReactList extends Component {
+const constrain = (from, size, itemsPerRow, {length, minSize, type}) => {
+  size = Math.max(size, minSize);
+  let mod = size % itemsPerRow;
+  if (mod) size += itemsPerRow - mod;
+  if (size > length) size = length;
+  from =
+    type === 'simple' || !from ? 0 :
+    Math.max(Math.min(from, length - size), 0);
+
+  if (mod = from % itemsPerRow) {
+    from -= mod;
+    size += mod;
+  }
+
+  return {from, size};
+};
+
+class ReactList extends Component {
   static displayName = 'ReactList';
 
   static propTypes = {
@@ -100,20 +118,23 @@ module.exports = class ReactList extends Component {
     super(props);
     const {initialIndex} = props;
     const itemsPerRow = 1;
-    const {from, size} = this.constrain(initialIndex, 0, itemsPerRow, props);
+    const {from, size} = constrain(initialIndex, 0, itemsPerRow, props);
     this.state = {from, size, itemsPerRow};
     this.cache = {};
-    this.cachedScrollPosition = null;
+    this.cachedScrollData = null;
     this.prevPrevState = {};
     this.unstable = false;
     this.updateCounter = 0;
   }
 
-  componentWillReceiveProps(next) {
-    // Viewport scroll is no longer useful if axis changes
-    if (this.props.axis !== next.axis) this.clearSizeCache();
-    let {from, size, itemsPerRow} = this.state;
-    this.maybeSetState(this.constrain(from, size, itemsPerRow, next), NOOP);
+  static getDerivedStateFromProps(props, prevState) {
+    let {from, size, itemsPerRow} = prevState;
+
+    const newState = constrain(from, size, itemsPerRow, props);
+    if (!isEqualSubset(prevState, newState)) {
+      return newState;
+    }
+    return null;
   }
 
   componentDidMount() {
@@ -168,9 +189,9 @@ module.exports = class ReactList extends Component {
 
   getScrollPosition() {
     // Cache scroll position as this causes a forced synchronous layout.
-    if (typeof this.cachedScrollPosition === 'number') return this.cachedScrollPosition;
-    const {scrollParent} = this;
     const {axis} = this.props;
+    if (this.cachedScrollData !== null && axis === this.cachedScrollData.axis) return this.cachedScrollData.scrollPosition;
+    const {scrollParent} = this;
     const scrollKey = SCROLL_START_KEYS[axis];
     const actual = scrollParent === window ?
       // Firefox always returns document.body[scrollKey] as 0 and Chrome/Safari
@@ -181,8 +202,9 @@ module.exports = class ReactList extends Component {
     const max = this.getScrollSize() - this.props.scrollParentViewportSizeGetter(this);
     const scroll = Math.max(0, Math.min(actual, max));
     const el = this.getEl();
-    this.cachedScrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
-    return this.cachedScrollPosition;
+    const scrollPosition = this.getOffset(scrollParent) + scroll - this.getOffset(el);
+    this.cachedScrollData = {axis, scrollPosition};
+    return scrollPosition;
   }
 
   setScroll(offset) {
@@ -254,7 +276,7 @@ module.exports = class ReactList extends Component {
   }
 
   clearSizeCache() {
-    this.cachedScrollPosition = null;
+    this.cachedScrollData = null;
   }
 
   // Called by 'scroll' and 'resize' events, clears scroll position cache.
@@ -348,7 +370,7 @@ module.exports = class ReactList extends Component {
 
     const {start, end} = this.getStartAndEnd();
 
-    const {from, size} = this.constrain(
+    const {from, size} = constrain(
       Math.floor(start / itemSize) * itemsPerRow,
       (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
       itemsPerRow,
@@ -415,23 +437,6 @@ module.exports = class ReactList extends Component {
 
     // Try the itemSizeEstimator.
     if (itemSizeEstimator) return itemSizeEstimator(index, cache);
-  }
-
-  constrain(from, size, itemsPerRow, {length, minSize, type}) {
-    size = Math.max(size, minSize);
-    let mod = size % itemsPerRow;
-    if (mod) size += itemsPerRow - mod;
-    if (size > length) size = length;
-    from =
-      type === 'simple' || !from ? 0 :
-      Math.max(Math.min(from, length - size), 0);
-
-    if (mod = from % itemsPerRow) {
-      from -= mod;
-      size += mod;
-    }
-
-    return {from, size};
   }
 
   scrollTo(index) {
@@ -503,4 +508,8 @@ module.exports = class ReactList extends Component {
       </div>
     );
   }
-};
+}
+
+polyfill(ReactList);
+
+module.exports = ReactList;
