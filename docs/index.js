@@ -20777,7 +20777,11 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var start = Math.max(0, scroll - threshold);
         var end = scroll + this.props.scrollParentViewportSizeGetter(this) + threshold;
         if (this.hasDeterminateSize()) {
-          end = Math.min(end, this.getSpaceBefore(this.props.length));
+          var _getItemSizeAndItemsP = this.getItemSizeAndItemsPerRow(),
+              itemSize = _getItemSizeAndItemsP.itemSize;
+
+          var maxLength = this.getSpaceBefore(this.props.length - 1) + itemSize;
+          end = Math.min(end, maxLength);
         }
         return { start: start, end: end };
       }
@@ -20927,9 +20931,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: 'updateUniformFrame',
       value: function updateUniformFrame(cb) {
-        var _getItemSizeAndItemsP = this.getItemSizeAndItemsPerRow(),
-            itemSize = _getItemSizeAndItemsP.itemSize,
-            itemsPerRow = _getItemSizeAndItemsP.itemsPerRow;
+        var _getItemSizeAndItemsP2 = this.getItemSizeAndItemsPerRow(),
+            itemSize = _getItemSizeAndItemsP2.itemSize,
+            itemsPerRow = _getItemSizeAndItemsP2.itemsPerRow;
 
         if (!itemSize || !itemsPerRow) return cb();
 
