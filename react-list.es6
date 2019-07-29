@@ -78,7 +78,9 @@ module.exports = class ReactList extends Component {
     threshold: PropTypes.number,
     type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: PropTypes.bool,
-    useTranslate3d: PropTypes.bool
+    useTranslate3d: PropTypes.bool,
+    className: PropTypes.string,
+    classNameInner: PropTypes.string
   };
 
   static defaultProps = {
@@ -93,7 +95,9 @@ module.exports = class ReactList extends Component {
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    className: 'ReactList',
+    classNameInner: 'ReactList__inner'
   };
 
   constructor(props) {
@@ -471,7 +475,7 @@ module.exports = class ReactList extends Component {
   }
 
   render() {
-    const {axis, length, type, useTranslate3d} = this.props;
+    const {axis, length, type, useTranslate3d, className, classNameInner} = this.props;
     const {from, itemsPerRow} = this.state;
 
     const items = this.renderItems();
@@ -498,8 +502,8 @@ module.exports = class ReactList extends Component {
       transform
     };
     return (
-      <div style={style} ref={c => this.el = c} className={'ReactList'}>
-        <div className={'ReactList__inner'} style={listStyle}>{items}</div>
+      <div style={style} ref={c => this.el = c} className={className}>
+        <div style={listStyle} className={classNameInner}>{items}</div>
       </div>
     );
   }

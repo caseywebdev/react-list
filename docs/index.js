@@ -21106,7 +21106,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             axis = _props7.axis,
             length = _props7.length,
             type = _props7.type,
-            useTranslate3d = _props7.useTranslate3d;
+            useTranslate3d = _props7.useTranslate3d,
+            className = _props7.className,
+            classNameInner = _props7.classNameInner;
         var _state7 = this.state,
             from = _state7.from,
             itemsPerRow = _state7.itemsPerRow;
@@ -21136,10 +21138,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
           'div',
           { style: style, ref: function ref(c) {
               return _this4.el = c;
-            }, className: 'ReactList' },
+            }, className: className },
           _react2.default.createElement(
             'div',
-            { className: 'ReactList__inner', style: listStyle },
+            { style: listStyle, className: classNameInner },
             items
           )
         );
@@ -21162,7 +21164,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     threshold: _propTypes2.default.number,
     type: _propTypes2.default.oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes2.default.bool,
-    useTranslate3d: _propTypes2.default.bool
+    useTranslate3d: _propTypes2.default.bool,
+    className: _propTypes2.default.string,
+    classNameInner: _propTypes2.default.string
   }, _class.defaultProps = {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
@@ -21187,7 +21191,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    className: 'ReactList',
+    classNameInner: 'ReactList__inner'
   }, _temp);
 });
 });
