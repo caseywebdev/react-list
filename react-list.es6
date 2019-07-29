@@ -498,8 +498,8 @@ module.exports = class ReactList extends Component {
       transform
     };
     return (
-      <div style={style} ref={c => this.el = c}>
-        <div style={listStyle}>{items}</div>
+      <div style={style} ref={c => this.el = c} className={'ReactList'}>
+        <div className={'ReactList__inner'} style={listStyle}>{items}</div>
       </div>
     );
   }

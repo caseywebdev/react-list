@@ -651,10 +651,10 @@
           'div',
           { style: style, ref: function ref(c) {
               return _this4.el = c;
-            } },
+            }, className: 'ReactList' },
           _react2.default.createElement(
             'div',
-            { style: listStyle },
+            { className: 'ReactList__inner', style: listStyle },
             items
           )
         );

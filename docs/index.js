@@ -21136,10 +21136,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
           'div',
           { style: style, ref: function ref(c) {
               return _this4.el = c;
-            } },
+            }, className: 'ReactList' },
           _react2.default.createElement(
             'div',
-            { style: listStyle },
+            { className: 'ReactList__inner', style: listStyle },
             items
           )
         );
