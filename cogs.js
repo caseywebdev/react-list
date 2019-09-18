@@ -1,13 +1,14 @@
-module.exports = [
-  {
+module.exports = {
+  main: {
     transformers: [
       'eslint',
       {
         name: 'babel',
         only: 'react-list.es6',
         options: {
-          presets: ['es2015', 'stage-0', 'react'],
-          plugins: [['transform-es2015-modules-umd', {
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+          plugins: [
+            '@babel/plugin-proposal-class-properties', ['@babel/plugin-transform-modules-umd', {
             globals: {
               react: 'React',
               'prop-types': 'PropTypes',
@@ -22,7 +23,7 @@ module.exports = [
     ],
     builds: {'react-list.es6': {ext: {'.es6': '.js'}}}
   },
-  {
+  docs: {
     transformers: [
       {
         name: 'replace',
@@ -34,7 +35,7 @@ module.exports = [
       {
         name: 'babel',
         only: 'docs/index.es6',
-        options: {presets: ['es2015', 'stage-0', 'react']}
+        options: {presets: ['@babel/preset-env', '@babel/preset-react']}
       },
       {
         name: 'concat-commonjs',
@@ -43,4 +44,4 @@ module.exports = [
     ],
     builds: {'docs/index.es6': {ext: {'.es6': '.js'}}}
   }
-];
+};

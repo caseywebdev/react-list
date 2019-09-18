@@ -1,55 +1,58 @@
-import React, {Component} from 'react';
-import {render} from 'react-dom';
+import React, { Component } from 'react';
+import { render } from 'react-dom';
 import ReactList from '..';
 
-const renderItem = (index, key) =>
+const renderItem = (index, key) => (
   <div key={key} className={'item' + (index % 2 ? '' : ' even')}>
     {index}
-  </div>;
+  </div>
+);
 renderItem.toJSON = () => renderItem.toString();
 
-const renderSquareItem = (index, key) =>
+const renderSquareItem = (index, key) => (
   <div key={key} className={'square-item' + (index % 2 ? '' : ' even')}>
     {index}
-  </div>;
+  </div>
+);
 renderSquareItem.toJSON = () => renderSquareItem.toString();
 
-const getHeight = index => 30 + (10 * (index % 10));
+const getHeight = index => 30 + 10 * (index % 10);
 getHeight.toJSON = () => getHeight.toString();
 
-const getWidth = index => 100 + (10 * (index % 10));
+const getWidth = index => 100 + 10 * (index % 10);
 getWidth.toJSON = () => getWidth.toString();
 
-const renderVariableHeightItem = (index, key) =>
+const renderVariableHeightItem = (index, key) => (
   <div
     key={key}
     className={'item' + (index % 2 ? '' : ' even')}
-    style={{lineHeight: `${getHeight(index)}px`}}
+    style={{ lineHeight: `${getHeight(index)}px` }}
   >
     {index}
-  </div>;
+  </div>
+);
 renderVariableHeightItem.toJSON = () => renderVariableHeightItem.toString();
 
-const renderVariableWidthItem = (index, key) =>
+const renderVariableWidthItem = (index, key) => (
   <div
     key={key}
     className={'item' + (index % 2 ? '' : ' even')}
-    style={{width: `${getWidth(index)}px`}}
+    style={{ width: `${getWidth(index)}px` }}
   >
     {index}
-  </div>;
+  </div>
+);
 renderVariableWidthItem.toJSON = () => renderVariableWidthItem.toString();
 
-const renderGridLine = (row, key) =>
+const renderGridLine = (row, key) => (
   <ReactList
     axis='x'
     key={key}
     length={10000}
-    itemRenderer={
-      (column, key) => renderSquareItem(column + (10000 * row), key)
-    }
+    itemRenderer={(column, key) => renderSquareItem(column + 10000 * row, key)}
     type='uniform'
-  />;
+  />
+);
 renderGridLine.toJSON = () => renderGridLine.toString();
 
 const examples = [
@@ -126,14 +129,16 @@ const examples = [
 
 class Examples extends Component {
   renderExamples() {
-    return examples.map((props, key) =>
+    return examples.map((props, key) => (
       <div key={key} className={`example axis-${props.axis}`}>
         <strong>Props</strong>
         <pre className='props'>{JSON.stringify(props, null, 2)}</pre>
         <strong>Component</strong>
-        <div className='component'><ReactList {...props} /></div>
+        <div className='component'>
+          <ReactList {...props} />
+        </div>
       </div>
-    );
+    ));
   }
 
   render() {
