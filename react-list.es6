@@ -66,6 +66,26 @@ const defaultScrollParentViewportSizeGetter = component => {
     : scrollParent[CLIENT_SIZE_KEYS[axis]];
 };
 
+const constrain = (props, state) => {
+  const { length, minSize, type } = props;
+  let { from, size, itemsPerRow } = state;
+  size = Math.max(size, minSize);
+  let mod = size % itemsPerRow;
+  if (mod) size += itemsPerRow - mod;
+  if (size > length) size = length;
+  from =
+    type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
+
+  if ((mod = from % itemsPerRow)) {
+    from -= mod;
+    size += mod;
+  }
+
+  if (from === state.from && size == state.size) return state;
+
+  return { ...state, from, size };
+};
+
 module.exports = class ReactList extends Component {
   static displayName = 'ReactList';
 
@@ -102,12 +122,18 @@ module.exports = class ReactList extends Component {
     useTranslate3d: false
   };
 
+  static getDerivedStateFromProps(props, state) {
+    const newState = constrain(props, state);
+    return newState === state ? null : newState;
+  }
+
   constructor(props) {
     super(props);
-    const { initialIndex } = props;
-    const itemsPerRow = 1;
-    const { from, size } = this.constrain(initialIndex, 0, itemsPerRow, props);
-    this.state = { from, size, itemsPerRow };
+    this.state = constrain(props, {
+      itemsPerRow: 1,
+      from: props.initialIndex,
+      size: 0
+    });
     this.cache = {};
     this.cachedScrollPosition = null;
     this.prevPrevState = {};
@@ -124,11 +150,6 @@ module.exports = class ReactList extends Component {
   componentDidUpdate(prevProps) {
     // Viewport scroll is no longer useful if axis changes
     if (this.props.axis !== prevProps.axis) this.clearSizeCache();
-    const { from, size, itemsPerRow } = this.state;
-    this.maybeSetState(
-      this.constrain(from, size, itemsPerRow, this.props),
-      NOOP
-    );
 
     // If the list has reached an unstable state, prevent an infinite loop.
     if (this.unstable) return;
@@ -376,12 +397,11 @@ module.exports = class ReactList extends Component {
 
     const { start, end } = this.getStartAndEnd();
 
-    const { from, size } = this.constrain(
-      Math.floor(start / itemSize) * itemsPerRow,
-      (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
-      itemsPerRow,
-      this.props
-    );
+    const { from, size } = constrain(this.props, {
+      from: Math.floor(start / itemSize) * itemsPerRow,
+      size: (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
+      itemsPerRow
+    });
 
     return this.maybeSetState({ itemsPerRow, from, itemSize, size }, cb);
   }
@@ -443,24 +463,6 @@ module.exports = class ReactList extends Component {
 
     // Try the itemSizeEstimator.
     if (itemSizeEstimator) return itemSizeEstimator(index, cache);
-  }
-
-  constrain(from, size, itemsPerRow, { length, minSize, type }) {
-    size = Math.max(size, minSize);
-    let mod = size % itemsPerRow;
-    if (mod) size += itemsPerRow - mod;
-    if (size > length) size = length;
-    from =
-      type === 'simple' || !from
-        ? 0
-        : Math.max(Math.min(from, length - size), 0);
-
-    if ((mod = from % itemsPerRow)) {
-      from -= mod;
-      size += mod;
-    }
-
-    return { from, size };
   }
 
   scrollTo(index) {

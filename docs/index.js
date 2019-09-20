@@ -30471,19 +30471,23 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
   function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
   function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
   function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
   function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
   function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+  function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+  function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
   function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -30582,10 +30586,43 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     return scrollParent === window ? window[INNER_SIZE_KEYS[axis]] : scrollParent[CLIENT_SIZE_KEYS[axis]];
   };
 
+  var constrain = function constrain(props, state) {
+    var length = props.length,
+        minSize = props.minSize,
+        type = props.type;
+    var from = state.from,
+        size = state.size,
+        itemsPerRow = state.itemsPerRow;
+    size = Math.max(size, minSize);
+    var mod = size % itemsPerRow;
+    if (mod) size += itemsPerRow - mod;
+    if (size > length) size = length;
+    from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
+
+    if (mod = from % itemsPerRow) {
+      from -= mod;
+      size += mod;
+    }
+
+    if (from === state.from && size == state.size) return state;
+    return _objectSpread({}, state, {
+      from: from,
+      size: size
+    });
+  };
+
   module.exports = (_temp = _class =
   /*#__PURE__*/
   function (_Component) {
     _inherits(ReactList, _Component);
+
+    _createClass(ReactList, null, [{
+      key: "getDerivedStateFromProps",
+      value: function getDerivedStateFromProps(props, state) {
+        var newState = constrain(props, state);
+        return newState === state ? null : newState;
+      }
+    }]);
 
     function ReactList(props) {
       var _this;
@@ -30593,18 +30630,11 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
       _classCallCheck(this, ReactList);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(ReactList).call(this, props));
-      var initialIndex = props.initialIndex;
-      var itemsPerRow = 1;
-
-      var _this$constrain = _this.constrain(initialIndex, 0, itemsPerRow, props),
-          from = _this$constrain.from,
-          size = _this$constrain.size;
-
-      _this.state = {
-        from: from,
-        size: size,
-        itemsPerRow: itemsPerRow
-      };
+      _this.state = constrain(props, {
+        itemsPerRow: 1,
+        from: props.initialIndex,
+        size: 0
+      });
       _this.cache = {};
       _this.cachedScrollPosition = null;
       _this.prevPrevState = {};
@@ -30626,12 +30656,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var _this2 = this;
 
         // Viewport scroll is no longer useful if axis changes
-        if (this.props.axis !== prevProps.axis) this.clearSizeCache();
-        var _this$state = this.state,
-            from = _this$state.from,
-            size = _this$state.size,
-            itemsPerRow = _this$state.itemsPerRow;
-        this.maybeSetState(this.constrain(from, size, itemsPerRow, this.props), NOOP); // If the list has reached an unstable state, prevent an infinite loop.
+        if (this.props.axis !== prevProps.axis) this.clearSizeCache(); // If the list has reached an unstable state, prevent an infinite loop.
 
         if (this.unstable) return;
 
@@ -30752,9 +30777,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var _this$props2 = this.props,
             axis = _this$props2.axis,
             useStaticSize = _this$props2.useStaticSize;
-        var _this$state2 = this.state,
-            itemSize = _this$state2.itemSize,
-            itemsPerRow = _this$state2.itemsPerRow;
+        var _this$state = this.state,
+            itemSize = _this$state.itemSize,
+            itemsPerRow = _this$state.itemsPerRow;
 
         if (useStaticSize && itemSize && itemsPerRow) {
           return {
@@ -30916,9 +30941,13 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             start = _this$getStartAndEnd3.start,
             end = _this$getStartAndEnd3.end;
 
-        var _this$constrain2 = this.constrain(Math.floor(start / itemSize) * itemsPerRow, (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow, itemsPerRow, this.props),
-            from = _this$constrain2.from,
-            size = _this$constrain2.size;
+        var _constrain = constrain(this.props, {
+          from: Math.floor(start / itemSize) * itemsPerRow,
+          size: (Math.ceil((end - start) / itemSize) + 1) * itemsPerRow,
+          itemsPerRow: itemsPerRow
+        }),
+            from = _constrain.from,
+            size = _constrain.size;
 
         return this.maybeSetState({
           itemsPerRow: itemsPerRow,
@@ -30933,9 +30962,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var cache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         if (cache[index] != null) return cache[index]; // Try the static itemSize.
 
-        var _this$state3 = this.state,
-            itemSize = _this$state3.itemSize,
-            itemsPerRow = _this$state3.itemsPerRow;
+        var _this$state2 = this.state,
+            itemSize = _this$state2.itemSize,
+            itemsPerRow = _this$state2.itemsPerRow;
 
         if (itemSize) {
           return cache[index] = Math.floor(index / itemsPerRow) * itemSize;
@@ -30984,10 +31013,10 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             itemSizeGetter = _this$props5.itemSizeGetter,
             itemSizeEstimator = _this$props5.itemSizeEstimator,
             type = _this$props5.type;
-        var _this$state4 = this.state,
-            from = _this$state4.from,
-            itemSize = _this$state4.itemSize,
-            size = _this$state4.size; // Try the static itemSize.
+        var _this$state3 = this.state,
+            from = _this$state3.from,
+            itemSize = _this$state3.itemSize,
+            size = _this$state3.size; // Try the static itemSize.
 
         if (itemSize) return itemSize; // Try the itemSizeGetter.
 
@@ -31002,28 +31031,6 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
 
 
         if (itemSizeEstimator) return itemSizeEstimator(index, cache);
-      }
-    }, {
-      key: "constrain",
-      value: function constrain(from, size, itemsPerRow, _ref) {
-        var length = _ref.length,
-            minSize = _ref.minSize,
-            type = _ref.type;
-        size = Math.max(size, minSize);
-        var mod = size % itemsPerRow;
-        if (mod) size += itemsPerRow - mod;
-        if (size > length) size = length;
-        from = type === 'simple' || !from ? 0 : Math.max(Math.min(from, length - size), 0);
-
-        if (mod = from % itemsPerRow) {
-          from -= mod;
-          size += mod;
-        }
-
-        return {
-          from: from,
-          size: size
-        };
       }
     }, {
       key: "scrollTo",
@@ -31044,9 +31051,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     }, {
       key: "getVisibleRange",
       value: function getVisibleRange() {
-        var _this$state5 = this.state,
-            from = _this$state5.from,
-            size = _this$state5.size;
+        var _this$state4 = this.state,
+            from = _this$state4.from,
+            size = _this$state4.size;
 
         var _this$getStartAndEnd4 = this.getStartAndEnd(0),
             start = _this$getStartAndEnd4.start,
@@ -31072,9 +31079,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var _this$props6 = this.props,
             itemRenderer = _this$props6.itemRenderer,
             itemsRenderer = _this$props6.itemsRenderer;
-        var _this$state6 = this.state,
-            from = _this$state6.from,
-            size = _this$state6.size;
+        var _this$state5 = this.state,
+            from = _this$state5.from,
+            size = _this$state5.size;
         var items = [];
 
         for (var i = 0; i < size; ++i) {
@@ -31095,9 +31102,9 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             length = _this$props7.length,
             type = _this$props7.type,
             useTranslate3d = _this$props7.useTranslate3d;
-        var _this$state7 = this.state,
-            from = _this$state7.from,
-            itemsPerRow = _this$state7.itemsPerRow;
+        var _this$state6 = this.state,
+            from = _this$state6.from,
+            itemsPerRow = _this$state6.itemsPerRow;
         var items = this.renderItems();
         if (type === 'simple') return items;
         var style = {

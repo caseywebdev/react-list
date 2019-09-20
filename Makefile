@@ -12,4 +12,4 @@ build: node_modules
 	$(COGS)
 
 dev: node_modules
-	$(COGS) -w docs/index.es6 -w react-list.es6
+	$(COGS) -w docs/index.es6 -w react-list.es6 -w react-list.js
