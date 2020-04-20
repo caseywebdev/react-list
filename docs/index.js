@@ -30443,29 +30443,29 @@ if ('development' !== 'production') {
 Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module, exports) {
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(["react", "prop-types"], factory);
+    define(["prop-types", "react"], factory);
   } else if (typeof exports !== "undefined") {
-    factory(COGS_REQUIRE("node_modules/react/index.js"), COGS_REQUIRE("node_modules/prop-types/index.js"));
+    factory(COGS_REQUIRE("node_modules/prop-types/index.js"), COGS_REQUIRE("node_modules/react/index.js"));
   } else {
     var mod = {
       exports: {}
     };
-    factory(global.React, global.PropTypes);
+    factory(global.PropTypes, global.React);
     global.ReactList = mod.exports;
   }
-})(this, function (_react, _propTypes) {
+})(this, function (_propTypes, _react) {
   "use strict";
 
-  _react = _interopRequireWildcard(_react);
   _propTypes = _interopRequireDefault(_propTypes);
+  _react = _interopRequireWildcard(_react);
 
   var _class, _temp;
-
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
   function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
   function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
   function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -30923,10 +30923,11 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
           ++size;
         }
 
-        this.maybeSetState({
+        this.maybeSetState(constrain(this.props, {
           from: from,
+          itemsPerRow: 1,
           size: size
-        }, cb);
+        }), cb);
       }
     }, {
       key: "updateUniformFrame",

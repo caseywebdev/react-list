@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 const CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
 const CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
@@ -387,9 +387,10 @@ module.exports = class ReactList extends Component {
       ++size;
     }
 
-    const { from: from_, size: size_ } = constrain(this.props, { from, size });
-
-    this.maybeSetState({ from: from_, size: size_ }, cb);
+    this.maybeSetState(
+      constrain(this.props, { from, itemsPerRow: 1, size }),
+      cb
+    );
   }
 
   updateUniformFrame(cb) {
