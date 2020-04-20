@@ -387,7 +387,9 @@ module.exports = class ReactList extends Component {
       ++size;
     }
 
-    this.maybeSetState({ from, size }, cb);
+    const { from: from_, size: size_ } = constrain(this.props, { from, size });
+
+    this.maybeSetState({ from: from_, size: size_ }, cb);
   }
 
   updateUniformFrame(cb) {
