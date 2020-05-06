@@ -101,9 +101,15 @@ used when the prop `type` is set to `variable`.
 
 The number of items in the list.
 
+##### minSize (defaults to `1`)
+
+The minimum number of items to render at any given time. This can be used to
+render some amount of items initially when rendering HTML on the server.
+
 ##### pageSize (defaults to `10`)
 
-The number of items to batch up for new renders.
+The number of items to batch up for new renders. Does not apply to `'uniform'`
+lists as the optimal number of items is calculated automatically.
 
 ##### scrollParentGetter (defaults to finding the nearest scrollable parent)
 
@@ -112,6 +118,12 @@ scrolling container for the list. In most cases this does not need to be set for
 the list to work as intended. It is exposed as a prop for more complicated uses
 where the scrolling container may not initially have an overflow property that
 enables scrolling.
+
+##### scrollParentViewportSizeGetter (defaults to scrollParent's viewport size)
+
+A function that returns the size of the scrollParent's viewport. Provide this
+prop if you can efficiently determine your scrollParent's viewport size as it
+can improve performance.
 
 ##### threshold (defaults to `100`)
 
@@ -171,7 +183,7 @@ viewport.
 
 ## FAQ
 
-##### Why is the list freezing/overflowing the stack?
+##### What is "ReactList failed to reach a stable state."?
 
 This happens when specifying the `uniform` type without actually providing
 uniform size elements. The component attempts to draw only the minimum necessary
@@ -189,7 +201,8 @@ spacing.
 
 ##### Why is there no onScroll event handler?
 
-If you need an onScroll handler, just add the handler to the div wrapping your ReactList component: 
+If you need an onScroll handler, just add the handler to the div wrapping your
+ReactList component:
 
 ```
 <div style={{height: 300, overflow: 'auto'}} onScroll={this.handleScroll}>
@@ -200,10 +213,10 @@ If you need an onScroll handler, just add the handler to the div wrapping your R
 ## Development
 
 ```bash
-open index.html
+open docs/index.html
 make
 ```
 
 [React]: https://github.com/facebook/react
-[the example page]: https://orgsync.github.io/react-list/
-[the example page source]: examples/index.es6
+[the example page]: https://coderiety.github.io/react-list
+[the example page source]: docs/index.es6

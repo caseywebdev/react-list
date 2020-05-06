@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.8.14
+- minSize property should not be ignored for 'variable' type. (#238)
+
+## 0.8.11
+- Reduce MAX_SYNC_UPDATES to 50 to match [upstream
+  changes](https://github.com/facebook/react/pull/13163).
+
+## 0.8.10
+- Add `scrollParentViewportSizeGetter` prop.
+
+## 0.8.7
+- Remove `findDOMNode` (and consequently the `react-dom` peer dependency) in
+  favor of the preferred `ref={c => this.el = c}` pattern.
+
+## 0.8.6
+- Add `minSize` prop to ensure a list is always at least `minSize` elements
+  large.
+
+## 0.8.5
+- Use `prop-types` package instead of `React.PropTypes`.
+
+## 0.8.4
+- Non-`uniform` type lists with a `window` scroll parent will no longer render
+  an initial page unless they are visible in the viewport. (#143)
+
+## 0.8.3
+- Use `setTimeout` to detect stack overflow.
+
+## 0.8.2
+- Fix issue with misconfiguration detection. (#160)
+
+## 0.8.1
+- Provide an error message if the list reaches an unstable state due to
+  misconfiguration. (#156, #157)
+
 ## 0.8.0
 - Dramatically reduced the number of `setState` calls which should yield better
   performance.

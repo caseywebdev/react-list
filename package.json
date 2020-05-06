@@ -1,28 +1,39 @@
 {
   "name": "react-list",
-  "version": "0.8.0",
+  "version": "0.8.14",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/orgsync/react-list"
+    "url": "https://github.com/coderiety/react-list"
+  },
+  "dependencies": {
+    "prop-types": "15"
   },
   "peerDependencies": {
-    "react": "0.14 || 15",
-    "react-dom": "0.14 || 15"
+    "react": "0.14 || 15 || 16"
   },
   "devDependencies": {
-    "babel-eslint": "6.1.2",
-    "babel-plugin-transform-es2015-modules-umd": "6.12.0",
-    "babel-preset-es2015": "6.14.0",
-    "babel-preset-react": "6.11.1",
-    "babel-preset-stage-0": "6.5.0",
-    "cogs": "2.0.9",
-    "cogs-transformer-babel": "2.0.4",
-    "cogs-transformer-eslint": "2.0.0",
-    "cogs-transformer-replace": "1.0.1",
-    "eslint-plugin-react": "6.2.0",
-    "eslint": "3.4.0"
+    "@babel/plugin-transform-modules-umd": "7",
+    "@babel/preset-env": "7",
+    "@babel/preset-react": "7",
+    "@babel/plugin-proposal-class-properties": "7",
+    "cogs-transformer-babel": "4",
+    "cogs-transformer-concat-commonjs": "3",
+    "cogs-transformer-eslint": "3",
+    "cogs-transformer-replace": "3",
+    "cogs": "4",
+    "eslint-config-coderiety": "2",
+    "react-dom": "16",
+    "react": "16"
+  },
+  "eslintConfig": {
+    "extends": "coderiety",
+    "env": {
+      "es6": true,
+      "browser": true,
+      "node": true
+    }
   }
 }
