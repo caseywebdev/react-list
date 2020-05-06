@@ -31102,7 +31102,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
             axis = _this$props7.axis,
             length = _this$props7.length,
             type = _this$props7.type,
-            useTranslate3d = _this$props7.useTranslate3d;
+            useTranslate3d = _this$props7.useTranslate3d,
+            usePosition = _this$props7.usePosition;
         var _this$state6 = this.state,
             from = _this$state6.from,
             itemsPerRow = _this$state6.itemsPerRow;
@@ -31123,12 +31124,23 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         var offset = this.getSpaceBefore(from, cache);
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
-        var transform = useTranslate3d ? "translate3d(".concat(x, "px, ").concat(y, "px, 0)") : "translate(".concat(x, "px, ").concat(y, "px)");
-        var listStyle = {
-          msTransform: transform,
-          WebkitTransform: transform,
-          transform: transform
-        };
+        var listStyle;
+
+        if (usePosition) {
+          listStyle = {
+            position: 'relative',
+            top: y,
+            left: x
+          };
+        } else {
+          var transform = useTranslate3d ? "translate3d(".concat(x, "px, ").concat(y, "px, 0)") : "translate(".concat(x, "px, ").concat(y, "px)");
+          listStyle = {
+            msTransform: transform,
+            WebkitTransform: transform,
+            transform: transform
+          };
+        }
+
         return _react["default"].createElement("div", {
           style: style,
           ref: function ref(c) {
@@ -31156,7 +31168,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     threshold: _propTypes["default"].number,
     type: _propTypes["default"].oneOf(['simple', 'variable', 'uniform']),
     useStaticSize: _propTypes["default"].bool,
-    useTranslate3d: _propTypes["default"].bool
+    useTranslate3d: _propTypes["default"].bool,
+    usePosition: _propTypes["default"].bool
   }), _defineProperty(_class, "defaultProps", {
     axis: 'y',
     itemRenderer: function itemRenderer(index, key) {
@@ -31177,7 +31190,8 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     threshold: 100,
     type: 'simple',
     useStaticSize: false,
-    useTranslate3d: false
+    useTranslate3d: false,
+    usePosition: false
   }), _temp);
 });
 });
@@ -31316,6 +31330,12 @@ var examples = [{
   length: 10000,
   itemRenderer: renderVariableHeightItem,
   itemSizeGetter: getHeight,
+  type: 'variable'
+}, {
+  length: 10000,
+  itemRenderer: renderVariableHeightItem,
+  itemSizeGetter: getHeight,
+  usePosition: true,
   type: 'variable'
 }, {
   axis: 'x',
