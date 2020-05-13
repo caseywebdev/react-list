@@ -35,7 +35,7 @@ const PASSIVE = (() => {
   : false;
 
 const UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
-const MAX_SYNC_UPDATES = 50;
+const MAX_SYNC_UPDATES = 40;
 
 const isEqualSubset = (a, b) => {
   for (const key in b) if (a[key] !== b[key]) return false;
