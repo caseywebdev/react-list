@@ -30553,7 +30553,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
     passive: true
   } : false;
   var UNSTABLE_MESSAGE = 'ReactList failed to reach a stable state.';
-  var MAX_SYNC_UPDATES = 50;
+  var MAX_SYNC_UPDATES = 40;
 
   var isEqualSubset = function isEqualSubset(a, b) {
     for (var key in b) {
