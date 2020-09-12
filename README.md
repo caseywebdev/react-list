@@ -218,5 +218,5 @@ make
 ```
 
 [React]: https://github.com/facebook/react
-[the example page]: https://coderiety.github.io/react-list
+[the example page]: https://caseywebdev.github.io/react-list
 [the example page source]: docs/index.es6
