@@ -3,7 +3,7 @@ COGS=$(BIN)cogs
 .DEFAULT_GOAL := build
 
 package-lock.json: package.json
-	npm install --package-lock-only
+	npm install --package-lock-only --save
 
 node_modules: package-lock.json
 	npm install

@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.8.15",
+  "version": "0.8.16",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
@@ -12,23 +12,24 @@
     "prop-types": "15"
   },
   "peerDependencies": {
-    "react": "0.14 || 15 || 16"
+    "react": "0.14 || 15 || 16 || 17"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "7",
     "@babel/plugin-transform-modules-umd": "7",
     "@babel/preset-env": "7",
     "@babel/preset-react": "7",
-    "@babel/plugin-proposal-class-properties": "7",
+    "cogs": "4",
     "cogs-transformer-babel": "4",
     "cogs-transformer-concat-commonjs": "3",
-    "cogs-transformer-eslint": "3",
+    "cogs-transformer-eslint": "4",
     "cogs-transformer-replace": "3",
-    "cogs": "4",
     "eslint-config-coderiety": "2",
-    "react-dom": "16",
-    "react": "16"
+    "react": "17",
+    "react-dom": "17"
   },
   "eslintConfig": {
+    "root": true,
     "extends": "coderiety",
     "env": {
       "es6": true,
