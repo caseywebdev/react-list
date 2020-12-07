@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.15
+- Reduce MAX_SYNC_UPDATES from 50 to 40. (#239)
+
+## 0.8.14
+- minSize property should not be ignored for 'variable' type. (#238)
+
+## 0.8.11
+- Reduce MAX_SYNC_UPDATES to 50 to match [upstream
+  changes](https://github.com/facebook/react/pull/13163).
+
 ## 0.8.10
 - Add `scrollParentViewportSizeGetter` prop.
 
