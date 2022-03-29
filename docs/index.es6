@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import ReactList from '..';
 
@@ -158,4 +158,4 @@ class Examples extends Component {
   }
 }
 
-render(<Examples />, document.getElementById('main'));
+createRoot(document.getElementById('main')).render(<Examples />);
