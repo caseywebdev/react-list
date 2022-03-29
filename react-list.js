@@ -85,8 +85,8 @@
     y: 'scrollTop'
   };
   var SIZE_KEYS = {
-    x: 'width',
-    y: 'height'
+    x: 'minWidth',
+    y: 'minHeight'
   };
 
   var NOOP = function NOOP() {}; // If a browser doesn't support the `options` argument to
