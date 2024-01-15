@@ -34861,6 +34861,7 @@ Cogs.define("react-list.js", function (COGS_REQUIRE, COGS_REQUIRE_ASYNC, module,
         window.removeEventListener('resize', this.updateFrameAndClearCache);
         this.scrollParent.removeEventListener('scroll', this.updateFrameAndClearCache, PASSIVE);
         this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+        this.scrollParent = null; // Important to ensure proper setup on second mount in StrictMode
       }
     }, {
       key: "getOffset",

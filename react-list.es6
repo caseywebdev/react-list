@@ -183,6 +183,7 @@ module.exports = class ReactList extends Component {
       PASSIVE
     );
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+    this.scrollParent = null; // Important to ensure proper setup on second mount in StrictMode
   }
 
   getOffset(el) {
