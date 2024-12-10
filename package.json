@@ -1,6 +1,6 @@
 {
   "name": "react-list",
-  "version": "0.8.17",
+  "version": "0.8.18",
   "author": "Casey Foster <c@sey.me>",
   "license": "MIT",
   "main": "react-list.js",
@@ -8,11 +8,8 @@
     "type": "git",
     "url": "https://github.com/caseywebdev/react-list"
   },
-  "dependencies": {
-    "prop-types": "15"
-  },
   "peerDependencies": {
-    "react": "0.14 || 15 - 18"
+    "react": "0.14 || 15 - 19"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "7",
@@ -22,11 +19,11 @@
     "cogs": "4",
     "cogs-transformer-babel": "4",
     "cogs-transformer-concat-commonjs": "3",
-    "cogs-transformer-eslint": "4",
     "cogs-transformer-replace": "3",
     "eslint-config-coderiety": "2",
-    "react": "18",
-    "react-dom": "18"
+    "eslint": "8",
+    "react": "19",
+    "react-dom": "19"
   },
   "eslintConfig": {
     "root": true,

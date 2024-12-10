@@ -8,8 +8,11 @@ package-lock.json: package.json
 node_modules: package-lock.json
 	npm install
 
-build: node_modules
+lint: node_modules
+	$(BIN)eslint src/react-list.js
+
+build: node_modules lint
 	$(COGS)
 
-dev: node_modules
-	$(COGS) -w docs/index.es6 -w react-list.es6 -w react-list.js
+dev: node_modules lint
+	$(COGS) -w src/docs/index.js -w src/react-list.js -w react-list.js

@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 const CLIENT_SIZE_KEYS = { x: 'clientWidth', y: 'clientHeight' };
 const CLIENT_START_KEYS = { x: 'clientTop', y: 'clientLeft' };
@@ -81,31 +80,13 @@ const constrain = (props, state) => {
     size += mod;
   }
 
-  if (from === state.from && size == state.size) return state;
+  if (from === state.from && size === state.size) return state;
 
   return { ...state, from, size };
 };
 
-module.exports = class ReactList extends Component {
+export default class ReactList extends Component {
   static displayName = 'ReactList';
-
-  static propTypes = {
-    axis: PropTypes.oneOf(['x', 'y']),
-    initialIndex: PropTypes.number,
-    itemRenderer: PropTypes.func,
-    itemSizeEstimator: PropTypes.func,
-    itemSizeGetter: PropTypes.func,
-    itemsRenderer: PropTypes.func,
-    length: PropTypes.number,
-    minSize: PropTypes.number,
-    pageSize: PropTypes.number,
-    scrollParentGetter: PropTypes.func,
-    scrollParentViewportSizeGetter: PropTypes.func,
-    threshold: PropTypes.number,
-    type: PropTypes.oneOf(['simple', 'variable', 'uniform']),
-    useStaticSize: PropTypes.bool,
-    useTranslate3d: PropTypes.bool
-  };
 
   static defaultProps = {
     axis: 'y',
@@ -305,7 +286,7 @@ module.exports = class ReactList extends Component {
 
   updateFrame(cb) {
     this.updateScrollParent();
-    if (typeof cb != 'function') cb = NOOP;
+    if (typeof cb !== 'function') cb = NOOP;
     switch (this.props.type) {
       case 'simple':
         return this.updateSimpleFrame(cb);
@@ -539,4 +520,4 @@ module.exports = class ReactList extends Component {
       </div>
     );
   }
-};
+}

@@ -1,12 +1,14 @@
 module.exports = {
   main: {
     transformers: [
-      'eslint',
       {
         name: 'babel',
-        only: 'react-list.es6',
+        only: 'src/react-list.js',
         options: {
-          presets: ['@babel/preset-env', '@babel/preset-react'],
+          presets: [
+            '@babel/preset-env',
+            ['@babel/preset-react', { runtime: 'automatic' }]
+          ],
           plugins: [
             '@babel/plugin-proposal-class-properties',
             [
@@ -14,9 +16,8 @@ module.exports = {
               {
                 globals: {
                   react: 'React',
-                  'prop-types': 'PropTypes',
-                  'react-dom': 'ReactDOM',
-                  'react-list': 'ReactList'
+                  'react-list': 'ReactList',
+                  'react/jsx-runtime': 'ReactJsxRuntime'
                 },
                 moduleId: 'react-list',
                 exactGlobals: true
@@ -26,7 +27,7 @@ module.exports = {
         }
       }
     ],
-    builds: { 'react-list.es6': { ext: { '.es6': '.js' } } }
+    builds: { 'src/react-list.js': { base: 'src' } }
   },
   docs: {
     transformers: [
@@ -39,14 +40,19 @@ module.exports = {
       },
       {
         name: 'babel',
-        only: 'docs/index.es6',
-        options: { presets: ['@babel/preset-env', '@babel/preset-react'] }
+        only: 'src/docs/index.js',
+        options: {
+          presets: [
+            '@babel/preset-env',
+            ['@babel/preset-react', { runtime: 'automatic' }]
+          ]
+        }
       },
       {
         name: 'concat-commonjs',
-        options: { entry: 'docs/index.es6', extensions: ['.es6', '.js'] }
+        options: { entry: 'src/docs/index.js' }
       }
     ],
-    builds: { 'docs/index.es6': { ext: { '.es6': '.js' } } }
+    builds: { 'src/docs/index.js': { base: 'src' } }
   }
 };
