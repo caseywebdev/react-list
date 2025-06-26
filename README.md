@@ -11,7 +11,7 @@ A versatile infinite scroll [React] component.
 - [Development](#development)
 
 ## Install
-
+testing
 ```bash
 bower install react-list
 
