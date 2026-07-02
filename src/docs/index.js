@@ -125,6 +125,16 @@ const examples = [
     itemRenderer: renderGridLine,
     type: 'uniform',
     useTranslate3d: true
+  },
+  {
+    length: 10000,
+    itemRenderer: renderGridLine,
+    type: 'uniform',
+    getListStyle: ({ x, y }) => ({
+      position: 'relative',
+      left: x,
+      top: y
+    })
   }
 ];
 

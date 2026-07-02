@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.19
+- Add getListStyle prop.
+
 ## 0.8.15
 - Reduce MAX_SYNC_UPDATES from 50 to 40. (#239)
 

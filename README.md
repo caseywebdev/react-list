@@ -163,6 +163,12 @@ A boolean to determine whether the `translate3d` CSS property should be used for
 positioning instead of the default `translate`. This can help performance on
 mobile devices, but is supported by fewer browsers.
 
+##### getListStyle({ x, y })
+
+A function to override the default translate: transform positioning behavior. For example,
+you could set `getListStyle={({ x, y }) => ({ position: 'relative', left: x,
+top: y })}` to use relative positioning.
+
 ## Methods
 
 ##### scrollTo(index)

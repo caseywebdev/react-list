@@ -489,7 +489,7 @@ export default class ReactList extends Component {
   }
 
   render() {
-    const { axis, length, type, useTranslate3d } = this.props;
+    const { axis, getListStyle, length, type, useTranslate3d } = this.props;
     const { from, itemsPerRow } = this.state;
 
     const items = this.renderItems();
@@ -509,11 +509,13 @@ export default class ReactList extends Component {
     const transform = useTranslate3d
       ? `translate3d(${x}px, ${y}px, 0)`
       : `translate(${x}px, ${y}px)`;
-    const listStyle = {
-      msTransform: transform,
-      WebkitTransform: transform,
-      transform
-    };
+    const listStyle = getListStyle
+      ? getListStyle({ x, y })
+      : {
+          msTransform: transform,
+          WebkitTransform: transform,
+          transform
+        };
     return (
       <div style={style} ref={c => (this.el = c)}>
         <div style={listStyle}>{items}</div>

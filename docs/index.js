@@ -44722,6 +44722,7 @@ Cogs.define("react-list.js", (module, exports, require, __import) => {
         var _this4 = this;
         var _this$props7 = this.props,
           axis = _this$props7.axis,
+          getListStyle = _this$props7.getListStyle,
           length = _this$props7.length,
           type = _this$props7.type,
           useTranslate3d = _this$props7.useTranslate3d;
@@ -44744,7 +44745,10 @@ Cogs.define("react-list.js", (module, exports, require, __import) => {
         var x = axis === 'x' ? offset : 0;
         var y = axis === 'y' ? offset : 0;
         var transform = useTranslate3d ? "translate3d(".concat(x, "px, ").concat(y, "px, 0)") : "translate(".concat(x, "px, ").concat(y, "px)");
-        var listStyle = {
+        var listStyle = getListStyle ? getListStyle({
+          x: x,
+          y: y
+        }) : {
           msTransform: transform,
           WebkitTransform: transform,
           transform: transform
@@ -44944,6 +44948,19 @@ var examples = [{
   itemRenderer: renderGridLine,
   type: 'uniform',
   useTranslate3d: true
+}, {
+  length: 10000,
+  itemRenderer: renderGridLine,
+  type: 'uniform',
+  getListStyle: function getListStyle(_ref) {
+    var x = _ref.x,
+      y = _ref.y;
+    return {
+      position: 'relative',
+      left: x,
+      top: y
+    };
+  }
 }];
 var Examples = /*#__PURE__*/function (_Component) {
   function Examples() {
